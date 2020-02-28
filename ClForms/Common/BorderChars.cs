@@ -1,4 +1,4 @@
-using System.Linq;
+using ClForms.Helpers;
 
 namespace ClForms.Common
 {
@@ -100,26 +100,14 @@ namespace ClForms.Common
 
         /// <inheritdoc />
         public override int GetHashCode()
-        {
-            var hash = 17;
-            unchecked
-            {
-                hash = new[]
-                    {
-                        TopLeft.GetHashCode(),
-                        TopMiddle.GetHashCode(),
-                        TopRight.GetHashCode(),
-                        MiddleLeft.GetHashCode(),
-                        MiddleRight.GetHashCode(),
-                        BottomLeft.GetHashCode(),
-                        BottomMiddle.GetHashCode(),
-                        BottomRight.GetHashCode(),
-                    }
-                    .Aggregate(hash, (current, value) => current * 23 + value);
-            }
-
-            return hash;
-        }
+            => GetHashCodeHelper.CalculateHashCode(TopLeft.GetHashCode(),
+                TopMiddle.GetHashCode(),
+                TopRight.GetHashCode(),
+                MiddleLeft.GetHashCode(),
+                MiddleRight.GetHashCode(),
+                BottomLeft.GetHashCode(),
+                BottomMiddle.GetHashCode(),
+                BottomRight.GetHashCode());
 
         internal static bool CompareParams(BorderChars borderChars1, BorderChars borderChars2)
             => borderChars1.GetHashCode() == borderChars2.GetHashCode();
