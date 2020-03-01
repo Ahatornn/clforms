@@ -7,6 +7,7 @@ namespace ClForms.Helpers
     /// </summary>
     internal class GetHashCodeHelper
     {
+        internal const int PrimeNumber = 19;
         private const int InitializeHashPrimeNumber = 17;
         private const int IterationPrimeNumber = 23;
 

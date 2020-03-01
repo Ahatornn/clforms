@@ -49,5 +49,15 @@ namespace ClForms.Abstractions.Engine
         /// Parent context reference
         /// </summary>
         IDrawingContext Parent { get; }
+
+        /// <summary>
+        /// Prepare context for drawing
+        /// </summary>
+        void Release(Color backgroundColor, Color foregroundColor, char @char);
+
+        /// <summary>
+        /// Prepare context for drawing
+        /// </summary>
+        void Release(Color backgroundColor, Color foregroundColor);
     }
 }
