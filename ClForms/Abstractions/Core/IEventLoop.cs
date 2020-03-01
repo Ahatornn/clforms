@@ -8,6 +8,11 @@ namespace ClForms.Abstractions.Core
     public interface IEventLoop
     {
         /// <summary>
+        /// Gets <see langword="true"/> if current loop was started
+        /// </summary>
+        bool Running { get; }
+
+        /// <summary>
         /// Queue empty event
         /// </summary>
         event EventLoopEmpty OnLoopEmpty;
