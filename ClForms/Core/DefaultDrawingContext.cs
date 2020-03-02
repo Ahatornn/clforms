@@ -14,7 +14,7 @@ namespace ClForms.Core
         /// <summary>
         /// Empty drawing context
         /// </summary>
-        public static DefaultDrawingContext Empty => new DefaultDrawingContext(Rect.Empty, 0, 23, Guid.Empty, null);
+        public static DefaultDrawingContext Empty => new DefaultDrawingContext(Rect.Empty, default, GetHashCodeHelper.PrimeNumber, Guid.Empty, null);
 
         private readonly ArrayDevice<Color> background;
         private readonly ArrayDevice<Color> foreground;
@@ -152,7 +152,7 @@ namespace ClForms.Core
         }
 
         private int GetHashCodeInternal()
-            => GetHashCodeHelper.CalculateHashCode(Parent?.ControlId.GetHashCode() ?? GetHashCodeHelper.PrimeNumber,
+            => GetHashCodeHelper.CalculateHashCode(Parent?.ControlId.GetHashCode() ?? GetHashCodeHelper.SmallPrimeNumber,
                 childrenIdHash,
                 background.GetHashCode(),
                 foreground.GetHashCode(),
