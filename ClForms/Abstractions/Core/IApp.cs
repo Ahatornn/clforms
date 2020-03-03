@@ -8,7 +8,7 @@ namespace ClForms.Abstractions.Core
     public interface IApp: IDisposable
     {
         /// <summary>
-        /// Starts application
+        /// Starts listening on the configured application
         /// </summary>
         void Start();
     }

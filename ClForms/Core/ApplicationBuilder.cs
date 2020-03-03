@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using ClForms.Abstractions;
 using ClForms.Abstractions.Core;
+using ClForms.Themes;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ClForms.Core
 {
@@ -32,6 +35,25 @@ namespace ClForms.Core
         }
 
         /// <inheritdoc cref="IAppBuilder.Build"/>
-        public IApp Build() => throw new NotImplementedException();
+        public IApp Build()
+        {
+            var collections = new ServiceCollection();
+            foreach (var action in configureServicesDelegates)
+            {
+                action(collections);
+            }
+
+            collections.TryAddScoped<ISystemColors, DefaultSystemColors>();
+            collections.TryAddScoped<IEventLoop, EventLoop>();
+
+            Application.StartupParameters = startArgs;
+            var provider = collections.BuildServiceProvider();
+            Application.ServiceProvider = provider;
+
+            var handler = new ApplicationHandler(provider.GetService<IEventLoop>());
+            Application.Handler = handler;
+
+            return handler;
+        }
     }
 }

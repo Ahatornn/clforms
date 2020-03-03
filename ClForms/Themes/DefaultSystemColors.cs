@@ -5,7 +5,7 @@ namespace ClForms.Themes
     /// <summary>
     /// Default system colors
     /// </summary>
-    internal struct DefaultSystemColors: ISystemColors
+    internal class DefaultSystemColors: ISystemColors
     {
         /// <inheritdoc />
         Color ISystemColors.BorderColor => Color.Black;
