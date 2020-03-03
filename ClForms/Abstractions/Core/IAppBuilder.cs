@@ -1,3 +1,6 @@
+using System;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace ClForms.Abstractions.Core
 {
     /// <summary>
@@ -9,5 +12,10 @@ namespace ClForms.Abstractions.Core
         /// Builds an <see cref="IApp"/> which specified configuration
         /// </summary>
         IApp Build();
+
+        /// <summary>
+        /// Adds a delegate for configuring additional services for the application
+        /// </summary>
+        IAppBuilder ConfigureServices(Action<IServiceCollection> configureServices);
     }
 }

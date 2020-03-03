@@ -1,30 +1,24 @@
 using System;
 using ClForms.Abstractions.Core;
+using ClForms.Core;
 
 namespace ClForms.Loader
 {
     /// <summary>
-    /// 
+    /// Loader of the application
     /// </summary>
     public static class AppLoader
     {
         /// <summary>
-        /// 
+        /// Create <see cref="IAppBuilder"/> with default value
         /// </summary>
-        /// <returns></returns>
         public static IAppBuilder CreateDefaultBuilder()
-        {
-            throw new NotImplementedException();
-        }
+            => CreateDefaultBuilder(Array.Empty<string>());
 
         /// <summary>
-        /// 
+        /// Create <see cref="IAppBuilder"/> with startup arguments
         /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
         public static IAppBuilder CreateDefaultBuilder(string[] args)
-        {
-            throw new NotImplementedException();
-        }
+            => new ApplicationBuilder(args);
     }
 }
