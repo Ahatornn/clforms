@@ -6,7 +6,7 @@ using ClForms.Themes;
 namespace ClForms.Core
 {
     /// <summary>
-    /// Resolver of <see cref="IPseudographicsProvider"/> for console wondow
+    /// Resolver of <see cref="IPseudographicsProvider"/> for console window
     /// </summary>
     internal class PseudographicsProvider: IPseudographicsProvider
     {
