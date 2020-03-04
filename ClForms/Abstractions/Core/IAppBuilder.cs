@@ -17,5 +17,10 @@ namespace ClForms.Abstractions.Core
         /// Adds a delegate for configuring additional services for the application
         /// </summary>
         IAppBuilder ConfigureServices(Action<IServiceCollection> configureServices);
+
+        /// <summary>
+        /// Sets the main window for application
+        /// </summary>
+        IAppBuilder SetMainWindow<TWindow>() where TWindow : class;
     }
 }

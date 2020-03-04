@@ -34,6 +34,9 @@ namespace ClForms.Core
             return (IAppBuilder) this;
         }
 
+        /// <inheritdoc cref="IAppBuilder.SetMainWindow{TWindow}"/>
+        public IAppBuilder SetMainWindow<TWindow>() where TWindow : class => throw new NotImplementedException();
+
         /// <inheritdoc cref="IAppBuilder.Build"/>
         public IApp Build()
         {
