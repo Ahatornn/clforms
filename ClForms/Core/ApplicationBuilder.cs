@@ -48,6 +48,7 @@ namespace ClForms.Core
 
             collections.TryAddScoped<ISystemColors, DefaultSystemColors>();
             collections.TryAddScoped<IEventLoop, EventLoop>();
+            collections.TryAddScoped<IPseudographicsProvider, PseudographicsProvider>();
 
             Application.StartupParameters = startArgs;
             var provider = collections.BuildServiceProvider();
