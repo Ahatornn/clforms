@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Core;
+using ClForms.Loader;
 using ClForms.Themes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -49,6 +50,7 @@ namespace ClForms.Core
             collections.TryAddScoped<ISystemColors, DefaultSystemColors>();
             collections.TryAddScoped<IEventLoop, EventLoop>();
             collections.TryAddScoped<IPseudographicsProvider, PseudographicsProvider>();
+            collections.TryAddScoped<IControlLifeCycle, ControlLifeCycle>();
 
             Application.StartupParameters = startArgs;
             var provider = collections.BuildServiceProvider();
