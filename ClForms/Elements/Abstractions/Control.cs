@@ -14,7 +14,7 @@ namespace ClForms.Elements.Abstractions
     /// This is the base class for kernel level implementations that are based on
     /// the CommandLine Forms elements and basic presentation characteristics.
     /// </summary>
-    public abstract class Control: IElementStyle<Control>
+    public abstract class Control: IElementStyle<Control>, IDisposable
     {
         private readonly IServiceProvider serviceProvider;
         private readonly Lazy<long> idProvider;
@@ -28,7 +28,7 @@ namespace ClForms.Elements.Abstractions
         private int? height;
         private bool autoSize;
         private object tag;
-        private Control parent;
+        private ContentControl parent;
 
         protected Control()
         {
@@ -93,24 +93,25 @@ namespace ClForms.Elements.Abstractions
         /// <summary>
         /// Gets or sets the parent container of the control
         /// </summary>
-        public Control Parent
+        public ContentControl Parent
         {
             get => parent;
             set
             {
                 if (parent != value)
                 {
-                    OnParentChanged?.Invoke(this, new PropertyChangedEventArgs<Control>(parent, value));
+                    OnParentChanged?.Invoke(this, new PropertyChangedEventArgs<ContentControl>(parent, value));
                     if (value != null)
                     {
-                        //value.AddContent(this);
+                        value.AddContent(this);
                         parent = value;
+                        //TODO необходимо добавить возможность читать стили компонента от родителя
                     }
                     else
                     {
                         var oldParent = parent;
                         parent = null;
-                        //oldParent.RemoveContent(this);
+                        oldParent.RemoveContent(this);
                     }
                 }
             }
@@ -339,6 +340,14 @@ namespace ClForms.Elements.Abstractions
         /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
         public void SetStyle(Action<Control> styleAction) => styleAction?.Invoke(this);
 
+        /// <inheritdoc cref="IDisposable"/>
+        public void Dispose() => DisposeManagedResources();
+
+        /// <summary>
+        /// Dispose managed resources
+        /// </summary>
+        protected virtual void DisposeManagedResources() { }
+
         internal void BeforeRender(Guid renderSessionId, int childrenIdHash)
         {
             drawingContext = new DefaultDrawingContext(bounds, Id, childrenIdHash, renderSessionId, Parent?.DrawingContext);
@@ -409,7 +418,7 @@ namespace ClForms.Elements.Abstractions
         /// <summary>
         /// Occurs when the value of the <see cref="Parent" /> property changes
         /// </summary>
-        public event EventHandler<PropertyChangedEventArgs<Control>> OnParentChanged;
+        public event EventHandler<PropertyChangedEventArgs<ContentControl>> OnParentChanged;
 
         #endregion
     }
