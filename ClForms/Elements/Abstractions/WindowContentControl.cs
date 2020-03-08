@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ClForms.Elements.Menu;
 
 namespace ClForms.Elements.Abstractions
 {
@@ -9,8 +10,8 @@ namespace ClForms.Elements.Abstractions
     /// </summary>
     public abstract class WindowContentControl: SingleContentControl
     {
-        protected Control mainMenu;
-        protected Control statusBar;
+        protected MainMenu mainMenu;
+        protected StatusBar statusBar;
 
         /// <see cref="ContentControl.GetEnumerator"/>
         public override IEnumerator<Control> GetEnumerator()
@@ -19,22 +20,22 @@ namespace ClForms.Elements.Abstractions
         /// <inheritdoc cref="ContentControl.AddContent"/>
         public override void AddContent(Control content)
         {
-            /*if (content is MainMenu || content is StatusBar)
+            if (content is MainMenu || content is StatusBar)
             {
                 return;
             }
-            */
+            
             base.AddContent(content);
         }
 
         /// <inheritdoc cref="ContentControl.RemoveContent"/>
         public override void RemoveContent(Control content)
         {
-            /*if (content is MainMenu || content is StatusBar)
+            if (content is MainMenu || content is StatusBar)
             {
                 return;
             }
-            */
+            
             base.RemoveContent(content);
         }
     }
@@ -44,9 +45,9 @@ namespace ClForms.Elements.Abstractions
         private int currentStep;
         private readonly Control[] elements;
 
-        internal WindowEnumerable(Control mainMenu,
+        internal WindowEnumerable(MainMenu mainMenu,
             Control content,
-            Control statusBar)
+            StatusBar statusBar)
         {
             currentStep = -1;
             elements = new[]
