@@ -51,6 +51,7 @@ namespace ClForms.Core
             collections.TryAddScoped<IEventLoop, EventLoop>();
             collections.TryAddScoped<IPseudographicsProvider, PseudographicsProvider>();
             collections.TryAddScoped<IControlLifeCycle, ControlLifeCycle>();
+            collections.TryAddScoped<IEnvironment, DefaultEnvironment>();
 
             Application.StartupParameters = startArgs;
             var provider = collections.BuildServiceProvider();

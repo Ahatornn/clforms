@@ -16,7 +16,6 @@ namespace ClForms.Elements.Abstractions
     /// </summary>
     public abstract class Control: IElementStyle<Control>, IDisposable
     {
-        private readonly IServiceProvider serviceProvider;
         private readonly Lazy<long> idProvider;
         private IDrawingContext drawingContext;
         private Thickness margin;
@@ -32,10 +31,9 @@ namespace ClForms.Elements.Abstractions
 
         protected Control()
         {
-            serviceProvider = Application.ServiceProvider;
             idProvider = new Lazy<long>(() =>
             {
-                var provider = serviceProvider.GetService<IControlLifeCycle>();
+                var provider = Application.ServiceProvider.GetService<IControlLifeCycle>();
                 return provider.GetId();
             });
             drawingContext = DefaultDrawingContext.Empty;
@@ -331,9 +329,12 @@ namespace ClForms.Elements.Abstractions
         /// </summary>
         /// <param name="finalRect">The final size that the parent computes for the child element,
         /// provided as a <see cref="Rect"/> instance without <see cref="Margin"/> property value</param>
-        public virtual void Arrange(Rect finalRect)
+        /// <param name="reduceMargin">Indicates if should reduce margin from final rect value</param>
+        public virtual void Arrange(Rect finalRect, bool reduceMargin = true)
         {
-            bounds = finalRect.Reduce(margin);
+            bounds = reduceMargin
+                ? finalRect.Reduce(margin)
+                : finalRect;
             IsVisualValid = false;
         }
 

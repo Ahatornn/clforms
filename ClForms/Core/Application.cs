@@ -26,5 +26,14 @@ namespace ClForms.Core
         /// <inheritdoc cref="ISystemColors"/>
         public static ISystemColors SystemColors =
             new Lazy<ISystemColors>(() => ServiceProvider.GetService<ISystemColors>()).Value;
+
+        /// <inheritdoc cref="IEnvironment"/>
+        public static IEnvironment Environment =
+            new Lazy<IEnvironment>(() => ServiceProvider.GetService<IEnvironment>()).Value;
+
+        /// <summary>
+        /// Processes all Windows messages currently in the message queue
+        /// </summary>
+        public static void DoEvents() => throw new NotImplementedException();
     }
 }

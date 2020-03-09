@@ -9,7 +9,7 @@ namespace ClForms.Core
     /// <summary>
     /// Default <see cref="IDrawingContext"/> resolver
     /// </summary>
-    internal class DefaultDrawingContext: IDrawingContext, IPaintContext
+    internal class DefaultDrawingContext: IDrawingContext
     {
         /// <summary>
         /// Empty drawing context

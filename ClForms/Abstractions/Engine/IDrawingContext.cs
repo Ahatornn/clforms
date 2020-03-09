@@ -7,7 +7,7 @@ namespace ClForms.Abstractions.Engine
     /// <summary>
     /// Drawing context
     /// </summary>
-    public interface IDrawingContext
+    public interface IDrawingContext: IPaintContext
     {
         /// <summary>
         /// Gets <see cref="IGraphicsDevice{Color}"/> of background
