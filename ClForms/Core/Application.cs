@@ -11,8 +11,6 @@ namespace ClForms.Core
     /// </summary>
     public static class Application
     {
-        internal static ApplicationHandler Handler;
-
         /// <summary>
         /// Gets startup parameters
         /// </summary>

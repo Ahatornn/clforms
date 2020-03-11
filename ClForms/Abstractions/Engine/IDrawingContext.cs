@@ -35,11 +35,6 @@ namespace ClForms.Abstractions.Engine
         long ControlId { get; }
 
         /// <summary>
-        /// Gets <see cref="ContextColorPoint"/> in point
-        /// </summary>
-        ContextColorPoint GetColorPoint(int col, int row);
-
-        /// <summary>
         /// Item rendering session id
         /// <remarks> Allows to determine session when the element was drawn</remarks>
         /// </summary>

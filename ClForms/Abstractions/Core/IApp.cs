@@ -1,3 +1,4 @@
+using ClForms.Elements;
 using System;
 
 namespace ClForms.Abstractions.Core
@@ -10,6 +11,6 @@ namespace ClForms.Abstractions.Core
         /// <summary>
         /// Starts listening on the configured application
         /// </summary>
-        void Start();
+        void Start(Window mainWindow);
     }
 }

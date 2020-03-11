@@ -47,19 +47,18 @@ namespace ClForms.Core
                 action(collections);
             }
 
-            collections.TryAddScoped<ISystemColors, DefaultSystemColors>();
-            collections.TryAddScoped<IEventLoop, EventLoop>();
-            collections.TryAddScoped<IPseudographicsProvider, PseudographicsProvider>();
-            collections.TryAddScoped<IControlLifeCycle, ControlLifeCycle>();
-            collections.TryAddScoped<IEnvironment, DefaultEnvironment>();
+            collections.TryAddSingleton<ISystemColors, DefaultSystemColors>();
+            collections.TryAddSingleton<IEventLoop, EventLoop>();
+            collections.TryAddSingleton<IPseudographicsProvider, PseudographicsProvider>();
+            collections.TryAddSingleton<IControlLifeCycle, ControlLifeCycle>();
+            collections.TryAddSingleton<IEnvironment, DefaultEnvironment>();
+            collections.TryAddSingleton<IApp, ApplicationHandler>();
 
             Application.StartupParameters = startArgs;
             var provider = collections.BuildServiceProvider();
             Application.ServiceProvider = provider;
 
-            var handler = new ApplicationHandler(provider.GetService<IEventLoop>());
-            Application.Handler = handler;
-
+            var handler = provider.GetService<IApp>();
             return handler;
         }
     }
