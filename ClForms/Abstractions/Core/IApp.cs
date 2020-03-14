@@ -12,5 +12,10 @@ namespace ClForms.Abstractions.Core
         /// Starts listening on the configured application
         /// </summary>
         void Start(Window mainWindow);
+
+        /// <summary>
+        /// Processes all Windows messages currently in the message queue
+        /// </summary>
+        void DoEvents();
     }
 }

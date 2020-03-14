@@ -1,5 +1,6 @@
 using System;
 using ClForms.Abstractions;
+using ClForms.Abstractions.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ClForms.Core
@@ -11,6 +12,8 @@ namespace ClForms.Core
     /// </summary>
     public static class Application
     {
+        internal static IApp Handler { get; set; }
+
         /// <summary>
         /// Gets startup parameters
         /// </summary>
@@ -32,6 +35,6 @@ namespace ClForms.Core
         /// <summary>
         /// Processes all Windows messages currently in the message queue
         /// </summary>
-        public static void DoEvents() => throw new NotImplementedException();
+        public static void DoEvents() => Handler.DoEvents();
     }
 }

@@ -59,6 +59,7 @@ namespace ClForms.Core
             Application.ServiceProvider = provider;
 
             var handler = provider.GetService<IApp>();
+            Application.Handler = handler;
             return handler;
         }
     }

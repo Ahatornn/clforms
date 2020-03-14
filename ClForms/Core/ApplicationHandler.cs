@@ -1,6 +1,9 @@
 using System;
+using System.Text;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Core;
+using ClForms.Abstractions.Engine;
+using ClForms.Common;
 using ClForms.Core.Models;
 using ClForms.Elements;
 using ClForms.Themes;
@@ -12,6 +15,7 @@ namespace ClForms.Core
     /// </summary>
     internal class ApplicationHandler: IApp
     {
+        private const int DoEventsAdditionalSteps = 4;
         private readonly IEventLoop eventLoop;
         private readonly IPseudographicsProvider pseudographicsProvider;
         private readonly ISystemColors systemColors;
@@ -29,7 +33,7 @@ namespace ClForms.Core
             this.pseudographicsProvider = pseudographicsProvider
                 ?? throw new ArgumentNullException(nameof(pseudographicsProvider));
             this.systemColors = systemColors ?? throw new ArgumentNullException();
-
+            this.eventLoop.OnLoopEmpty += OnLoopEmptyHandler;
             Windows = new WindowCollection();
         }
 
@@ -71,6 +75,21 @@ namespace ClForms.Core
 
         #endregion
 
+        /// <inheritdoc cref="IApp.DoEvents"/>
+        public void DoEvents()
+        {
+            var maxStepCount = eventLoop.Length + DoEventsAdditionalSteps;
+            eventLoop.OnLoopEmpty -= OnLoopEmptyHandler;
+            eventLoop.Enqueue(() => OnLoopEmptyHandler(eventLoop, EventArgs.Empty));
+            var iteration = 0;
+            while (eventLoop.Length > 0 && iteration < maxStepCount)
+            {
+                eventLoop.ProcessIteration();
+                iteration++;
+            }
+            eventLoop.OnLoopEmpty += OnLoopEmptyHandler;
+        }
+
         private void InputAction(ConsoleKeyInfo keyInfo)
         {
             if (keyInfo.Key == ConsoleKey.R &&
@@ -91,6 +110,51 @@ namespace ClForms.Core
             Console.CursorVisible = false;
         }
 
+        private void OnLoopEmptyHandler(object sender, EventArgs e)
+        {
+            if (CloseWindow())
+            {
+                return;
+            }
+        }
+
+        internal bool CloseWindow()
+        {
+            var wasClosed = false;
+            while (CloseWindowInternal())
+            {
+                wasClosed = true;
+            }
+
+            if (wasClosed)
+            {
+                if (currentWindowParams?.Context != null)
+                {
+                    InvalidateScreen(currentWindowParams.Context);
+                    CheckMeasureOrVisualInvalidate(currentWindowParams);
+                }
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool CloseWindowInternal()
+        {
+            if (currentWindowParams?.Window != null && currentWindowParams.Window.WasClosed)
+            {
+                Windows.TryPop(out _);
+                if (!Windows.TryPeek(out currentWindowParams))
+                {
+                    eventLoop.Stop();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         private void ClearScreen()
         {
             if (systemColors.ScreenBackground != Color.NotSet)
@@ -98,6 +162,58 @@ namespace ClForms.Core
                 pseudographicsProvider.BackgroundColor = systemColors.ScreenBackground;
             }
             Console.Clear();
+        }
+
+        /// <summary>
+        /// Redrawing the screen to the same state as another window was displayed on it
+        /// </summary>
+        private void InvalidateScreen(IDrawingContext ctx)
+        {
+            var strBuilder = new StringBuilder(ctx.ContextBounds.Width);
+            var colorPoint = ctx.GetColorPoint(0, 0);
+            SetConsoleColor(colorPoint);
+            for (var row = 0; row < ctx.ContextBounds.Height; row++)
+            {
+                strBuilder.Clear();
+
+                Console.SetCursorPosition(0, row);
+                for (var col = 0; col < ctx.ContextBounds.Width; col++)
+                {
+                    var currentPoint = ctx.GetColorPoint(col, row);
+                    if (currentPoint == colorPoint)
+                    {
+                        strBuilder.Append(ctx.Chars[col, row]);
+                    }
+                    else
+                    {
+                        if (strBuilder.Length > 0)
+                        {
+                            pseudographicsProvider.Write(strBuilder.ToString());
+                            strBuilder.Clear();
+                        }
+                        SetConsoleColor(currentPoint);
+                        colorPoint = currentPoint;
+                        strBuilder.Append(ctx.Chars[col, row]);
+                    }
+                }
+
+                if (strBuilder.Length > 0)
+                {
+                    pseudographicsProvider.Write(strBuilder.ToString());
+                }
+            }
+            pseudographicsProvider.SetCursorPosition(0, 0);
+        }
+
+        private void SetConsoleColor(ContextColorPoint colorPoint)
+        {
+            pseudographicsProvider.BackgroundColor = colorPoint.Background;
+            pseudographicsProvider.ForegroundColor = colorPoint.Foreground;
+        }
+
+        private void CheckMeasureOrVisualInvalidate(WindowParameters wndParams)
+        {
+
         }
     }
 }
