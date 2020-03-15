@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Core;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +18,7 @@ namespace ClForms.Core
         /// <summary>
         /// Gets startup parameters
         /// </summary>
-        public static string[] StartupParameters { get; internal set; }
+        public static IList<string> StartupParameters { get; internal set; }
 
         /// <summary>
         /// Gets a mechanism for retrieving a service object
@@ -36,5 +37,8 @@ namespace ClForms.Core
         /// Processes all Windows messages currently in the message queue
         /// </summary>
         public static void DoEvents() => Handler.DoEvents();
+
+        /// <inheritdoc cref="IApp.Terminate"/>
+        public static void Terminate() => Handler.Terminate();
     }
 }

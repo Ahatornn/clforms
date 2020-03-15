@@ -98,6 +98,11 @@ namespace ClForms.Core
             eventLoop.OnLoopEmpty += OnLoopEmptyHandler;
         }
 
+        public void Terminate()
+        {
+            eventLoop.Stop();
+        }
+
         private void InputAction(ConsoleKeyInfo keyInfo)
         {
             if (keyInfo.Key == ConsoleKey.R &&

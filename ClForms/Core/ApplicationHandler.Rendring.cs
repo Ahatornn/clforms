@@ -4,7 +4,9 @@ using ClForms.Common;
 using ClForms.Core.Models;
 using ClForms.Elements.Abstractions;
 using ClForms.Helpers;
+using ClForms.Themes;
 using System;
+using System.Text;
 
 namespace ClForms.Core
 {
@@ -120,7 +122,143 @@ namespace ClForms.Core
         /// </summary>
         private void InvalidateScreenArea(IDrawingContext ctx, Point location, WindowParameters wndParams)
         {
-            throw new NotImplementedException();
+            var contextHash = ctx.GetHashCode();
+            var parentHash = ctx.Parent?.GetHashCode() ?? 0;
+            if (wndParams.ControlContextHash.TryGetValue(ctx.ControlId, out var previousValue) &&
+                previousValue.HashValue == contextHash &&
+                previousValue.ParentHashValue == parentHash)
+            {
+                return;
+            }
+
+            var param = new InvalidateParameters(contextHash,
+                parentHash,
+                ctx.RenderSessionId,
+                ctx.ContextBounds,
+                location);
+            wndParams.ControlContextHash.AddOrUpdate(ctx.ControlId, param, (key, oldValue) => param);
+
+            if (ctx.Parent != null &&
+                previousValue != null &&
+                previousValue.RenderId != param.RenderId)
+            {
+                var preColorPoint = new ContextColorPoint(Color.NotSet, Color.NotSet);
+                SetConsoleColor(preColorPoint);
+                wndParams.ControlContextHash.TryGetValue(ctx.Parent.ControlId, out var parentValue);
+                for (var row = previousValue.InvalidateRect.Top; row < previousValue.InvalidateRect.Bottom; row++)
+                {
+                    for (var col = previousValue.InvalidateRect.Left; col < previousValue.InvalidateRect.Right; col++)
+                    {
+                        if (!ctx.ContextBounds.Contains(col, row))
+                        {
+                            var currentPoint = GetParentColorPoint(new ContextColorPoint(Color.NotSet,
+                                    Color.NotSet),
+                                ctx.Parent, 
+                                new Point(col, row),
+                                systemColors);
+                            if (currentPoint != preColorPoint)
+                            {
+                                SetConsoleColor(currentPoint);
+                            }
+
+                            var point = new Point(col + parentValue?.Location.X ?? 0,
+                                row + parentValue?.Location.Y ?? 0);
+
+                            pseudographicsProvider.SetCursorPosition(point.X, point.Y);
+                            wndParams.Context.SetCursorPos(point);
+
+                            pseudographicsProvider.Write(ctx.Parent.Chars[col, row]);
+                            wndParams.Context.DrawText(ctx.Parent.Chars[col, row], currentPoint.Background,
+                                currentPoint.Foreground);
+
+                            preColorPoint = currentPoint;
+                        }
+                    }
+                }
+            }
+
+            if (ctx.ContextBounds.HasEmptyDimension())
+            {
+                return;
+            }
+
+            var strBuilder = new StringBuilder(ctx.ContextBounds.Width);
+            var colorPoint = ctx.GetColorPoint(0, 0);
+            SetConsoleColor(colorPoint);
+            for (var row = 0; row < ctx.ContextBounds.Height; row++)
+            {
+                strBuilder.Clear();
+
+                pseudographicsProvider.SetCursorPosition(location.X, row + location.Y);
+                wndParams.Context.SetCursorPos(location.X, row + location.Y);
+
+                for (var col = 0; col < ctx.ContextBounds.Width; col++)
+                {
+                    var currentPoint = ctx.GetColorPoint(col, row);
+                    if (currentPoint == colorPoint)
+                    {
+                        strBuilder.Append(ctx.Chars[col, row]);
+                    }
+                    else
+                    {
+                        if (strBuilder.Length > 0)
+                        {
+                            pseudographicsProvider.Write(strBuilder.ToString());
+                            wndParams.Context.DrawText(strBuilder.ToString(), colorPoint.Background,
+                                colorPoint.Foreground);
+
+                            strBuilder.Clear();
+                        }
+                        SetConsoleColor(currentPoint);
+                        colorPoint = currentPoint;
+                        strBuilder.Append(ctx.Chars[col, row]);
+                    }
+                }
+
+                if (strBuilder.Length > 0)
+                {
+                    pseudographicsProvider.Write(strBuilder.ToString());
+                    wndParams.Context.DrawText(strBuilder.ToString(),
+                        colorPoint.Background,
+                        colorPoint.Foreground);
+                }
+            }
+            pseudographicsProvider.SetCursorPosition(location.X, location.Y);
+        }
+
+        private static ContextColorPoint GetParentColorPoint(ContextColorPoint colors, 
+            IDrawingContext context, 
+            Point point,
+            ISystemColors systemColors)
+        {
+            if (context == null)
+            {
+                return new ContextColorPoint(colors.Background != Color.NotSet
+                        ? colors.Background
+                        : systemColors.ScreenBackground,
+                    colors.Foreground != Color.NotSet
+                        ? colors.Foreground
+                        : systemColors.ScreenForeground);
+            }
+            var parentColors = context.GetColorPoint(point.X, point.Y);
+
+            var result = new ContextColorPoint(colors.Background == Color.NotSet
+                    ? parentColors.Background
+                    : colors.Background,
+                colors.Foreground == Color.NotSet
+                    ? parentColors.Foreground
+                    : colors.Foreground);
+
+            if (result.Background != Color.NotSet &&
+                result.Foreground != Color.NotSet)
+            {
+                return result;
+            }
+
+            return GetParentColorPoint(result, 
+                context.Parent, 
+                point + context.ContextBounds.Location,
+                systemColors);
         }
     }
 }

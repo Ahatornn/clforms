@@ -17,5 +17,10 @@ namespace ClForms.Abstractions.Core
         /// Processes all Windows messages currently in the message queue
         /// </summary>
         void DoEvents();
+
+        /// <summary>
+        /// Informs all message pumps that they must terminate, and then closes all application windows
+        /// </summary>
+        void Terminate();
     }
 }
