@@ -54,5 +54,10 @@ namespace ClForms.Abstractions.Engine
         /// Prepare context for drawing
         /// </summary>
         void Release(Color backgroundColor, Color foregroundColor);
+
+        /// <summary>
+        /// Creates a shallow copy of the <see cref="IDrawingContext"/>
+        /// </summary>
+        IDrawingContext Clone(long controlId, Guid renderSessionId);
     }
 }

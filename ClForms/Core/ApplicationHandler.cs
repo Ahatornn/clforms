@@ -1,40 +1,48 @@
-using System;
-using System.Text;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Core;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Core.Models;
 using ClForms.Elements;
+using ClForms.Elements.Menu;
+using ClForms.Helpers;
 using ClForms.Themes;
+using System;
+using System.Linq;
+using System.Text;
 
 namespace ClForms.Core
 {
     /// <summary>
     /// Represents a configured Command Line Forms
     /// </summary>
-    internal class ApplicationHandler: IApp
+    internal partial class ApplicationHandler: IApp
     {
         private const int DoEventsAdditionalSteps = 4;
         private readonly IEventLoop eventLoop;
         private readonly IPseudographicsProvider pseudographicsProvider;
         private readonly ISystemColors systemColors;
-        private WindowParameters currentWindowParams;
         private readonly WindowCollection Windows;
+        private readonly IEnvironment environment;
+        private WindowParameters currentWindowParams;
+        private Rect screenRect;
 
         /// <summary>
         /// Initialize a new instance <see cref="ApplicationHandler"/>
         /// </summary>
         internal ApplicationHandler(IEventLoop eventLoop,
             IPseudographicsProvider pseudographicsProvider,
-            ISystemColors systemColors)
+            ISystemColors systemColors,
+            IEnvironment environment)
         {
             this.eventLoop = eventLoop ?? throw new ArgumentNullException(nameof(eventLoop));
             this.pseudographicsProvider = pseudographicsProvider
                 ?? throw new ArgumentNullException(nameof(pseudographicsProvider));
-            this.systemColors = systemColors ?? throw new ArgumentNullException();
+            this.systemColors = systemColors ?? throw new ArgumentNullException(nameof(systemColors));
+            this.environment = environment ?? throw new ArgumentNullException(nameof(environment));
             this.eventLoop.OnLoopEmpty += OnLoopEmptyHandler;
             Windows = new WindowCollection();
+            screenRect = new Rect(0, 0, this.environment.WindowWidth, this.environment.WindowHeight);
         }
 
         /// <inheritdoc />
@@ -107,7 +115,7 @@ namespace ClForms.Core
             currentWindowParams.ControlContextHash.Clear();
             var wndParams = Windows.GetWindowParameters(wnd);
             wndParams.Context.Release(systemColors.ScreenBackground, systemColors.ScreenForeground);
-            Console.CursorVisible = false;
+            pseudographicsProvider.CursorVisible = false;
         }
 
         private void OnLoopEmptyHandler(object sender, EventArgs e)
@@ -116,6 +124,27 @@ namespace ClForms.Core
             {
                 return;
             }
+
+            if (screenRect.Width != environment.WindowWidth ||
+                screenRect.Height != environment.WindowHeight)
+            {
+                pseudographicsProvider.Clear();
+                screenRect = new Rect(0, 0, environment.WindowWidth, environment.WindowHeight);
+                ClearScreen();
+                IDrawingContext preWndContext = null;
+                foreach (var wndPr in Windows.Reverse())
+                {
+                    var wndContext = preWndContext != null
+                        ? preWndContext.Clone(wndPr.Window.Id, Guid.Empty)
+                        : new DefaultDrawingContext(screenRect, wndPr.Window.Id, GetHashCodeHelper.CalculateHashCode(wndPr.Window), Guid.Empty, null);
+                    preWndContext = wndContext;
+                    wndPr.SetContext(wndContext);
+                    wndPr.ControlContextHash.Clear();
+                    PrepareWindow(wndPr.Window);
+                    ReleaseDrawingContext(wndPr);
+                }
+            }
+            CheckMeasureOrVisualInvalidate(currentWindowParams);
         }
 
         internal bool CloseWindow()
@@ -161,7 +190,7 @@ namespace ClForms.Core
             {
                 pseudographicsProvider.BackgroundColor = systemColors.ScreenBackground;
             }
-            Console.Clear();
+            pseudographicsProvider.Clear();
         }
 
         /// <summary>
@@ -176,7 +205,7 @@ namespace ClForms.Core
             {
                 strBuilder.Clear();
 
-                Console.SetCursorPosition(0, row);
+                pseudographicsProvider.SetCursorPosition(0, row);
                 for (var col = 0; col < ctx.ContextBounds.Width; col++)
                 {
                     var currentPoint = ctx.GetColorPoint(col, row);
@@ -211,9 +240,36 @@ namespace ClForms.Core
             pseudographicsProvider.ForegroundColor = colorPoint.Foreground;
         }
 
-        private void CheckMeasureOrVisualInvalidate(WindowParameters wndParams)
+        /// <summary>
+        /// Preparing the window for display on the screen
+        /// </summary>
+        private void PrepareWindow(Window wnd)
         {
+            wnd.Measure(new Size(environment.WindowWidth, environment.WindowHeight));
+            if (wnd.WindowState == ControlState.Maximized)
+            {
+                wnd.Arrange(screenRect);
+            }
+            else
+            {
+                var location = new Point((environment.WindowWidth - wnd.DesiredSize.Width) / 2,
+                    (environment.WindowHeight - wnd.DesiredSize.Height) / 2);
 
+                if (wnd is PopupMenuWindow popWnd)
+                {
+                    location = popWnd.PreferredLocation;
+                }
+
+                wnd.Arrange(new Rect(location.X, location.Y, wnd.DesiredSize.Width, wnd.DesiredSize.Height));
+            }
+        }
+
+        private Point GetFocusableCursorPosition(long controlId, Point cursorPosition)
+        {
+            currentWindowParams.ControlContextHash.TryGetValue(controlId, out var control);
+            return control == null
+                ? cursorPosition
+                : control.Location + cursorPosition;
         }
     }
 }
