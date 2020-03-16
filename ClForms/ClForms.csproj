@@ -2,6 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Authors>Anatolii Konoplev</Authors>
+    <Product>Command-Line Forms</Product>
+    <Description>This is a framework for make console application with pseudographics interface</Description>
   </PropertyGroup>
 
   <ItemGroup>

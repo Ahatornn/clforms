@@ -9,6 +9,6 @@ namespace MazeEditor
             => AppLoader.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
                 .Build()
-                .Start();
+                .Start(new MainWindow());
     }
 }
