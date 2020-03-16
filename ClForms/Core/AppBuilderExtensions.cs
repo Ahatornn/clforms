@@ -16,5 +16,14 @@ namespace ClForms.Core
                 startupConfig.ConfigureServices(service);
                 service.AddSingleton(typeof(IStartup), sp => startupConfig);
             });
+
+        /// <summary>
+        /// Specify configuration for target service
+        /// </summary>
+        public static void SetConfigure<T>(this IServiceProvider provider, Action<T> configure)
+        {
+            var service = (T)provider?.GetService(typeof(T));
+            configure?.Invoke(service);
+        }
     }
 }

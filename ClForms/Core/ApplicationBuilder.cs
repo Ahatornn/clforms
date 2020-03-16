@@ -32,7 +32,7 @@ namespace ClForms.Core
                 throw new ArgumentNullException(nameof(configureServices));
             }
             configureServicesDelegates.Add(configureServices);
-            return (IAppBuilder) this;
+            return this;
         }
 
         /// <inheritdoc cref="IAppBuilder.SetMainWindow{TWindow}"/>
