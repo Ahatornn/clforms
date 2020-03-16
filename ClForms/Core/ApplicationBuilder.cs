@@ -60,6 +60,8 @@ namespace ClForms.Core
 
             var handler = provider.GetService<IApp>();
             Application.Handler = handler;
+            var sturtup = provider.GetService<IStartup>();
+            sturtup?.Configure(provider);
             return handler;
         }
     }

@@ -141,7 +141,7 @@ namespace ClForms.Core
         /// <summary>
         /// Create a copy <see cref="DefaultDrawingContext"/> from current context
         /// </summary>
-        public DefaultDrawingContext Clone(long controlId, Guid renderSessionId)
+        public IDrawingContext Clone(long controlId, Guid renderSessionId)
         {
             var result = new DefaultDrawingContext(ContextBounds, controlId, childrenIdHash, renderSessionId, this);
             result.background.Release(background);

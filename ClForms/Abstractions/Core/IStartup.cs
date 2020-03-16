@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace ClForms.Abstractions.Core
 {
@@ -11,5 +12,10 @@ namespace ClForms.Abstractions.Core
         /// This API may change or be removed in future releases
         /// </summary>
         void ConfigureServices(IServiceCollection services);
+
+        /// <summary>
+        /// This API may configure future releases
+        /// </summary>
+        void Configure(IServiceProvider provider);
     }
 }
