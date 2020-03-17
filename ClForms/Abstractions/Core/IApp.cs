@@ -22,5 +22,15 @@ namespace ClForms.Abstractions.Core
         /// Informs all message pumps that they must terminate, and then closes all application windows
         /// </summary>
         void Terminate();
+
+        /// <summary>
+        /// Show specified window on the screen
+        /// </summary>
+        void ShowWindow(Window wnd);
+
+        /// <summary>
+        /// Close current active window
+        /// </summary>
+        bool CloseWindow();
     }
 }

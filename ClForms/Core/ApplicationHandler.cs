@@ -98,6 +98,7 @@ namespace ClForms.Core
             eventLoop.OnLoopEmpty += OnLoopEmptyHandler;
         }
 
+        /// <inheritdoc cref="IApp.Terminate"/>
         public void Terminate()
         {
             eventLoop.Stop();
@@ -152,7 +153,22 @@ namespace ClForms.Core
             CheckMeasureOrVisualInvalidate(currentWindowParams);
         }
 
-        internal bool CloseWindow()
+        /// <inheritdoc cref="IApp.ShowWindow"/>
+        public void ShowWindow(Window wnd)
+        {
+            if (!(wnd.WasClosed && wnd.Showing))
+            {
+                var wndParams = currentWindowParams != null
+                    ? new WindowParameters(wnd, currentWindowParams.Context.Clone(wnd.Id, Guid.Empty))
+                    : new WindowParameters(wnd, new DefaultDrawingContext(screenRect, wnd.Id, GetHashCodeHelper.CalculateHashCode(wnd), Guid.Empty, null));
+                Windows.Push(wndParams);
+                currentWindowParams = wndParams;
+                PrepareWindow(currentWindowParams.Window);
+            }
+        }
+
+        /// <inheritdoc cref="IApp.CloseWindow"/>
+        public bool CloseWindow()
         {
             var wasClosed = false;
             while (CloseWindowInternal())

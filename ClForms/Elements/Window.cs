@@ -322,7 +322,7 @@ namespace ClForms.Elements
                         topString = $"{topString}{Application.Environment.BorderChars.TopMiddle}{Application.Environment.BorderChars.TopRight}";
                     }
                     context.SetCursorPos(BorderThickness.Left - 1, BorderThickness.Top - 1);
-                    context.DrawText(topString);
+                    context.DrawText(topString, borderColor);
                 }
 
                 for (var row = BorderThickness.Top; row < context.ContextBounds.Height - BorderThickness.Vertical + 2; row++)
@@ -330,13 +330,13 @@ namespace ClForms.Elements
                     if (BorderThickness.Left > 0)
                     {
                         context.SetCursorPos(BorderThickness.Left - 1, row);
-                        context.DrawText(Application.Environment.BorderChars.MiddleLeft);
+                        context.DrawText(Application.Environment.BorderChars.MiddleLeft, borderColor);
                     }
 
                     if (BorderThickness.Right > 0)
                     {
                         context.SetCursorPos(context.ContextBounds.Width - BorderThickness.Right, row);
-                        context.DrawText(Application.Environment.BorderChars.MiddleRight);
+                        context.DrawText(Application.Environment.BorderChars.MiddleRight, borderColor);
                     }
                 }
 
@@ -349,7 +349,7 @@ namespace ClForms.Elements
                     var topString =
                         $"{Application.Environment.BorderChars.BottomLeft}{bottomLine}{Application.Environment.BorderChars.BottomRight}";
                     context.SetCursorPos(BorderThickness.Left - 1, context.ContextBounds.Height - BorderThickness.Vertical + 1);
-                    context.DrawText(topString);
+                    context.DrawText(topString, borderColor);
                 }
             }
         }
@@ -364,9 +364,9 @@ namespace ClForms.Elements
                 throw new InvalidOperationException($"The window '{Title}' is already showing");
             }
             WasClosed = false;
-            //Application.ShowWindow(this);
+            Application.ShowWindow(this);
             Showing = true;
-            //SetFocusableControl(Direction.Forward);
+            FocusableHelper.SetFocusableControl(this, Direction.Forward);
             OnActivated?.Invoke(this, EventArgs.Empty);
         }
 
@@ -400,7 +400,7 @@ namespace ClForms.Elements
             }
             WasClosed = true;
             Showing = false;
-            //Application.CloseWindow();
+            Application.CloseWindow();
             OnClosed?.Invoke(this, EventArgs.Empty);
         }
 

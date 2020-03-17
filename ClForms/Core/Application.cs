@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Core;
+using ClForms.Elements;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ClForms.Core
@@ -40,5 +41,11 @@ namespace ClForms.Core
 
         /// <inheritdoc cref="IApp.Terminate"/>
         public static void Terminate() => Handler.Terminate();
+
+        /// <inheritdoc cref="IApp.ShowWindow"/>
+        internal static void ShowWindow(Window wnd) => Handler.ShowWindow(wnd);
+
+        /// <inheritdoc cref="IApp.CloseWindow"/>
+        internal static bool CloseWindow() => Handler.CloseWindow();
     }
 }
