@@ -300,6 +300,7 @@ namespace ClForms.Elements
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
         {
+            base.OnRender(context);
             var borderColor = Application.SystemColors.BorderColor;
             if (WindowState != ControlState.Maximized && !context.ContextBounds.HasEmptyDimension())
             {
