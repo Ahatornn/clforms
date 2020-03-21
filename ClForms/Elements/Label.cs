@@ -1,40 +1,40 @@
 using System;
 using System.Linq;
+using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
 using ClForms.Core;
+using ClForms.Elements.Abstractions;
 using ClForms.Helpers;
+using ClForms.Themes;
 
-namespace ClForms.Elements.Abstractions
+namespace ClForms.Elements
 {
     /// <summary>
-    /// Specifies the basic functionality common to button controls
+    /// Represents a standard Windows label
     /// </summary>
-    public abstract class ButtonBase: BaseFocusableControl
+    public class Label: Control, IElementStyle<Label>
     {
         private string text;
         private bool wordWrap;
         private TextAlignment textAlignment;
-        protected Point RenderTextPosition { get; private set; }
 
         /// <summary>
-        /// Initialize a new instance <see cref="ButtonBase"/>
+        /// Initialize a new instance <see cref="Label"/>
         /// </summary>
-        protected ButtonBase()
+        public Label()
         {
-            Background = Application.SystemColors.ButtonFace;
-            Foreground = Application.SystemColors.ButtonText;
-            Padding = new Thickness(2, 0);
+            textAlignment = TextAlignment.Left;
+            Background = Color.NotSet;
+            Foreground = Application.SystemColors.WindowForeground;
             wordWrap = false;
-            textAlignment = TextAlignment.Center;
-            RenderTextPosition = Point.Empty;
         }
 
         /// <summary>
-        /// Initialize a new instance <see cref="ButtonBase"/> with value of the <see cref="Text"/>
+        /// Initialize a new instance <see cref="Label"/>
         /// </summary>
-        protected ButtonBase(string text)
+        public Label(string text)
             : this()
         {
             this.text = text;
@@ -111,19 +111,19 @@ namespace ClForms.Elements.Abstractions
         /// <inheritdoc cref="Control.Measure"/>
         public override void Measure(Size availableSize)
         {
-            var textPresenter = GetTextPresenter();
             var contentArea = new Rect(new Size(availableSize.Width, availableSize.Height))
                 .Reduce(Margin)
                 .Reduce(Padding);
             contentArea.Width = Width ?? contentArea.Width;
             contentArea.Height = Height ?? contentArea.Height;
+            var presentedText = GetTextPresenter();
 
-            if (!string.IsNullOrWhiteSpace(textPresenter) && !contentArea.HasEmptyDimension())
+            if (!string.IsNullOrWhiteSpace(presentedText) && !contentArea.HasEmptyDimension())
             {
                 Size size;
-                if (textPresenter.Length <= contentArea.Width)
+                if (presentedText.Length <= contentArea.Width)
                 {
-                    size = new Size(textPresenter.Length, 1);
+                    size = new Size(presentedText.Length, 1);
                 }
                 else
                 {
@@ -133,7 +133,7 @@ namespace ClForms.Elements.Abstractions
                     }
                     else
                     {
-                        var tempParagraph = TextHelper.GetParagraph(textPresenter, contentArea.Width).ToArray();
+                        var tempParagraph = TextHelper.GetParagraph(presentedText, contentArea.Width).ToArray();
                         size = new Size(contentArea.Width, tempParagraph.Length);
                     }
                 }
@@ -160,53 +160,30 @@ namespace ClForms.Elements.Abstractions
         protected override void OnRender(IDrawingContext context)
         {
             base.OnRender(context);
-
-            var textPresenter = GetTextPresenter();
             var reducedArea = context.ContextBounds.Reduce(Padding);
-            if (reducedArea.HasEmptyDimension() ||
-                string.IsNullOrWhiteSpace(textPresenter))
+            var presentedText = GetTextPresenter();
+            if (reducedArea.HasEmptyDimension() || string.IsNullOrWhiteSpace(presentedText))
             {
                 return;
             }
-
-            var paragraph = TextHelper.GetParagraph(textPresenter, reducedArea.Width).ToArray();
+            var paragraph = TextHelper.GetParagraph(presentedText, reducedArea.Width).ToArray();
             var rowCount = Math.Min(paragraph.Length, reducedArea.Height);
-
-            var leftIndent = (context.ContextBounds.Width - reducedArea.Width - Padding.Horizontal) / 2;
-            var topIndent = (context.ContextBounds.Height - rowCount - Padding.Vertical) / 2;
-
             for (var row = 0; row < rowCount; row++)
             {
-                context.SetCursorPos(leftIndent + Padding.Left, topIndent + Padding.Top + row);
-                var str = TextHelper.GetTextWithAlignment(paragraph[row], reducedArea.Width, textAlignment);
-                if (row == 0)
-                {
-                    RenderTextPosition = new Point(leftIndent + Array.FindIndex(str.ToCharArray(),
-                                                       x => !char.IsWhiteSpace(x)), topIndent);
-                }
-                context.DrawText(str);
+                context.SetCursorPos(Padding.Left, Padding.Top + row);
+                context.DrawText(TextHelper.GetTextWithAlignment(paragraph[row], reducedArea.Width, textAlignment));
             }
         }
 
-        /// <inheritdoc cref="BaseFocusableControl.InputAction"/>
-        protected override void InputActionInternal(ConsoleKeyInfo keyInfo)
-        {
-            if (keyInfo.Key == ConsoleKey.Spacebar ||
-                keyInfo.Key == ConsoleKey.Enter)
-            {
-                Click(EventArgs.Empty);
-            }
-        }
+        /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
+        public void SetStyle(Action<Label> styleAction) => styleAction?.Invoke(this);
 
         /// <summary>
-        /// Gets or sets the text on the button
+        /// Removes all characters from the <see cref="Text"/>
         /// </summary>
-        protected abstract string GetTextPresenter();
+        public void Clear() => Text = string.Empty;
 
-        /// <summary>
-        /// Call event of the <see cref="OnClick" />
-        /// </summary>
-        protected virtual void Click(EventArgs e) => OnClick?.Invoke(this, EventArgs.Empty);
+        protected virtual string GetTextPresenter() => text;
 
         #endregion
 
@@ -226,11 +203,6 @@ namespace ClForms.Elements.Abstractions
         /// Occurs when the value of the <see cref="TextAlignment" /> property changes
         /// </summary>
         public event EventHandler<PropertyChangedEventArgs<TextAlignment>> OnTextAlignmentChanged;
-
-        /// <summary>
-        /// Occurs when the <see cref="ButtonBase"/> control is clicked
-        /// </summary>
-        public event EventHandler OnClick;
 
         #endregion
     }
