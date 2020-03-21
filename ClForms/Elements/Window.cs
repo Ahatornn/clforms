@@ -11,6 +11,9 @@ using ClForms.Helpers;
 
 namespace ClForms.Elements
 {
+    /// <summary>
+    /// Specifies the basic functionality of Window
+    /// </summary>
     public class Window: WindowContentControl, IElementStyle<Window>
     {
         protected Thickness BorderThickness = new Thickness(2, 1);
@@ -19,6 +22,9 @@ namespace ClForms.Elements
         private ControlState windowState;
         private DialogResult dialogResult;
 
+        /// <summary>
+        /// Initialize a new instance <see cref="Window"/>
+        /// </summary>
         public Window()
         {
             windowState = ControlState.Normal;

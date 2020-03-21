@@ -18,6 +18,9 @@ namespace ClForms.Elements
         private readonly Dock defaultDockBehavior;
         private ControlState state;
 
+        /// <summary>
+        /// Initialize a new instance <see cref="DockPanel"/>
+        /// </summary>
         public DockPanel()
         {
             controlDocks = new ConcurrentDictionary<long, Dock>();

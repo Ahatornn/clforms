@@ -17,7 +17,6 @@ namespace ClForms.Elements.Abstractions
     public abstract class Control: IElementStyle<Control>, IDisposable
     {
         private readonly Lazy<long> idProvider;
-        private IDrawingContext drawingContext;
         private Thickness margin;
         private Thickness padding;
         private Color background;
@@ -29,6 +28,9 @@ namespace ClForms.Elements.Abstractions
         private object tag;
         private ContentControl parent;
 
+        /// <summary>
+        /// Initialize a new instance <see cref="Control"/>
+        /// </summary>
         protected Control()
         {
             idProvider = new Lazy<long>(() =>
@@ -36,7 +38,7 @@ namespace ClForms.Elements.Abstractions
                 var provider = Application.ServiceProvider.GetService<IControlLifeCycle>();
                 return provider.GetId();
             });
-            drawingContext = DefaultDrawingContext.Empty;
+            DrawingContext = DefaultDrawingContext.Empty;
             bounds = Rect.Empty;
             background = foreground = Color.NotSet;
             padding = Thickness.Empty;
@@ -84,7 +86,7 @@ namespace ClForms.Elements.Abstractions
         /// <summary>
         /// Gets a value indicating the drawing context
         /// </summary>
-        public IDrawingContext DrawingContext => drawingContext;
+        public IDrawingContext DrawingContext { get; private set; }
 
         #region Parent
 
@@ -345,14 +347,19 @@ namespace ClForms.Elements.Abstractions
         public void Dispose() => DisposeManagedResources();
 
         /// <summary>
+        /// Gets the form the control is in
+        /// </summary>
+        public Window ParentWindow() => (Window) FindParentInternal(x => x is Window);
+
+        /// <summary>
         /// Dispose managed resources
         /// </summary>
         protected virtual void DisposeManagedResources() { }
 
         internal void BeforeRender(Guid renderSessionId, int childrenIdHash)
         {
-            drawingContext = new DefaultDrawingContext(bounds, Id, childrenIdHash, renderSessionId, Parent?.DrawingContext);
-            OnRender(drawingContext);
+            DrawingContext = new DefaultDrawingContext(bounds, Id, childrenIdHash, renderSessionId, Parent?.DrawingContext);
+            OnRender(DrawingContext);
             IsVisualValid = true;
         }
 
