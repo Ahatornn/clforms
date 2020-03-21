@@ -54,9 +54,9 @@ namespace ClForms.Core
             collections.TryAddSingleton<IEnvironment, DefaultEnvironment>();
             collections.TryAddSingleton<IApp, ApplicationHandler>();
 
-            Application.StartupParameters = startArgs;
             var provider = collections.BuildServiceProvider();
             Application.ServiceProvider = provider;
+            Application.StartupParameters = startArgs;
 
             var handler = provider.GetService<IApp>();
             Application.Handler = handler;

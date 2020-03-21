@@ -80,12 +80,6 @@ namespace ClForms.Elements.Abstractions
         object IEnumerator.Current => Current;
 
         /// <inheritdoc />
-        public void Dispose()
-        {
-            foreach (var control in elements ?? Enumerable.Empty<Control>())
-            {
-                control.Dispose();
-            }
-        }
+        public void Dispose() { }
     }
 }

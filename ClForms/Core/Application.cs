@@ -27,11 +27,11 @@ namespace ClForms.Core
         public static IServiceProvider ServiceProvider { get; internal set; }
 
         /// <inheritdoc cref="ISystemColors"/>
-        public static ISystemColors SystemColors =
+        public static ISystemColors SystemColors =>
             new Lazy<ISystemColors>(() => ServiceProvider.GetService<ISystemColors>()).Value;
 
         /// <inheritdoc cref="IEnvironment"/>
-        public static IEnvironment Environment =
+        public static IEnvironment Environment =>
             new Lazy<IEnvironment>(() => ServiceProvider.GetService<IEnvironment>()).Value;
 
         /// <summary>

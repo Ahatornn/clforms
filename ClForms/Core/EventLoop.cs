@@ -15,11 +15,6 @@ namespace ClForms.Core
         private readonly ManualResetEventSlim wait;
         private Action<ConsoleKeyInfo> inputAction;
 
-        public EventLoop(int loopWaitTimeout)
-        {
-            this.loopWaitTimeout = loopWaitTimeout;
-        }
-
         /// <inheritdoc />
         public bool Running { get; private set; }
 
@@ -30,9 +25,11 @@ namespace ClForms.Core
         {
             actionQueue = new ConcurrentQueue<Action>();
             wait = new ManualResetEventSlim(false);
+            this.loopWaitTimeout = 45;
         }
 
-        public event EventLoopEmpty OnLoopEmpty;
+        /// <inheritdoc cref="IEventLoop.OnLoopEmpty"/>
+        public event EventLoopEmptyHandler OnLoopEmpty;
 
         /// <inheritdoc />
         public void Enqueue(Action action)

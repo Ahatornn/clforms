@@ -101,6 +101,6 @@ namespace ClForms.Elements.Abstractions
         object IEnumerator.Current => Current;
 
         /// <inheritdoc />
-        public void Dispose() => Current?.Dispose();
+        public void Dispose() { }
     }
 }

@@ -15,7 +15,7 @@ namespace ClForms.Abstractions.Core
         /// <summary>
         /// Queue empty event
         /// </summary>
-        event EventLoopEmpty OnLoopEmpty;
+        event EventLoopEmptyHandler OnLoopEmpty;
 
         /// <summary>
         /// Add an action to the event queue
@@ -53,5 +53,5 @@ namespace ClForms.Abstractions.Core
     /// <summary>
     /// Queue emptying delegate
     /// </summary>
-    public delegate void EventLoopEmpty(object sender, EventArgs e);
+    public delegate void EventLoopEmptyHandler(object sender, EventArgs e);
 }

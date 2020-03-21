@@ -11,7 +11,7 @@ namespace ClForms.Loader
         /// <summary>
         /// Initialize a new instance <see cref="ControlLifeCycle"/>
         /// </summary>
-        internal ControlLifeCycle()
+        public ControlLifeCycle()
         {
             currentControlId = DateTime.UtcNow.Ticks;
         }

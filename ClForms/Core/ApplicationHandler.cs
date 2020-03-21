@@ -30,7 +30,7 @@ namespace ClForms.Core
         /// <summary>
         /// Initialize a new instance <see cref="ApplicationHandler"/>
         /// </summary>
-        internal ApplicationHandler(IEventLoop eventLoop,
+        public ApplicationHandler(IEventLoop eventLoop,
             IPseudographicsProvider pseudographicsProvider,
             ISystemColors systemColors,
             IEnvironment environment)

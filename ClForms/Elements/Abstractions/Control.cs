@@ -352,6 +352,7 @@ namespace ClForms.Elements.Abstractions
         internal void BeforeRender(Guid renderSessionId, int childrenIdHash)
         {
             drawingContext = new DefaultDrawingContext(bounds, Id, childrenIdHash, renderSessionId, Parent?.DrawingContext);
+            drawingContext.Release(Background, Foreground, '\0');
             OnRender(drawingContext);
             IsVisualValid = true;
         }
