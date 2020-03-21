@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ClForms.Elements.Abstractions
 {
@@ -78,5 +79,10 @@ namespace ClForms.Elements.Abstractions
         /// Interceptor of an action of the remove content
         /// </summary>
         protected virtual void RemoveContentInterceptor(Control content) { }
+
+        /// <summary>
+        /// Retrieves all components of a specific type
+        /// </summary>
+        protected IEnumerable<T> GetAllControls<T>() => this.Where(x => x is T).Cast<T>();
     }
 }
