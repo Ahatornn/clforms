@@ -107,6 +107,9 @@ namespace ClForms.Elements
         /// <inheritdoc cref="DockPanel.Measure"/>
         public override void Measure(Size availableSize) => base.Measure(new Size(availableSize.Width, 1));
 
+        /// <summary>
+        /// Trying to find an item associated with the specified <see cref="ConsoleKeyInfo"/>
+        /// </summary>
         public bool FindAndClick(ConsoleKeyInfo keyInfo)
         {
             if (keyInfo.Key >= ConsoleKey.F1 && keyInfo.Key <= ConsoleKey.F24 &&

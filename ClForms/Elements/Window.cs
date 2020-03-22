@@ -138,11 +138,11 @@ namespace ClForms.Elements
                 if (mainMenu != value)
                 {
                     var shouldMeasure = mainMenu == null;
-                    /*if (mainMenu?.IsOpened == true)
+                    if (mainMenu?.IsOpened == true)
                     {
                         mainMenu.Close();
                     }
-                    */
+                    
                     if (mainMenu?.Parent == this)
                     {
                         mainMenu.Parent = null;
@@ -449,7 +449,7 @@ namespace ClForms.Elements
             {
                 Close();
             }
-            /*
+            
             if ((keyInfo.Modifiers & ConsoleModifiers.Alt) != 0 &&
                 keyInfo.Key == ConsoleKey.F1 &&
                 mainMenu != null &&
@@ -480,7 +480,7 @@ namespace ClForms.Elements
             if (statusBar?.FindAndClick(keyInfo) == true)
             {
                 return;
-            }*/
+            }
 
             if (keyInfo.Key == ConsoleKey.Tab)
             {

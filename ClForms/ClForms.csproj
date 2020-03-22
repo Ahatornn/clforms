@@ -5,11 +5,11 @@
     <Authors>Konoplev Anatolii</Authors>
     <Product>Command-Line Forms</Product>
     <Description>This is a framework for make console application with pseudographics interface</Description>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <RepositoryUrl>https://github.com/Ahatornn/clforms</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>command-line, interface, pseudographics, forms, C#</PackageTags>
+    <PackageTags>command-line, interface, pseudographics, forms</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Copyright>2020 Konoplev Anatolii</Copyright>
