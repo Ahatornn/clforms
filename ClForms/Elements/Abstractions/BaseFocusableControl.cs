@@ -211,7 +211,7 @@ namespace ClForms.Elements.Abstractions
 
         #endregion
 
-        #region Properties
+        #region Methods
 
         /// <inheritdoc cref="IFocusableControl.CanFocus"/>
         public bool CanFocus() => !(isDisabled || tabStop);
@@ -233,6 +233,20 @@ namespace ClForms.Elements.Abstractions
         /// Internal keystroke processing
         /// </summary>
         protected abstract void InputActionInternal(ConsoleKeyInfo keyInfo);
+
+        protected virtual Color GetRenderBackColor()
+            => isDisabled
+                ? disabledBackground
+                : isFocus
+                    ? focusBackground
+                    : Background;
+
+        protected virtual Color GetRenderForeColor()
+            => isDisabled
+                ? disabledForeground
+                : isFocus
+                    ? focusForeground
+                    : Foreground;
 
         #endregion
 

@@ -37,5 +37,14 @@ namespace ClForms.Abstractions
         /// </summary>
         char MenuSeparatorRightBorder { get; }
 
+        /// <summary>
+        /// Gets char border of menu separator
+        /// </summary>
+        char MenuSeparatorBorder { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the menu item has sub menu items
+        /// </summary>
+        char MenuSubItemsMarker { get; }
     }
 }

@@ -9,7 +9,7 @@ namespace ClForms.Core
     {
         private readonly IPseudographicsProvider pseudographicsProvider;
         private string checkStateChars = "□√■";
-        private string menuSeparatorBorder = "├┨";
+        private string menuSeparatorBorder = "├─┨";
 
         /// <summary>
         /// Initialize a new instance <see cref="DefaultEnvironment"/>
@@ -37,6 +37,12 @@ namespace ClForms.Core
         public char MenuSeparatorLeftBorder => menuSeparatorBorder[0];
 
         /// <inheritdoc cref="IEnvironment.MenuSeparatorRightBorder"/>
-        public char MenuSeparatorRightBorder => menuSeparatorBorder[1];
+        public char MenuSeparatorRightBorder => menuSeparatorBorder[2];
+
+        /// <inheritdoc cref="IEnvironment.MenuSeparatorBorder"/>
+        public char MenuSeparatorBorder => menuSeparatorBorder[1];
+
+        /// <inheritdoc cref="IEnvironment.MenuSubItemsMarker"/>
+        public char MenuSubItemsMarker { get; } = '►';
     }
 }
