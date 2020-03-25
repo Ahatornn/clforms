@@ -190,6 +190,7 @@ namespace ClForms.Elements
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
         {
+            base.OnRender(context);
             if (borderThickness.Top > 0)
             {
                 context.SetCursorPos(borderThickness.Left - 1, borderThickness.Top - 1);
