@@ -1,12 +1,12 @@
-﻿using ClForms.Abstractions;
+using System;
+using System.Text;
+using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Core.Models;
 using ClForms.Elements.Abstractions;
 using ClForms.Helpers;
 using ClForms.Themes;
-using System;
-using System.Text;
 
 namespace ClForms.Core
 {
@@ -96,6 +96,7 @@ namespace ClForms.Core
         /// </summary>
         private void DetectVisualInvalidate(Control element, Guid renderSessionId, Point startPoint, WindowParameters wndParams)
         {
+            var parentReRendered = false;
             if (element == null)
             {
                 return;
@@ -105,12 +106,17 @@ namespace ClForms.Core
             {
                 element.BeforeRender(renderSessionId, GetHashCodeHelper.CalculateHashCode(element));
                 InvalidateScreenArea(element.DrawingContext, startPoint, wndParams);
+                parentReRendered = true;
             }
 
             if (element is ContentControl contentControl)
             {
                 foreach (var control in contentControl)
                 {
+                    if (parentReRendered)
+                    {
+                        wndParams.ControlContextHash.TryRemove(control.Id, out _);
+                    }
                     var location = control.Location + startPoint;
                     DetectVisualInvalidate(control, renderSessionId, location, wndParams);
                 }
@@ -140,7 +146,8 @@ namespace ClForms.Core
 
             if (ctx.Parent != null &&
                 previousValue != null &&
-                previousValue.RenderId != param.RenderId)
+                previousValue.RenderId != param.RenderId &&
+                previousValue.ParentHashValue == parentHash)
             {
                 var preColorPoint = new ContextColorPoint(Color.NotSet, Color.NotSet);
                 SetConsoleColor(preColorPoint);

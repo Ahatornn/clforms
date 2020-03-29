@@ -178,6 +178,7 @@ namespace ClForms.Elements.Menu
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
         {
+            base.OnRender(context);
             var visibleItems = Items.Where(x => x.Visible)
                 .ToList();
             if (context.ContextBounds.HasEmptyDimension() || !visibleItems.Any())
