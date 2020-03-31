@@ -42,6 +42,11 @@ namespace ClForms.Core
         /// <inheritdoc cref="IApp.Terminate"/>
         public static void Terminate() => Handler.Terminate();
 
+        /// <summary>
+        /// Gets a main window of application
+        /// </summary>
+        public static Window MainWindow { get; internal set; }
+
         /// <inheritdoc cref="IApp.ShowWindow"/>
         internal static void ShowWindow(Window wnd) => Handler.ShowWindow(wnd);
 

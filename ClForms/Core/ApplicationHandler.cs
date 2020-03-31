@@ -61,6 +61,7 @@ namespace ClForms.Core
                 ApplicationName = mainWindow.Title;
             }
             mainWindow.Show();
+            Application.MainWindow = mainWindow;
             PrepareInvalidateScreen(mainWindow);
             eventLoop.Start(InputAction);
         }

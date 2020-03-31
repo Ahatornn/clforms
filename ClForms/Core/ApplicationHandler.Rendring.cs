@@ -105,6 +105,13 @@ namespace ClForms.Core
             if (!element.IsVisualValid)
             {
                 element.BeforeRender(renderSessionId, GetHashCodeHelper.CalculateHashCode(element));
+                if (element == Application.MainWindow &&
+                    wndParams.ControlContextHash.TryGetValue(element.Id, out var previousValue) &&
+                    element.DrawingContext.ContextBounds != previousValue.InvalidateRect &&
+                    currentWindowParams.Window.WindowState == ControlState.Normal)
+                {
+                    ClearScreen();
+                }
                 InvalidateScreenArea(element.DrawingContext, startPoint, wndParams);
                 parentReRendered = true;
             }
