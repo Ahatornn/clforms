@@ -20,11 +20,14 @@ namespace WindowApp
             switch (targetScreenType)
             {
                 case ScreenType.Welcome:
-                    _ = new WelcomeForm { panel1 = { Parent = panel1 } };
+                    _ = new WelcomeForm {panel1 = {Parent = panel1}};
                     break;
                 case ScreenType.StatusBarCommon:
-                    _ = new StatusBarCommonForm { panel1 = { Parent = panel1 } };
+                    _ = new StatusBarCommonForm {panel1 = {Parent = panel1}};
                     StatusBar = statusBar1;
+                    break;
+                case ScreenType.MainWindowCommon:
+                    _ = new MainMenuForm(this) {panel1 = {Parent = panel1}};
                     break;
             }
         }
