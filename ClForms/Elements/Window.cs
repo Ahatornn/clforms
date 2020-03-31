@@ -65,7 +65,7 @@ namespace ClForms.Elements
         #region HideTitle
 
         /// <summary>
-        /// Gets or sets a window's title 
+        /// Gets or sets a value that indicates whether a window should hide title text in the top
         /// </summary>
         public bool HideTitle
         {

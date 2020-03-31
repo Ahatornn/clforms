@@ -66,6 +66,20 @@ namespace ClForms.Elements.Abstractions
         }
 
         /// <summary>
+        /// Removes all items from the control collection
+        /// </summary>
+        public void RemoveAllContent()
+        {
+            foreach (var control in contents)
+            {
+                RemoveContentInterceptor(control);
+                control.Parent = null;
+            }
+            contents.Clear();
+            InvalidateMeasure();
+        }
+
+        /// <summary>
         /// Gets the number of elements contained in the current control
         /// </summary>
         public int ContentCount => contents.Count;

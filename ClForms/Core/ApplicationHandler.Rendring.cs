@@ -116,6 +116,7 @@ namespace ClForms.Core
                     if (parentReRendered)
                     {
                         wndParams.ControlContextHash.TryRemove(control.Id, out _);
+                        control.InvalidateVisual();
                     }
                     var location = control.Location + startPoint;
                     DetectVisualInvalidate(control, renderSessionId, location, wndParams);
