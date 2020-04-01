@@ -111,6 +111,7 @@ namespace ClForms.Core
                     currentWindowParams.Window.WindowState == ControlState.Normal)
                 {
                     ClearScreen();
+                    wndParams.Context.Release(systemColors.ScreenBackground, systemColors.ScreenForeground);
                 }
                 InvalidateScreenArea(element.DrawingContext, startPoint, wndParams);
                 parentReRendered = true;

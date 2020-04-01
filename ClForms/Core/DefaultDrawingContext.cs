@@ -77,6 +77,7 @@ namespace ClForms.Core
             currentForeground = foregroundColor;
             background.Release(backgroundColor);
             foreground.Release(foregroundColor);
+            chars.Release('\0');
         }
 
         /// <inheritdoc cref="IPaintContext.SetCursorPos(int,int)"/>
