@@ -1,3 +1,4 @@
+using System;
 using ClForms.Common;
 using ClForms.Elements;
 using ClForms.Elements.Menu;
@@ -10,11 +11,11 @@ namespace WindowApp.Forms
         private readonly Window targetWindow;
         private bool wasHiddenMenuItem;
         private bool wasControlStatedMenuItem;
+        private bool wasBackgroundMenuItem;
+        private bool wasForegroundMenuItem;
 
         public MainMenuForm(Window targetWindow)
         {
-            wasHiddenMenuItem = false;
-            wasControlStatedMenuItem = false;
             this.targetWindow = targetWindow;
             InitializeComponent();
             targetWindow.MainMenu = mainMenu1;
@@ -28,6 +29,8 @@ namespace WindowApp.Forms
             {
                 wasHiddenMenuItem = true;
                 wasControlStatedMenuItem = false;
+                wasBackgroundMenuItem = false;
+                wasForegroundMenuItem = false;
                 codeStackPanel.RemoveAllContent();
                 codeStackPanel.AddContent(new Label
                 {
@@ -49,6 +52,8 @@ namespace WindowApp.Forms
             {
                 wasControlStatedMenuItem = true;
                 wasHiddenMenuItem = false;
+                wasBackgroundMenuItem = false;
+                wasForegroundMenuItem = false;
                 codeStackPanel.RemoveAllContent();
                 codeStackPanel.AddContent(new Label
                 {
@@ -61,5 +66,55 @@ namespace WindowApp.Forms
         }
 
         private void ExitClick(object sender, System.EventArgs e) => targetWindow.Close();
+
+        private void ForegroundClick(object sender, EventArgs e)
+        {
+            if (sender is MenuItem targetMenuItem)
+            {
+                targetWindow.Foreground = (Color) targetMenuItem.Tag;
+            }
+
+            if (!wasForegroundMenuItem)
+            {
+                wasHiddenMenuItem = false;
+                wasControlStatedMenuItem = false;
+                wasBackgroundMenuItem = false;
+                wasForegroundMenuItem = true;
+
+                codeStackPanel.RemoveAllContent();
+                codeStackPanel.AddContent(new Label
+                {
+                    Foreground = Color.Blue,
+                    WordWrap = true,
+                    Text = "this.Foreground = Color.{value};",
+                });
+                descriptionCodeLabel.Text = "The Foreground property of window sets text color of client area. All controls who set own foreground is [NotSet] will inherit parent text color";
+            }
+        }
+
+        private void BackgroundItemClick(object sender, EventArgs e)
+        {
+            if (sender is MenuItem targetMenuItem)
+            {
+                targetWindow.Background = (Color) targetMenuItem.Tag;
+            }
+
+            if (!wasBackgroundMenuItem)
+            {
+                wasHiddenMenuItem = false;
+                wasControlStatedMenuItem = false;
+                wasBackgroundMenuItem = true;
+                wasForegroundMenuItem = false;
+
+                codeStackPanel.RemoveAllContent();
+                codeStackPanel.AddContent(new Label
+                {
+                    Foreground = Color.Blue,
+                    WordWrap = true,
+                    Text = "this.Background = Color.{value};",
+                });
+                descriptionCodeLabel.Text = "The Background property of window sets background color of client area. All controls who set own background is [NotSet] will inherit parent background";
+            }
+        }
     }
 }

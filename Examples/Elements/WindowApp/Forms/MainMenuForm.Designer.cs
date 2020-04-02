@@ -1,5 +1,8 @@
+using System;
+using System.Linq;
 using ClForms.Common;
 using ClForms.Common.Grid;
+using ClForms.Core;
 using ClForms.Elements;
 using ClForms.Elements.Menu;
 using ClForms.Themes;
@@ -17,7 +20,7 @@ namespace WindowApp.Forms
             };
 
             mainMenu1 = new MainMenu();
-            var paramItem = new MenuItem("Window parameters");
+            var paramItem = new MenuItem("Window");
             var maxParamItem = new MenuItem("Maximized");
             maxParamItem.Tag = ControlState.Maximized;
             maxParamItem.OnClick += WindowStateChangedClick;
@@ -38,6 +41,33 @@ namespace WindowApp.Forms
             paramItem.Items.Add(exitItem);
             mainMenu1.Items.Add(paramItem);
 
+            var commonParam = new MenuItem("Common");
+            var bgItem = new MenuItem("Background");
+            var fgItem = new MenuItem("Foreground");
+            foreach (var value in Enum.GetValues(typeof(Color))
+                .Cast<Color>()
+                .Where(x => x != Color.NotSet)
+                .OrderBy(x => x.ToString()))
+            {
+                if (value.ToString().StartsWith("Dark"))
+                {
+                    var bgClItem = new MenuItem(value.ToString());
+                    bgClItem.Tag = value;
+                    bgClItem.OnClick += BackgroundItemClick;
+                    bgItem.Items.Add(bgClItem);
+                }
+                else
+                {
+                    var fgClItem = new MenuItem(value.ToString());
+                    fgClItem.Tag = value;
+                    fgClItem.OnClick += ForegroundClick;
+                    fgItem.Items.Add(fgClItem);
+                }
+            }
+            commonParam.Items.Add(bgItem);
+            commonParam.Items.Add(fgItem);
+            mainMenu1.Items.Add(commonParam);
+
             var grid = new Grid
             {
                 Parent = panel1,
@@ -53,13 +83,18 @@ namespace WindowApp.Forms
             var lb1 = new Label
             {
                 WordWrap = true,
+                Foreground = Color.NotSet,
+                Background = Color.NotSet,
                 Text = "Now look at an example how to use MainMenu in your application. Look at the top of the window. There are panel with items. Press [Alt+F1] for go to the first main menu item.",
                 Margin = new Thickness(0, 0, 0, 1),
             };
 
             grid.AddContent(lb1, 0, 0, 2);
 
-            codeStackPanel = new StackPanel(Orientation.Vertical);
+            codeStackPanel = new StackPanel(Orientation.Vertical)
+            {
+                Background = Application.SystemColors.WindowBackground,
+            };
             codeStackPanel.AddContent(new Label
             {
                 Foreground = Color.Blue,
