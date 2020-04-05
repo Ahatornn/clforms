@@ -161,9 +161,6 @@ namespace ClForms.Elements
         /// <inheritdoc cref="Control.Arrange"/>
         public override void Arrange(Rect finalRect, bool reduceMargin = true)
         {
-            var contentRect = new Rect(0, 0, finalRect.Width, finalRect.Height)
-                .Reduce(Margin)
-                .Reduce(Padding);
             var amendment = showGridLine ? 1 : 0;
             var topIndent = 0;
             for (var row = 0; row < RowCount; row++)
@@ -204,8 +201,8 @@ namespace ClForms.Elements
                             controlTopIndent = controlAreaHeight - control.DesiredSize.Height;
                         }
 
-                        control.Arrange(new Rect(contentRect.Left + leftIndent + controlLeftIndent + amendment,
-                            contentRect.Top + topIndent + controlTopIndent + amendment,
+                        control.Arrange(new Rect(Padding.Left + leftIndent + controlLeftIndent + amendment,
+                            Padding.Top + topIndent + controlTopIndent + amendment,
                             Math.Min(controlAreaWidth, control.DesiredSize.Width),
                             Math.Min(controlAreaHeight, control.DesiredSize.Height)));
                     }
