@@ -18,19 +18,25 @@ namespace PanelsApp
         private void GotoScreen(ScreenType targetScreenType)
         {
             currentScreenType = targetScreenType;
+            ReleaseCheckedMenu();
             switch (targetScreenType)
             {
                 case ScreenType.Welcome:
-                    _ = new WelcomeForm { panel1 = { Parent = panel1 } };
+                    _ = new WelcomeForm {panel1 = {Parent = panel1}};
                     break;
                 case ScreenType.Panel:
-                    _ = new PanelForm(propMenuItem) { panel1 = { Parent = panel1 } };
+                    _ = new PanelForm(propMenuItem) {panel1 = {Parent = panel1}};
+                    panelMenuItem.Checked = true;
                     break;
                 case ScreenType.GroupBox:
+                    _ = new GroupBoxForm(propMenuItem) {panel1 = {Parent = panel1}};
+                    gruopMenuItem.Checked = true;
                     break;
                 case ScreenType.StackPanel:
+                    stackMenuItem.Checked = true;
                     break;
                 case ScreenType.DockPanel:
+                    dockMenuItem.Checked = true;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(targetScreenType), targetScreenType, null);
@@ -56,6 +62,14 @@ namespace PanelsApp
             var screenType = (ScreenType) ((sender as MenuItem)?.Tag ?? ScreenType.Welcome);
             statusBarLabel.Text = screenType.ToString();
             GotoScreen(screenType);
+        }
+
+        private void ReleaseCheckedMenu()
+        {
+            panelMenuItem.Checked = false;
+            gruopMenuItem.Checked = false;
+            stackMenuItem.Checked = false;
+            dockMenuItem.Checked = false;
         }
     }
 }

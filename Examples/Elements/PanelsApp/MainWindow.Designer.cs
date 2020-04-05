@@ -30,22 +30,22 @@ namespace PanelsApp
             mainMenu1 = new MainMenu();
             var controlsMenuItem = new MenuItem("Controls");
 
-            var panelMenuItem = new MenuItem("Panel");
+            panelMenuItem = new MenuItem("Panel");
             panelMenuItem.OnClick += ControlMenuItemClick;
             panelMenuItem.Tag = ScreenType.Panel;
             controlsMenuItem.Items.Add(panelMenuItem);
 
-            var gruopMenuItem = new MenuItem("GroupBox");
+            gruopMenuItem = new MenuItem("GroupBox");
             gruopMenuItem.OnClick += ControlMenuItemClick;
             gruopMenuItem.Tag = ScreenType.GroupBox;
             controlsMenuItem.Items.Add(gruopMenuItem);
 
-            var stackMenuItem = new MenuItem("StackPanel");
+            stackMenuItem = new MenuItem("StackPanel");
             stackMenuItem.OnClick += ControlMenuItemClick;
             stackMenuItem.Tag = ScreenType.StackPanel;
             controlsMenuItem.Items.Add(stackMenuItem);
 
-            var dockMenuItem = new MenuItem("DockPanel");
+            dockMenuItem = new MenuItem("DockPanel");
             dockMenuItem.OnClick += ControlMenuItemClick;
             dockMenuItem.Tag = ScreenType.DockPanel;
             controlsMenuItem.Items.Add(dockMenuItem);
@@ -59,6 +59,10 @@ namespace PanelsApp
         private StatusBar statusBar1;
         private MainMenu mainMenu1;
         private MenuItem propMenuItem;
+        private MenuItem panelMenuItem;
+        private MenuItem gruopMenuItem;
+        private MenuItem stackMenuItem;
+        private MenuItem dockMenuItem;
         private Label statusBarLabel;
     }
 }
