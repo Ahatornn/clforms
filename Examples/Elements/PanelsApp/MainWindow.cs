@@ -33,6 +33,7 @@ namespace PanelsApp
                     gruopMenuItem.Checked = true;
                     break;
                 case ScreenType.StackPanel:
+                    _ = new StackPanelForm(propMenuItem) {panel1 = {Parent = panel1}};
                     stackMenuItem.Checked = true;
                     break;
                 case ScreenType.DockPanel:
