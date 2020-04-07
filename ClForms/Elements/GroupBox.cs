@@ -56,7 +56,7 @@ namespace ClForms.Elements
         #region TextAlignment
 
         /// <summary>
-        /// Gets or sets the horizontal alignment of the contents of the text
+        /// Gets or sets the horizontal alignment of the text associated with this control
         /// </summary>
         public TextAlignment TextAlignment
         {
@@ -77,7 +77,7 @@ namespace ClForms.Elements
         #region BorderThickness
 
         /// <summary>
-        /// Gets or sets the relative <see cref="Thickness"/> of a <see cref="GroupBox"/>
+        /// Gets or sets the relative frame <see cref="Thickness"/> of a <see cref="GroupBox"/>
         /// </summary>
         public Thickness BorderThickness
         {
