@@ -103,16 +103,25 @@ namespace ClForms.Elements
                         }
                     }
                 }
-                size.Width = Math.Min(Width.HasValue
-                        ? Width.Value + Margin.Horizontal
-                        : size.Width + (Margin + Padding).Horizontal,
-                    availableSize.Width);
-                size.Height = Math.Min(Height.HasValue
-                        ? Height.Value + Margin.Vertical
-                        : size.Height + (Margin + Padding).Vertical,
-                    availableSize.Height);
 
-                base.Measure(size);
+                if (AutoSize)
+                {
+                    size.Width = Math.Min(Width.HasValue
+                            ? Width.Value + Margin.Horizontal
+                            : size.Width + (Margin + Padding).Horizontal,
+                        availableSize.Width);
+                    size.Height = Math.Min(Height.HasValue
+                            ? Height.Value + Margin.Vertical
+                            : size.Height + (Margin + Padding).Vertical,
+                        availableSize.Height);
+
+                    base.Measure(size);
+                }
+                else
+                {
+                    base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                        Math.Min(Height ?? availableSize.Height, availableSize.Height)));
+                }
             }
             else
             {
