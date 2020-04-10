@@ -16,7 +16,6 @@ namespace ClForms.Elements
         private readonly ConcurrentDictionary<long, Dock> controlDocks;
         private bool lastChildFill;
         private readonly Dock defaultDockBehavior;
-        private ControlState state;
 
         /// <summary>
         /// Initialize a new instance <see cref="DockPanel"/>
@@ -24,8 +23,8 @@ namespace ClForms.Elements
         public DockPanel()
         {
             controlDocks = new ConcurrentDictionary<long, Dock>();
-            State = ControlState.Maximized;
             defaultDockBehavior = Dock.Top;
+            AutoSize = false;
         }
 
         #region Properties
@@ -34,7 +33,7 @@ namespace ClForms.Elements
 
         /// <summary>
         /// Gets or sets a value that indicates whether the last child element within a <see cref="DockPanel"/> stretches
-        /// to fill the remaining available space.
+        /// to fill the remaining available space
         /// </summary>
         public bool LastChildFill
         {
@@ -46,25 +45,6 @@ namespace ClForms.Elements
                     OnLastChildFillChanged?.Invoke(this, new PropertyChangedEventArgs<bool>(lastChildFill, value));
                     lastChildFill = value;
                     InvalidateMeasure();
-                }
-            }
-        }
-
-        #endregion
-        #region State
-
-        /// <summary>
-        /// Gets or sets a <see cref="ControlState"/> value
-        /// </summary>
-        public ControlState State
-        {
-            get => state;
-            set
-            {
-                if (state != value)
-                {
-                    OnStateChanged?.Invoke(this, new PropertyChangedEventArgs<ControlState>(state, value));
-                    state = value;
                 }
             }
         }
@@ -149,11 +129,7 @@ namespace ClForms.Elements
                 }
             }
 
-            if (State == ControlState.Maximized)
-            {
-                base.Measure(availableSize);
-            }
-            else
+            if (AutoSize)
             {
                 var contentWidth = (Width ?? Math.Max(topBottomWidth, leftRightWidth)) +
                                    Margin.Horizontal +
@@ -168,6 +144,11 @@ namespace ClForms.Elements
 
                 base.Measure(new Size(Math.Min(contentWidth, availableSize.Width),
                     Math.Min(contentHeight, availableSize.Height)));
+            }
+            else
+            {
+                base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                    Math.Min(Height ?? availableSize.Height, availableSize.Height)));
             }
         }
 
@@ -233,11 +214,6 @@ namespace ClForms.Elements
         /// Occurs when the value of the <see cref="LastChildFill" /> property changes
         /// </summary>
         public event EventHandler<PropertyChangedEventArgs<bool>> OnLastChildFillChanged;
-
-        /// <summary>
-        /// Occurs when the value of the <see cref="State" /> property changes
-        /// </summary>
-        public event EventHandler<PropertyChangedEventArgs<ControlState>> OnStateChanged;
 
         #endregion
     }
