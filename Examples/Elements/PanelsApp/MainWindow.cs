@@ -37,6 +37,7 @@ namespace PanelsApp
                     stackMenuItem.Checked = true;
                     break;
                 case ScreenType.DockPanel:
+                    _ = new DockPanelForm(propMenuItem) {panel1 = {Parent = panel1}};
                     dockMenuItem.Checked = true;
                     break;
                 default:
