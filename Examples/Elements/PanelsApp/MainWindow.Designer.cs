@@ -50,6 +50,11 @@ namespace PanelsApp
             dockMenuItem.Tag = ScreenType.DockPanel;
             controlsMenuItem.Items.Add(dockMenuItem);
 
+            tileMenuItem = new MenuItem("TilePanel");
+            tileMenuItem.OnClick += ControlMenuItemClick;
+            tileMenuItem.Tag = ScreenType.TilePanel;
+            controlsMenuItem.Items.Add(tileMenuItem);
+
             mainMenu1.Items.Add(controlsMenuItem);
             propMenuItem = new MenuItem("Properties");
             mainMenu1.Items.Add(propMenuItem);
@@ -63,6 +68,7 @@ namespace PanelsApp
         private MenuItem gruopMenuItem;
         private MenuItem stackMenuItem;
         private MenuItem dockMenuItem;
+        private MenuItem tileMenuItem;
         private Label statusBarLabel;
     }
 }

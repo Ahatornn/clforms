@@ -40,6 +40,10 @@ namespace PanelsApp
                     _ = new DockPanelForm(propMenuItem) {panel1 = {Parent = panel1}};
                     dockMenuItem.Checked = true;
                     break;
+                case ScreenType.TilePanel:
+                    _ = new TilePanelForm(propMenuItem) { panel1 = { Parent = panel1 } };
+                    tileMenuItem.Checked = true;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(targetScreenType), targetScreenType, null);
             }
@@ -72,6 +76,7 @@ namespace PanelsApp
             gruopMenuItem.Checked = false;
             stackMenuItem.Checked = false;
             dockMenuItem.Checked = false;
+            tileMenuItem.Checked = false;
         }
     }
 }

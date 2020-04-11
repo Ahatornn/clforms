@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace PanelsApp
 {
     internal enum ScreenType
@@ -11,5 +7,6 @@ namespace PanelsApp
         GroupBox,
         StackPanel,
         DockPanel,
+        TilePanel,
     }
 }
