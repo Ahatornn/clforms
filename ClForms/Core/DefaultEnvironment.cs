@@ -9,6 +9,7 @@ namespace ClForms.Core
     {
         private readonly IPseudographicsProvider pseudographicsProvider;
         private string checkStateChars = "□√■";
+        private string radioCheckChars = "●○";
         private string menuSeparatorBorder = "├─┨";
 
         /// <summary>
@@ -32,6 +33,9 @@ namespace ClForms.Core
 
         /// <inheritdoc cref="IEnvironment.GetCheckStateChar"/>
         public char GetCheckStateChar(CheckState state) => checkStateChars[(int) state];
+
+        /// <inheritdoc cref="IEnvironment.GetRadioCheckChar"/>
+        public char GetRadioCheckChar(bool isChecked) => radioCheckChars[isChecked ? 0 : 1];
 
         /// <inheritdoc cref="IEnvironment.MenuSeparatorLeftBorder"/>
         public char MenuSeparatorLeftBorder => menuSeparatorBorder[0];

@@ -28,6 +28,11 @@ namespace ClForms.Abstractions
         char GetCheckStateChar(CheckState state);
 
         /// <summary>
+        /// Gets presenter char of radiobutton's <see cref="IsChecked"/> property
+        /// </summary>
+        char GetRadioCheckChar(bool isChecked);
+
+        /// <summary>
         /// Gets left char border of menu separator
         /// </summary>
         char MenuSeparatorLeftBorder { get; }
