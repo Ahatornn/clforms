@@ -127,7 +127,7 @@ namespace ClForms.Elements
 
         #endregion
 
-        #region Properties
+        #region Methods
 
         /// <inheritdoc cref="Control.Measure"/>
         public override void Measure(Size availableSize)
