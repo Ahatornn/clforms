@@ -23,6 +23,16 @@ namespace ClForms.Abstractions
         Color WindowForeground { get; }
 
         /// <summary>
+        /// Gets a <see cref="Color"/> structure that is the color of the background in the client area of a dialog window
+        /// </summary>
+        Color DialogWindowBackground { get; }
+
+        /// <summary>
+        /// Gets a <see cref="Color"/> structure that is the color of the text in the client area of a dialog window
+        /// </summary>
+        Color DialogWindowForeground { get; }
+
+        /// <summary>
         /// Gets a <see cref="Color"/> structure that is the color of a menu's background
         /// </summary>
         Color MenuBackground { get; }

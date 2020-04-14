@@ -17,6 +17,12 @@ namespace ClForms.Themes
         Color ISystemColors.WindowForeground => Color.Black;
 
         /// <inheritdoc />
+        Color ISystemColors.DialogWindowBackground => Color.Gray;
+
+        /// <inheritdoc />
+        Color ISystemColors.DialogWindowForeground => Color.Black;
+
+        /// <inheritdoc />
         Color ISystemColors.MenuBackground => Color.Gray;
 
         /// <inheritdoc />
@@ -38,10 +44,10 @@ namespace ClForms.Themes
         Color ISystemColors.ButtonText => Color.Black;
 
         /// <inheritdoc />
-        Color ISystemColors.ButtonInactiveFace => Color.DarkGray;
+        Color ISystemColors.ButtonInactiveFace => Color.Gray;
 
         /// <inheritdoc />
-        Color ISystemColors.ButtonInactiveText => Color.Gray;
+        Color ISystemColors.ButtonInactiveText => Color.DarkGray;
 
         /// <inheritdoc />
         Color ISystemColors.MenuInactiveFace => Color.Gray;

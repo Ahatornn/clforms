@@ -1,9 +1,9 @@
 using System;
+using ButtonsApp.Forms;
 using ClForms.Elements;
 using ClForms.Elements.Menu;
-using PanelsApp.Forms;
 
-namespace PanelsApp
+namespace ButtonsApp
 {
     public partial class MainWindow : Window
     {
@@ -24,33 +24,17 @@ namespace PanelsApp
                 case ScreenType.Welcome:
                     _ = new WelcomeForm {panel1 = {Parent = panel1}};
                     break;
-                case ScreenType.Panel:
-                    _ = new PanelForm(propMenuItem) {panel1 = {Parent = panel1}};
-                    panelMenuItem.Checked = true;
+                case ScreenType.Button:
+                    _ = new ButtonForm {panel1 = {Parent = panel1}};
                     break;
-                case ScreenType.GroupBox:
-                    _ = new GroupBoxForm(propMenuItem) {panel1 = {Parent = panel1}};
-                    gruopMenuItem.Checked = true;
+                case ScreenType.CheckBox:
+                    _ = new CheckBoxForm {panel1 = {Parent = panel1}};
                     break;
-                case ScreenType.StackPanel:
-                    _ = new StackPanelForm(propMenuItem) {panel1 = {Parent = panel1}};
-                    stackMenuItem.Checked = true;
-                    break;
-                case ScreenType.DockPanel:
-                    _ = new DockPanelForm(propMenuItem) {panel1 = {Parent = panel1}};
-                    dockMenuItem.Checked = true;
-                    break;
-                case ScreenType.TilePanel:
-                    _ = new TilePanelForm(propMenuItem) { panel1 = { Parent = panel1 } };
-                    tileMenuItem.Checked = true;
+                case ScreenType.RadioButton:
+                    _ = new RadioButtonForm {panel1 = {Parent = panel1}};
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(targetScreenType), targetScreenType, null);
-            }
-
-            if (currentScreenType != ScreenType.Welcome && MainMenu == null)
-            {
-                MainMenu = mainMenu1;
             }
         }
 
@@ -73,11 +57,9 @@ namespace PanelsApp
 
         private void ReleaseCheckedMenu()
         {
-            panelMenuItem.Checked = false;
-            gruopMenuItem.Checked = false;
-            stackMenuItem.Checked = false;
-            dockMenuItem.Checked = false;
-            tileMenuItem.Checked = false;
+            buttonMenuItem.Checked = false;
+            checkBoxMenuItem.Checked = false;
+            radioMenuItem.Checked = false;
         }
     }
 }

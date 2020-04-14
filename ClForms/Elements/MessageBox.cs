@@ -95,15 +95,19 @@ namespace ClForms.Elements
                 Padding = new Thickness(2, 0),
                 WindowState = ControlState.Normal,
                 AutoSize = true,
+                Background = Application.SystemColors.DialogWindowBackground,
+                Foreground = Application.SystemColors.DialogWindowForeground,
             };
             var mainPanel = new StackPanel
             {
                 Orientation = Orientation.Vertical,
+                AutoSize = true,
             };
 
             var topPanel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
+                AutoSize = true,
             };
 
             if (messageIcon != MessageBoxIcon.None)
@@ -152,7 +156,7 @@ namespace ClForms.Elements
 
             var bottomPanel = new DockPanel
             {
-                AutoSize = false,
+                AutoSize = true,
             };
             foreach (var button in CreateButtons(buttons).Reverse())
             {

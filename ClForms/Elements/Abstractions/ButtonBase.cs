@@ -159,7 +159,7 @@ namespace ClForms.Elements.Abstractions
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
         {
-            base.OnRender(context);
+            context.Release(GetRenderBackColor(), GetRenderForeColor(), '\0');
 
             var textPresenter = GetTextPresenter();
             var reducedArea = context.ContextBounds.Reduce(Padding);

@@ -32,6 +32,15 @@ namespace ClForms.Elements
             threeState = false;
         }
 
+        /// <summary>
+        /// Initialize a new instance <see cref="CheckBox"/>
+        /// </summary>
+        public CheckBox(string text)
+        : this()
+        {
+            Text = text;
+        }
+
         #region Properties
 
         #region Checked
