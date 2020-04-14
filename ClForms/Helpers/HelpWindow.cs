@@ -1,6 +1,7 @@
 using System;
 using ClForms.Common;
 using ClForms.Common.Grid;
+using ClForms.Core;
 using ClForms.Elements;
 
 namespace ClForms.Helpers
@@ -14,6 +15,8 @@ namespace ClForms.Helpers
                 Title = "Help",
                 WindowState = ControlState.Normal,
                 Width = 58,
+                Background = Application.SystemColors.DialogWindowBackground,
+                Foreground = Application.SystemColors.DialogWindowForeground,
             };
 
             var context = new Grid()
