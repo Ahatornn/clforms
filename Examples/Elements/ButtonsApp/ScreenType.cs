@@ -6,5 +6,6 @@ namespace ButtonsApp
         Button,
         CheckBox,
         RadioButton,
+        MessageBox,
     }
 }

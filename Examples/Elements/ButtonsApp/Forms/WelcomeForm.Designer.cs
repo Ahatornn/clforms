@@ -35,21 +35,16 @@ namespace ButtonsApp.Forms
                 TextAlignment = TextAlignment.Center,
                 WordWrap = true,
             });
-            stackPanel1.AddContent(new Label("Button")
+
+            foreach (var controlName in controlList)
             {
-                TextAlignment = TextAlignment.Center,
-                Foreground = Color.Green,
-            });
-            stackPanel1.AddContent(new Label("CheckBox")
-            {
-                TextAlignment = TextAlignment.Center,
-                Foreground = Color.Green,
-            });
-            stackPanel1.AddContent(new Label("RadioButton")
-            {
-                TextAlignment = TextAlignment.Center,
-                Foreground = Color.Green,
-            });
+                stackPanel1.AddContent(new Label(controlName)
+                {
+                    TextAlignment = TextAlignment.Center,
+                    Foreground = Color.Green,
+                });
+            }
+            
             stackPanel1.AddContent(new Label("If you want to continue press [space bar]. For close this window and exit from app press [Ctrl+F4]")
             {
                 TextAlignment = TextAlignment.Center,

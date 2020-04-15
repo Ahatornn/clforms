@@ -33,6 +33,9 @@ namespace ButtonsApp
                 case ScreenType.RadioButton:
                     _ = new RadioButtonForm {panel1 = {Parent = panel1}};
                     break;
+                case ScreenType.MessageBox:
+                    _ = new MessageBoxForm {panel1 = {Parent = panel1}};
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(targetScreenType), targetScreenType, null);
             }
@@ -60,6 +63,7 @@ namespace ButtonsApp
             buttonMenuItem.Checked = false;
             checkBoxMenuItem.Checked = false;
             radioMenuItem.Checked = false;
+            messageBoxMenuItem.Checked = false;
         }
     }
 }

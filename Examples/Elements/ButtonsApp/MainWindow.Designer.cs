@@ -45,6 +45,11 @@ namespace ButtonsApp
             radioMenuItem.Tag = ScreenType.RadioButton;
             controlsMenuItem.Items.Add(radioMenuItem);
 
+            messageBoxMenuItem = new MenuItem("MessageBox");
+            messageBoxMenuItem.OnClick += ControlMenuItemClick;
+            messageBoxMenuItem.Tag = ScreenType.MessageBox;
+            controlsMenuItem.Items.Add(messageBoxMenuItem);
+
             mainMenu1.Items.Add(controlsMenuItem);
             MainMenu = mainMenu1;
         }
@@ -55,6 +60,7 @@ namespace ButtonsApp
         private MenuItem buttonMenuItem;
         private MenuItem checkBoxMenuItem;
         private MenuItem radioMenuItem;
+        private MenuItem messageBoxMenuItem;
         private Label statusBarLabel;
     }
 }
