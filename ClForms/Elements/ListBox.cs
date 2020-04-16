@@ -2,6 +2,7 @@ using System;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
 using ClForms.Elements.Abstractions;
+using ClForms.Helpers;
 
 namespace ClForms.Elements
 {
@@ -10,13 +11,52 @@ namespace ClForms.Elements
     /// </summary>
     public class ListBox<T>: ListBoxBase<T>, IElementStyle<ListBox<T>>
     {
-        protected override void OnRenderItemInternal(IDrawingContext context, T item, int itemAreaWidth) => throw new NotImplementedException();
+        /// <inheritdoc />
+        protected override void OnRenderItemInternal(IDrawingContext context, T item, int itemAreaWidth)
+        {
+            var itemText = GetItemText(item);
+            var drawingText = itemText.Substring(0, Math.Min(itemAreaWidth, itemText.Length));
 
-        protected override bool CanSelectItem(T item) => throw new NotImplementedException();
+            var backColor = GetRenderBackColor();
+            var foreColor = GetRenderForeColor();
+            if (SelectedItems.Contains(item))
+            {
+                backColor = IsDisabled
+                    ? DisabledForeground
+                    : SelectedBackground;
+                foreColor = IsDisabled
+                    ? DisabledBackground
+                    : SelectedForeground;
+            }
 
-        protected override int GetItemTextLength(T item) => throw new NotImplementedException();
+            context.DrawText(TextHelper.GetTextWithAlignment(drawingText, itemAreaWidth, TextAlignment),
+                backColor,
+                foreColor);
+        }
 
-        public void SetStyle(Action<ListBox<T>> styleAction) => throw new NotImplementedException();
+        /// <inheritdoc />
+        protected override bool CanSelectItem(T item) => true;
+
+        /// <inheritdoc />
+        protected override int GetItemTextLength(T item) => GetItemText(item).Length;
+
+        /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
+        public void SetStyle(Action<ListBox<T>> styleAction) => styleAction?.Invoke(this);
+
+        private string GetItemText(T item)
+        {
+            if (item == null)
+            {
+                return string.Empty;
+            }
+
+            if (!string.IsNullOrWhiteSpace(FormatString))
+            {
+                return string.Format(FormatString, item);
+            }
+
+            return item.ToString();
+        }
     }
 
     /// <summary>
