@@ -25,11 +25,4 @@ Added TextBox</PackageReleaseNotes>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="C:\Users\nucle\Downloads\img\clforms-2.jpg">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
-
 </Project>
