@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClForms" Version="1.0.18" />
+    <PackageReference Include="ClForms" Version="1.0.19" />
   </ItemGroup>
 
 </Project>
