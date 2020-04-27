@@ -20,6 +20,7 @@ namespace ClForms.Elements.Menu
             DisabledBackground = mainMenu.DisabledBackground;
             DisabledForeground = mainMenu.DisabledForeground;
             Items.AddRange(items);
+            AutoSize = true;
         }
 
         /// <inheritdoc cref="ListBoxBase{T}.OnRenderItemInternal"/>

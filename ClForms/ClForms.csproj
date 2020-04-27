@@ -5,7 +5,7 @@
     <Authors>Konoplev Anatolii</Authors>
     <Product>Command-Line Forms</Product>
     <Description>This is a framework for make console application with pseudographics interface</Description>
-    <Version>1.0.18</Version>
+    <Version>1.0.19</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <RepositoryUrl>https://github.com/Ahatornn/clforms</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
@@ -16,8 +16,8 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>clforms-2.jpg</PackageIcon>
     <PackageProjectUrl>https://github.com/Ahatornn/clforms</PackageProjectUrl>
-    <PackageReleaseNotes>Added ProgressBar
-Added TextBox</PackageReleaseNotes>
+    <PackageReleaseNotes>FixPopupMenuContent autosize
+Fix ListBoxBase methods</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

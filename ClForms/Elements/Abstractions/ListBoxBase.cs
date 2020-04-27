@@ -26,7 +26,6 @@ namespace ClForms.Elements.Abstractions
 
         protected ListBoxBase()
         {
-            Height = 6;
             Background = Application.SystemColors.ControlFace;
             Foreground = Application.SystemColors.ControlText;
             FocusBackground = Background;
@@ -50,6 +49,7 @@ namespace ClForms.Elements.Abstractions
                 ConsoleKey.Home,
             };
             formatString = " {0} ";
+            AutoSize = false;
         }
 
         #region Properties
@@ -213,6 +213,7 @@ namespace ClForms.Elements.Abstractions
                     throw new ArgumentException("ListBox invalid selection mode", nameof(SelectedIndex));
                 }
 
+                var oldValue = SelectedIndex;
                 if (SelectionMode == SelectionMode.One && value != -1)
                 {
                     var selectedIndex = SelectedIndex;
@@ -238,7 +239,10 @@ namespace ClForms.Elements.Abstractions
                     SelectedItems.Clear();
                 }
 
-                OnSelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+                if(oldValue != SelectedIndex)
+                {
+                    OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(oldValue, SelectedIndex));
+                }
                 InvalidateVisual();
             }
         }
@@ -281,7 +285,7 @@ namespace ClForms.Elements.Abstractions
                 .Reduce(Padding);
             contentArea.Width = Width ?? contentArea.Width;
             contentArea.Height = Height ?? contentArea.Height;
-            if (Items.Any())
+            if (Items.Any() && AutoSize)
             {
                 var itemWidth = Math.Min(Width.HasValue
                         ? Width.Value + Margin.Horizontal
@@ -295,8 +299,8 @@ namespace ClForms.Elements.Abstractions
             }
             else
             {
-                base.Measure(new Size(Math.Min((Width ?? Padding.Horizontal) + Margin.Horizontal, availableSize.Width),
-                    Math.Min((Height ?? Padding.Vertical) + Margin.Vertical, availableSize.Height)));
+                base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                        Math.Min(Height ?? availableSize.Height, availableSize.Height)));
             }
         }
 
@@ -379,7 +383,7 @@ namespace ClForms.Elements.Abstractions
             if (SelectedItems.Any())
             {
                 SelectedItems.Clear();
-                OnSelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+                OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(-1, -1));
                 if (updateCount == 0)
                 {
                     InvalidateVisual();
@@ -394,8 +398,12 @@ namespace ClForms.Elements.Abstractions
         {
             if (SelectedItems.Contains(item))
             {
+                var oldSelectedValue = SelectedIndex;
                 SelectedItems.Remove(item);
-                OnSelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+                if (oldSelectedValue != SelectedIndex)
+                {
+                    OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(oldSelectedValue, SelectedIndex));
+                }
                 if (updateCount == 0)
                 {
                     InvalidateVisual();
@@ -528,7 +536,7 @@ namespace ClForms.Elements.Abstractions
         /// <summary>
         /// Occurs when the value of the <see cref="SelectedIndex" /> property changes
         /// </summary>
-        public event EventHandler OnSelectedIndexChanged;
+        public event EventHandler<PropertyChangedEventArgs<int>> OnSelectedIndexChanged;
 
         /// <summary>
         /// Occurs when the value of the <see cref="TextAlignment" /> property changes
