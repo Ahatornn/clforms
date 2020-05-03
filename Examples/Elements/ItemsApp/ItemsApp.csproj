@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClForms" Version="1.0.19" />
+    <ProjectReference Include="..\..\..\ClForms\ClForms.csproj" />
   </ItemGroup>
 
 </Project>

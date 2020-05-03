@@ -1,6 +1,7 @@
 using System;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
+using ClForms.Core.Contexts;
 using ClForms.Helpers;
 using ClForms.Themes;
 
@@ -37,9 +38,9 @@ namespace ClForms.Core
         {
             ContextBounds = rect;
             renderArea = new Rect(rect.Size);
-            background = new ArrayDevice<Color>(rect.Size);
-            foreground = new ArrayDevice<Color>(rect.Size);
-            chars = new ArrayDevice<char>(rect.Size);
+            background = new ColorDevice(rect.Size);
+            foreground = new ColorDevice(rect.Size);
+            chars = new CharDevice(rect.Size);
             cursorPosition = Point.Empty;
             ControlId = controlId;
             RenderSessionId = renderSessionId;
