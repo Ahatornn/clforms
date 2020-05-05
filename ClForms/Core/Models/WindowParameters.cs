@@ -1,4 +1,3 @@
-using ClForms.Common;
 using ClForms.Core.Contexts;
 using ClForms.Elements;
 
@@ -14,10 +13,14 @@ namespace ClForms.Core.Models
         /// </summary>
         internal Window Window { get; }
 
-        internal Rect WindowRect { get; set; }
-
+        /// <summary>
+        /// Gets or sets the <see cref="ScreenDrawingContext"/> of the parent window
+        /// </summary>
         internal ScreenDrawingContext ParentContext { get; set; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="ScreenDrawingContext"/> of the current window
+        /// </summary>
         internal ScreenDrawingContext CurrentBuffer { get; set; }
 
         /// <summary>
