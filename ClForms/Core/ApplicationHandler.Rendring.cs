@@ -1,8 +1,8 @@
-using System;
 using System.Text;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
+using ClForms.Core.Contexts;
 using ClForms.Core.Models;
 using ClForms.Elements.Abstractions;
 using ClForms.Helpers;
@@ -12,19 +12,22 @@ namespace ClForms.Core
 {
     internal partial class ApplicationHandler
     {
-        private void ReleaseDrawingContext(WindowParameters wndParams)
+        private void ReleaseDrawingContext(WindowParameters wndParams, ScreenDrawingContext bufferContext)
         {
             pseudographicsProvider.CursorVisible = false;
+
             // Run on all controls and for those who have !IsVisualValid calling BeforeRender
-            DetectVisualInvalidate(wndParams.Window, Guid.NewGuid(), wndParams.Window.Location, wndParams);
+            DetectVisualInvalidate(wndParams.Window, Point.Empty, bufferContext);
+
             pseudographicsProvider.SetCursorPosition(0, 0);
             pseudographicsProvider.BackgroundColor = systemColors.WindowBackground;
             pseudographicsProvider.ForegroundColor = systemColors.WindowForeground;
+
             // Now we are looking for a control that the cursor will work for and put it there
-            if (wndParams.Window?.FocusableControl is ICursorAdmit control)
+            if (wndParams.Window?.FocusableControl is ICursorAdmit cursorControl &&
+                wndParams.Window?.FocusableControl is Control control)
             {
-                var cursorPosition =
-                    GetFocusableCursorPosition(wndParams.Window.FocusableControl.Id, control.CursorPosition);
+                var cursorPosition = control.Location + cursorControl.CursorPosition;
                 pseudographicsProvider.SetCursorPosition(cursorPosition.X, cursorPosition.Y);
                 pseudographicsProvider.CursorVisible = true;
             }
@@ -46,15 +49,19 @@ namespace ClForms.Core
             var shouldMeasure = DetectMeasureInvalidate(wndParams.Window, ref shouldRender);
 
             // 2- If it needed re-size, call Measure and Arrange
+            var previousWndSize = wndParams.Window.Bounds;
             if (shouldMeasure)
             {
-                PrepareWindow(wndParams.Window);
+                PrepareWindow(wndParams);
             }
 
             // 3- if it needed re-render, or re-size was called, call ReleaseDrawingContext
             if (shouldMeasure || shouldRender)
             {
-                ReleaseDrawingContext(wndParams);
+                var bufferForRender = new ScreenDrawingContext(wndParams.Window.Bounds);
+                bufferForRender.Release(Color.NotSet, Color.NotSet);
+                ReleaseDrawingContext(wndParams, bufferForRender);
+                TransferToScreen(wndParams, bufferForRender, wndParams.Window.Bounds != previousWndSize);
             }
         }
 
@@ -94,9 +101,10 @@ namespace ClForms.Core
         /// <summary>
         /// Going through all the elements and looking for those that need to be re-rendered
         /// </summary>
-        private void DetectVisualInvalidate(Control element, Guid renderSessionId, Point startPoint, WindowParameters wndParams)
+        private void DetectVisualInvalidate(Control element,
+            Point startPoint,
+            ScreenDrawingContext bufferContext)
         {
-            var parentReRendered = false;
             if (element == null)
             {
                 return;
@@ -104,30 +112,16 @@ namespace ClForms.Core
 
             if (!element.IsVisualValid)
             {
-                element.BeforeRender(renderSessionId, GetHashCodeHelper.CalculateHashCode(element));
-                if (element == Application.MainWindow &&
-                    wndParams.ControlContextHash.TryGetValue(element.Id, out var previousValue) &&
-                    element.DrawingContext.ContextBounds != previousValue.InvalidateRect &&
-                    currentWindowParams.Window.WindowState == ControlState.Normal)
-                {
-                    ClearScreen();
-                    wndParams.Context.Release(systemColors.ScreenBackground, systemColors.ScreenForeground);
-                }
-                InvalidateScreenArea(element.DrawingContext, startPoint, wndParams);
-                parentReRendered = true;
+                element.BeforeRender();
             }
+            InvalidateScreenArea(element.DrawingContext, startPoint, bufferContext);
 
             if (element is ContentControl contentControl)
             {
                 foreach (var control in contentControl)
                 {
-                    if (parentReRendered)
-                    {
-                        wndParams.ControlContextHash.TryRemove(control.Id, out _);
-                        control.InvalidateVisual();
-                    }
                     var location = control.Location + startPoint;
-                    DetectVisualInvalidate(control, renderSessionId, location, wndParams);
+                    DetectVisualInvalidate(control, location, bufferContext);
                 }
             }
         }
@@ -135,64 +129,10 @@ namespace ClForms.Core
         /// <summary>
         /// Redrawing a piece of the screen
         /// </summary>
-        private void InvalidateScreenArea(IDrawingContext ctx, Point location, WindowParameters wndParams)
+        private void InvalidateScreenArea(IDrawingContext ctx,
+            Point location,
+            ScreenDrawingContext bufferContext)
         {
-            var contextHash = ctx.GetHashCode();
-            var parentHash = ctx.Parent?.GetHashCode() ?? 0;
-            if (wndParams.ControlContextHash.TryGetValue(ctx.ControlId, out var previousValue) &&
-                previousValue.HashValue == contextHash &&
-                previousValue.ParentHashValue == parentHash)
-            {
-                return;
-            }
-
-            var param = new InvalidateParameters(contextHash,
-                parentHash,
-                ctx.RenderSessionId,
-                ctx.ContextBounds,
-                location);
-            wndParams.ControlContextHash.AddOrUpdate(ctx.ControlId, param, (key, oldValue) => param);
-
-            if (ctx.Parent != null &&
-                previousValue != null &&
-                previousValue.RenderId != param.RenderId &&
-                previousValue.ParentHashValue == parentHash)
-            {
-                var preColorPoint = new ContextColorPoint(Color.NotSet, Color.NotSet);
-                SetConsoleColor(preColorPoint);
-                wndParams.ControlContextHash.TryGetValue(ctx.Parent.ControlId, out var parentValue);
-                for (var row = previousValue.InvalidateRect.Top; row < previousValue.InvalidateRect.Bottom; row++)
-                {
-                    for (var col = previousValue.InvalidateRect.Left; col < previousValue.InvalidateRect.Right; col++)
-                    {
-                        if (!ctx.ContextBounds.Contains(col, row))
-                        {
-                            var currentPoint = GetParentColorPoint(new ContextColorPoint(Color.NotSet,
-                                    Color.NotSet),
-                                ctx.Parent, 
-                                new Point(col, row),
-                                systemColors);
-                            if (currentPoint != preColorPoint)
-                            {
-                                SetConsoleColor(currentPoint);
-                            }
-
-                            var point = new Point(col + parentValue?.Location.X ?? 0,
-                                row + parentValue?.Location.Y ?? 0);
-
-                            pseudographicsProvider.SetCursorPosition(point.X, point.Y);
-                            wndParams.Context.SetCursorPos(point);
-
-                            pseudographicsProvider.Write(ctx.Parent.Chars[col, row]);
-                            wndParams.Context.DrawText(ctx.Parent.Chars[col, row], currentPoint.Background,
-                                currentPoint.Foreground);
-
-                            preColorPoint = currentPoint;
-                        }
-                    }
-                }
-            }
-
             if (ctx.ContextBounds.HasEmptyDimension())
             {
                 return;
@@ -200,13 +140,12 @@ namespace ClForms.Core
 
             var strBuilder = new StringBuilder(ctx.ContextBounds.Width);
             var colorPoint = ctx.GetColorPoint(0, 0);
-            SetConsoleColor(colorPoint);
+
             for (var row = 0; row < ctx.ContextBounds.Height; row++)
             {
                 strBuilder.Clear();
 
-                pseudographicsProvider.SetCursorPosition(location.X, row + location.Y);
-                wndParams.Context.SetCursorPos(location.X, row + location.Y);
+                bufferContext.SetCursorPos(new Point(location.X, row + location.Y));
 
                 for (var col = 0; col < ctx.ContextBounds.Width; col++)
                 {
@@ -219,13 +158,10 @@ namespace ClForms.Core
                     {
                         if (strBuilder.Length > 0)
                         {
-                            pseudographicsProvider.Write(strBuilder.ToString());
-                            wndParams.Context.DrawText(strBuilder.ToString(), colorPoint.Background,
+                            bufferContext.DrawText(strBuilder.ToString(), colorPoint.Background,
                                 colorPoint.Foreground);
-
                             strBuilder.Clear();
                         }
-                        SetConsoleColor(currentPoint);
                         colorPoint = currentPoint;
                         strBuilder.Append(ctx.Chars[col, row]);
                     }
@@ -233,48 +169,69 @@ namespace ClForms.Core
 
                 if (strBuilder.Length > 0)
                 {
-                    pseudographicsProvider.Write(strBuilder.ToString());
-                    wndParams.Context.DrawText(strBuilder.ToString(),
+                    bufferContext.DrawText(strBuilder.ToString(),
                         colorPoint.Background,
                         colorPoint.Foreground);
                 }
             }
-            pseudographicsProvider.SetCursorPosition(location.X, location.Y);
         }
 
-        private static ContextColorPoint GetParentColorPoint(ContextColorPoint colors, 
-            IDrawingContext context, 
-            Point point,
-            ISystemColors systemColors)
+        private void TransferToScreen(WindowParameters windowParameters, ScreenDrawingContext bufferForRender, bool shouldBackgroundRender)
         {
-            if (context == null)
+            var targetBuffer = shouldBackgroundRender
+                ? windowParameters.ParentContext.Merge(windowParameters.Window.Location, bufferForRender)
+                : bufferForRender;
+            var targetLocation = shouldBackgroundRender
+                ? Point.Empty
+                : windowParameters.Window.Location;
+
+            var strBuilder = new StringBuilder(targetBuffer.ContextBounds.Width);
+            var colorPoint = targetBuffer.GetColorPoint(0, 0);
+            for (var row = 0; row < targetBuffer.ContextBounds.Height; row++)
             {
-                return new ContextColorPoint(colors.Background != Color.NotSet
-                        ? colors.Background
-                        : systemColors.ScreenBackground,
-                    colors.Foreground != Color.NotSet
-                        ? colors.Foreground
-                        : systemColors.ScreenForeground);
+                strBuilder.Clear();
+
+                pseudographicsProvider.SetCursorPosition(targetLocation.X, row + targetLocation.Y);
+                for (var col = 0; col < targetBuffer.ContextBounds.Width; col++)
+                {
+                    var currentPoint = targetBuffer.GetColorPoint(col, row);
+                    if (currentPoint == colorPoint)
+                    {
+                        strBuilder.Append(targetBuffer.Chars[col, row]);
+                    }
+                    else
+                    {
+                        if (strBuilder.Length > 0)
+                        {
+                            if(colorPoint.Background != Color.NotSet && colorPoint.Foreground != Color.NotSet)
+                            {
+                                pseudographicsProvider.BackgroundColor = colorPoint.Background;
+                                pseudographicsProvider.ForegroundColor = colorPoint.Foreground;
+                                pseudographicsProvider.Write(strBuilder.ToString());
+                            }
+                            else
+                            {
+                                pseudographicsProvider.SetCursorPosition(col + targetLocation.X, row + targetLocation.Y);
+                            }
+                            strBuilder.Clear();
+                        }
+                        colorPoint = currentPoint;
+                        strBuilder.Append(targetBuffer.Chars[col, row]);
+                    }
+                }
+
+                if (strBuilder.Length > 0)
+                {
+                    if (colorPoint.Background != Color.NotSet && colorPoint.Foreground != Color.NotSet)
+                    {
+                        pseudographicsProvider.BackgroundColor = colorPoint.Background;
+                        pseudographicsProvider.ForegroundColor = colorPoint.Foreground;
+                        pseudographicsProvider.Write(strBuilder.ToString());
+                    }
+                }
             }
-            var parentColors = context.GetColorPoint(point.X, point.Y);
-
-            var result = new ContextColorPoint(colors.Background == Color.NotSet
-                    ? parentColors.Background
-                    : colors.Background,
-                colors.Foreground == Color.NotSet
-                    ? parentColors.Foreground
-                    : colors.Foreground);
-
-            if (result.Background != Color.NotSet &&
-                result.Foreground != Color.NotSet)
-            {
-                return result;
-            }
-
-            return GetParentColorPoint(result, 
-                context.Parent, 
-                point + context.ContextBounds.Location,
-                systemColors);
+            pseudographicsProvider.SetCursorPosition(0, 0);
+            windowParameters.CurrentBuffer = bufferForRender;
         }
     }
 }

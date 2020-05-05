@@ -9,7 +9,7 @@ namespace ClForms.Abstractions.Engine
     /// </summary>
     public class ArrayDevice<T>: IGraphicsDevice<T>
     {
-        private readonly T[,] device;
+        protected readonly T[,] device;
 
         /// <summary>
         /// Initialize a new instance <see cref="ArrayDevice{T}"/>

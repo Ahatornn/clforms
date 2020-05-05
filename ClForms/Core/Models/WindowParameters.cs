@@ -1,6 +1,5 @@
-﻿using ClForms.Abstractions.Engine;
+using ClForms.Core.Contexts;
 using ClForms.Elements;
-using System.Collections.Concurrent;
 
 namespace ClForms.Core.Models
 {
@@ -15,32 +14,22 @@ namespace ClForms.Core.Models
         internal Window Window { get; }
 
         /// <summary>
-        /// The parameters of the update components window
+        /// Gets or sets the <see cref="ScreenDrawingContext"/> of the parent window
         /// </summary>
-        internal ConcurrentDictionary<long, InvalidateParameters> ControlContextHash { get; }
+        internal ScreenDrawingContext ParentContext { get; set; }
 
         /// <summary>
-        /// Context-snapshot of the drawn window
+        /// Gets or sets the <see cref="ScreenDrawingContext"/> of the current window
         /// </summary>
-        internal IDrawingContext Context { get; private set; }
+        internal ScreenDrawingContext CurrentBuffer { get; set; }
 
         /// <summary>
         /// Initialize a new instance <see cref="WindowParameters"/>
         /// </summary>
-        public WindowParameters(Window window, IDrawingContext context)
+        public WindowParameters(Window window, ScreenDrawingContext parentContext)
         {
             Window = window;
-            Context = context;
-            ControlContextHash = new ConcurrentDictionary<long, InvalidateParameters>();
-        }
-
-        /// <summary>
-        /// Sets the new context of the drawn window. 
-        /// This is required when the screen size has changed
-        /// </summary>
-        internal void SetContext(IDrawingContext context)
-        {
-            Context = context;
+            ParentContext = parentContext;
         }
     }
 }
