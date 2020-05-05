@@ -65,5 +65,12 @@ namespace ClForms.Core.Contexts
             }
             cursorPosition = new Point(right, cursorPosition.Y);
         }
+
+        internal void SetValues(int col, int row, Color backColor, Color foreColor, char @char)
+        {
+            background[col, row] = backColor;
+            foreground[col, row] = foreColor;
+            chars[col, row] = @char;
+        }
     }
 }

@@ -27,7 +27,6 @@ namespace ClForms.Core
         private readonly IEnvironment environment;
         private WindowParameters currentWindowParams;
         private Rect screenRect;
-        private ScreenDrawingContext screenContext;
 
         /// <summary>
         /// Initialize a new instance <see cref="ApplicationHandler"/>
@@ -118,9 +117,9 @@ namespace ClForms.Core
         private void PrepareInvalidateScreen(Window wnd)
         {
             ClearScreen();
-            currentWindowParams.ControlContextHash.Clear();
+            //currentWindowParams.ControlContextHash.Clear();
             var wndParams = windows.GetWindowParameters(wnd);
-            wndParams.Context.Release(systemColors.ScreenBackground, systemColors.ScreenForeground);
+            //wndParams.Context.Release(systemColors.ScreenBackground, systemColors.ScreenForeground);
             pseudographicsProvider.CursorVisible = false;
         }
 
@@ -136,23 +135,29 @@ namespace ClForms.Core
             {
                 screenRect = new Rect(0, 0, environment.WindowWidth, environment.WindowHeight);
                 ClearScreen();
-                IDrawingContext preWndContext = null;
+                WindowParameters preWndParams = null;
                 foreach (var wndPr in windows.Reverse())
                 {
-                    var wndContext = preWndContext != null
-                        ? preWndContext.Clone(wndPr.Window.Id, Guid.Empty)
-                        : new DefaultDrawingContext(screenRect, wndPr.Window.Id, GetHashCodeHelper.CalculateHashCode(wndPr.Window), Guid.Empty, null);
-                    preWndContext = wndContext;
-                    wndPr.SetContext(wndContext);
-                    wndPr.ControlContextHash.Clear();
-                    PrepareWindow(wndPr.Window);
+                    wndPr.ParentContext = preWndParams == null
+                        ? CreateEmptyDC()
+                        : preWndParams.ParentContext.Merge(wndPr.WindowRect.Location, wndPr.CurrentBuffer);
 
-                    var bufferForRender = new ScreenDrawingContext(screenRect);
+                    preWndParams = wndPr;
+                    /*var wndParams = preWndParams == null
+                        ? new WindowParameters(wndPr.Window, CreateEmptyDC())
+                        : new WindowParameters(wndPr.Window, preWndParams.ParentDC.Merge(wndPr.WindowRect.Location, wndPr.CurrentBuffer));
+                    wndPr.ParentDC = wndParams.ParentDC;
+                    preWndParams = wndParams;
+                    //wndPr.SetContext(wndContext);
+                    //wndPr.ControlContextHash.Clear();*/
+                    PrepareWindow(wndPr);
+
+                    var bufferForRender = new ScreenDrawingContext(wndPr.WindowRect);
                     bufferForRender.Release(Color.NotSet, Color.NotSet);
 
                     ReleaseDrawingContext(wndPr, bufferForRender);
 
-                    TransferToScreen(bufferForRender);
+                    TransferToScreen(wndPr, bufferForRender, false);
                 }
             }
             CheckMeasureOrVisualInvalidate(currentWindowParams);
@@ -163,12 +168,16 @@ namespace ClForms.Core
         {
             if (!(wnd.WasClosed && wnd.Showing))
             {
-                var wndParams = currentWindowParams != null
-                    ? new WindowParameters(wnd, currentWindowParams.Context.Clone(wnd.Id, Guid.Empty))
-                    : new WindowParameters(wnd, new DefaultDrawingContext(screenRect, wnd.Id, GetHashCodeHelper.CalculateHashCode(wnd), Guid.Empty, null));
+                var wndParams = currentWindowParams == null
+                    ? new WindowParameters(wnd, CreateEmptyDC())
+                    : new WindowParameters(wnd, currentWindowParams.ParentContext.Merge(currentWindowParams.WindowRect.Location, currentWindowParams.CurrentBuffer));
+
+                //var wndParams = currentWindowParams != null
+                //    ? new WindowParameters(wnd, currentWindowParams.Context.Clone(wnd.Id, Guid.Empty))
+                //    : new WindowParameters(wnd, new DefaultDrawingContext(screenRect, wnd.Id, GetHashCodeHelper.CalculateHashCode(wnd), Guid.Empty, null));
                 windows.Push(wndParams);
                 currentWindowParams = wndParams;
-                PrepareWindow(currentWindowParams.Window);
+                PrepareWindow(currentWindowParams);
             }
         }
 
@@ -183,9 +192,9 @@ namespace ClForms.Core
 
             if (wasClosed)
             {
-                if (currentWindowParams?.Context != null)
+                if (currentWindowParams?.Window != null)
                 {
-                    InvalidateScreen(currentWindowParams.Context);
+                    InvalidateScreen(currentWindowParams);
                     CheckMeasureOrVisualInvalidate(currentWindowParams);
                 }
                 return true;
@@ -217,81 +226,46 @@ namespace ClForms.Core
                 pseudographicsProvider.BackgroundColor = systemColors.ScreenBackground;
             }
             pseudographicsProvider.Clear();
-            screenContext = new ScreenDrawingContext(screenRect);
-            screenContext.Release(systemColors.ScreenBackground, systemColors.ScreenForeground);
         }
+
 
         /// <summary>
         /// Redrawing the screen to the same state as another window was displayed on it
         /// </summary>
-        private void InvalidateScreen(IDrawingContext ctx)
-        {
-            /*var strBuilder = new StringBuilder(ctx.ContextBounds.Width);
-            var colorPoint = ctx.GetColorPoint(0, 0);
-            SetConsoleColor(colorPoint);
-            for (var row = 0; row < ctx.ContextBounds.Height; row++)
-            {
-                strBuilder.Clear();
-
-                pseudographicsProvider.SetCursorPosition(0, row);
-                for (var col = 0; col < ctx.ContextBounds.Width; col++)
-                {
-                    var currentPoint = ctx.GetColorPoint(col, row);
-                    if (currentPoint == colorPoint)
-                    {
-                        strBuilder.Append(ctx.Chars[col, row]);
-                    }
-                    else
-                    {
-                        if (strBuilder.Length > 0)
-                        {
-                            pseudographicsProvider.Write(strBuilder.ToString());
-                            strBuilder.Clear();
-                        }
-                        SetConsoleColor(currentPoint);
-                        colorPoint = currentPoint;
-                        strBuilder.Append(ctx.Chars[col, row]);
-                    }
-                }
-
-                if (strBuilder.Length > 0)
-                {
-                    pseudographicsProvider.Write(strBuilder.ToString());
-                }
-            }
-            pseudographicsProvider.SetCursorPosition(0, 0);*/
-        }
+        private void InvalidateScreen(WindowParameters windowParameters)
+            => TransferToScreen(windowParameters, windowParameters.CurrentBuffer, true);
 
         /// <summary>
         /// Preparing the window for display on the screen
         /// </summary>
-        private void PrepareWindow(Window wnd)
+        private void PrepareWindow(WindowParameters param)
         {
-            wnd.Measure(new Size(environment.WindowWidth, environment.WindowHeight));
-            if (wnd.WindowState == ControlState.Maximized)
+            param.Window.Measure(new Size(environment.WindowWidth, environment.WindowHeight));
+            if (param.Window.WindowState == ControlState.Maximized)
             {
-                wnd.Arrange(screenRect);
+                param.Window.Arrange(screenRect);
+                param.WindowRect = new Rect(0, 0, param.Window.Bounds.Width, param.Window.Bounds.Height);
             }
             else
             {
-                var location = new Point((environment.WindowWidth - wnd.DesiredSize.Width) / 2,
-                    (environment.WindowHeight - wnd.DesiredSize.Height) / 2);
+                var location = new Point((environment.WindowWidth - param.Window.DesiredSize.Width) / 2,
+                    (environment.WindowHeight - param.Window.DesiredSize.Height) / 2);
 
-                if (wnd is PopupMenuWindow popWnd)
+                if (param.Window is PopupMenuWindow popWnd)
                 {
                     location = popWnd.PreferredLocation;
                 }
-
-                wnd.Arrange(new Rect(location.X, location.Y, wnd.DesiredSize.Width, wnd.DesiredSize.Height));
+                param.WindowRect = new Rect(location.X, location.Y, param.Window.DesiredSize.Width, param.Window.DesiredSize.Height);
+                //wnd.Arrange(new Rect(location.X, location.Y, wnd.DesiredSize.Width, wnd.DesiredSize.Height));
+                param.Window.Arrange(new Rect(location.X, location.Y, param.Window.DesiredSize.Width, param.Window.DesiredSize.Height));
             }
         }
 
-        private Point GetFocusableCursorPosition(long controlId, Point cursorPosition)
+        private ScreenDrawingContext CreateEmptyDC()
         {
-            currentWindowParams.ControlContextHash.TryGetValue(controlId, out var control);
-            return control == null
-                ? cursorPosition
-                : control.Location + cursorPosition;
+            var context = new ScreenDrawingContext(screenRect);
+            context.Release(systemColors.ScreenBackground, systemColors.ScreenForeground);
+            return context;
         }
     }
 }
