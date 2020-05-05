@@ -35,12 +35,6 @@ namespace ClForms.Abstractions.Engine
         long ControlId { get; }
 
         /// <summary>
-        /// Item rendering session id
-        /// <remarks> Allows to determine session when the element was drawn</remarks>
-        /// </summary>
-        Guid RenderSessionId { get; }
-
-        /// <summary>
         /// Parent context reference
         /// </summary>
         IDrawingContext Parent { get; }

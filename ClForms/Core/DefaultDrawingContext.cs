@@ -2,7 +2,6 @@ using System;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Core.Contexts;
-using ClForms.Helpers;
 using ClForms.Themes;
 
 namespace ClForms.Core
@@ -15,7 +14,7 @@ namespace ClForms.Core
         /// <summary>
         /// Empty drawing context
         /// </summary>
-        public static DefaultDrawingContext Empty => new DefaultDrawingContext(Rect.Empty, default, GetHashCodeHelper.PrimeNumber, Guid.Empty, null);
+        public static DefaultDrawingContext Empty => new DefaultDrawingContext(Rect.Empty, default, null);
 
         private readonly ArrayDevice<Color> background;
         private readonly ArrayDevice<Color> foreground;
@@ -24,16 +23,12 @@ namespace ClForms.Core
         private Rect renderArea;
         private Color currentBackground;
         private Color currentForeground;
-        private readonly int childrenIdHash;
-        private readonly Lazy<int> contextHashCode;
 
         /// <summary>
         /// Initialize a new instance <see cref="DefaultDrawingContext"/>
         /// </summary>
         public DefaultDrawingContext(Rect rect,
             long controlId,
-            int childrenIdHash,
-            Guid renderSessionId,
             IDrawingContext parent)
         {
             ContextBounds = rect;
@@ -43,10 +38,7 @@ namespace ClForms.Core
             chars = new CharDevice(rect.Size);
             cursorPosition = Point.Empty;
             ControlId = controlId;
-            RenderSessionId = renderSessionId;
             Parent = parent;
-            this.childrenIdHash = childrenIdHash;
-            contextHashCode = new Lazy<int>(GetHashCodeInternal);
         }
 
         /// <inheritdoc cref="IDrawingContext.Background"/>
@@ -127,15 +119,9 @@ namespace ClForms.Core
             SetCursorPos(right - (right >= renderArea.Width ? 1 : 0), cursorPosition.Y);
         }
 
-        /// <inheritdoc cref="object.GetHashCode"/>
-        public override int GetHashCode() => contextHashCode.Value;
-
         /// <inheritdoc cref="IPaintContext.GetColorPoint"/>
         public ContextColorPoint GetColorPoint(int col, int row)
             => new ContextColorPoint(background[col, row], foreground[col, row]);
-
-        /// <inheritdoc cref="IDrawingContext.RenderSessionId"/>
-        public Guid RenderSessionId { get; }
 
         /// <inheritdoc cref="IDrawingContext.Parent"/>
         public IDrawingContext Parent { get; }
@@ -145,21 +131,12 @@ namespace ClForms.Core
         /// </summary>
         public IDrawingContext Clone(long controlId, Guid renderSessionId)
         {
-            var result = new DefaultDrawingContext(ContextBounds, controlId, childrenIdHash, renderSessionId, this);
+            var result = new DefaultDrawingContext(ContextBounds, controlId, this);
             result.background.Release(background);
             result.foreground.Release(foreground);
             result.chars.Release(chars);
 
             return result;
         }
-
-        private int GetHashCodeInternal()
-            => GetHashCodeHelper.CalculateHashCode(Parent?.ControlId.GetHashCode() ?? GetHashCodeHelper.SmallPrimeNumber,
-                childrenIdHash,
-                background.GetHashCode(),
-                foreground.GetHashCode(),
-                chars.GetHashCode(),
-                ContextBounds.GetHashCode(),
-                ControlId.GetHashCode());
     }
 }

@@ -356,9 +356,9 @@ namespace ClForms.Elements.Abstractions
         /// </summary>
         protected virtual void DisposeManagedResources() { }
 
-        internal void BeforeRender(Guid renderSessionId, int childrenIdHash)
+        internal void BeforeRender()
         {
-            DrawingContext = new DefaultDrawingContext(bounds, Id, childrenIdHash, renderSessionId, Parent?.DrawingContext);
+            DrawingContext = new DefaultDrawingContext(bounds, Id, Parent?.DrawingContext);
             OnRender(DrawingContext);
             IsVisualValid = true;
         }

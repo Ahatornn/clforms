@@ -1,4 +1,3 @@
-using ClForms.Elements.Abstractions;
 using System.Linq;
 
 namespace ClForms.Helpers
@@ -8,8 +7,6 @@ namespace ClForms.Helpers
     /// </summary>
     internal class GetHashCodeHelper
     {
-        internal const int SmallPrimeNumber = 3;
-        internal const int PrimeNumber = 19;
         private const int InitializeHashPrimeNumber = 17;
         private const int IterationPrimeNumber = 23;
 
@@ -24,25 +21,6 @@ namespace ClForms.Helpers
                 hash = propertyValues.Aggregate(hash, (current, value) => current * IterationPrimeNumber + value);
             }
 
-            return hash;
-        }
-
-        /// <summary>
-        /// Returns the hash code by object property values
-        /// </summary>
-        internal static int CalculateHashCode(Control parentControl)
-        {
-            var hash = InitializeHashPrimeNumber;
-            if (parentControl is ContentControl contentControl)
-            {
-                unchecked
-                {
-                    foreach (var child in contentControl)
-                    {
-                        hash = hash * IterationPrimeNumber + child.Id.GetHashCode();
-                    }
-                }
-            }
             return hash;
         }
     }

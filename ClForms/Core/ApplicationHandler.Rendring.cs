@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
@@ -18,10 +17,7 @@ namespace ClForms.Core
             pseudographicsProvider.CursorVisible = false;
 
             // Run on all controls and for those who have !IsVisualValid calling BeforeRender
-            DetectVisualInvalidate(wndParams.Window,
-                Guid.NewGuid(),
-                Point.Empty,
-                bufferContext);
+            DetectVisualInvalidate(wndParams.Window, Point.Empty, bufferContext);
 
             pseudographicsProvider.SetCursorPosition(0, 0);
             pseudographicsProvider.BackgroundColor = systemColors.WindowBackground;
@@ -64,9 +60,7 @@ namespace ClForms.Core
             {
                 var bufferForRender = new ScreenDrawingContext(wndParams.Window.Bounds);
                 bufferForRender.Release(Color.NotSet, Color.NotSet);
-
                 ReleaseDrawingContext(wndParams, bufferForRender);
-
                 TransferToScreen(wndParams, bufferForRender, wndParams.Window.Bounds != previousWndSize);
             }
         }
@@ -108,7 +102,6 @@ namespace ClForms.Core
         /// Going through all the elements and looking for those that need to be re-rendered
         /// </summary>
         private void DetectVisualInvalidate(Control element,
-            Guid renderSessionId,
             Point startPoint,
             ScreenDrawingContext bufferContext)
         {
@@ -119,7 +112,7 @@ namespace ClForms.Core
 
             if (!element.IsVisualValid)
             {
-                element.BeforeRender(renderSessionId, GetHashCodeHelper.CalculateHashCode(element));
+                element.BeforeRender();
             }
             InvalidateScreenArea(element.DrawingContext, startPoint, bufferContext);
 
@@ -128,7 +121,7 @@ namespace ClForms.Core
                 foreach (var control in contentControl)
                 {
                     var location = control.Location + startPoint;
-                    DetectVisualInvalidate(control, renderSessionId, location, bufferContext);
+                    DetectVisualInvalidate(control, location, bufferContext);
                 }
             }
         }
