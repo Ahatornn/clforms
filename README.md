@@ -38,7 +38,8 @@ Already have the components in the list below
 
 #### Planned date to release
 ------------
-30.04.2020
+was: 30.04.2020
+new: 12.05.2020 (making double buffer)
 
 
 ## Quick start
