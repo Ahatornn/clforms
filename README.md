@@ -1,4 +1,10 @@
 # clforms
+
+![logo](https://github.com/Ahatornn/clforms/blob/master/Images/favico.jpg)
+
+[![NuGet](https://img.shields.io/nuget/dt/ClForms.svg)](https://www.nuget.org/packages/ClForms)
+[![NuGet](https://img.shields.io/nuget/v/ClForms.svg)](https://www.nuget.org/packages/ClForms)
+
 **Pseudographics interface for console window by .Net Core 3.1**
 
 **Attention!**
