@@ -140,11 +140,12 @@ namespace ClForms.Core
                         : preWndParams.ParentContext.Merge(preWndParams.Window.Location, preWndParams.CurrentBuffer);
 
                     preWndParams = wndPr;
-
+                    pseudographicsProvider.CursorVisible = false;
                     var bufferForRender = new ScreenDrawingContext(wndPr.Window.Bounds);
                     bufferForRender.Release(Color.NotSet, Color.NotSet);
-                    ReleaseDrawingContext(wndPr, bufferForRender);
+                    DetectVisualInvalidate(wndPr.Window, Point.Empty, bufferForRender);
                     TransferToScreen(wndPr, bufferForRender, false);
+                    SetFocusableBehavior(wndPr);
                 }
             }
             CheckMeasureOrVisualInvalidate(currentWindowParams);

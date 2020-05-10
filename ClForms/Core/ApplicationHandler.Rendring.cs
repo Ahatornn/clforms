@@ -1,5 +1,6 @@
 using System.Text;
 using ClForms.Abstractions;
+using ClForms.Abstractions.Core;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Core.Contexts;
@@ -12,27 +13,6 @@ namespace ClForms.Core
 {
     internal partial class ApplicationHandler
     {
-        private void ReleaseDrawingContext(WindowParameters wndParams, ScreenDrawingContext bufferContext)
-        {
-            pseudographicsProvider.CursorVisible = false;
-
-            // Run on all controls and for those who have !IsVisualValid calling BeforeRender
-            DetectVisualInvalidate(wndParams.Window, Point.Empty, bufferContext);
-
-            pseudographicsProvider.SetCursorPosition(0, 0);
-            pseudographicsProvider.BackgroundColor = systemColors.WindowBackground;
-            pseudographicsProvider.ForegroundColor = systemColors.WindowForeground;
-
-            // Now we are looking for a control that the cursor will work for and put it there
-            if (wndParams.Window?.FocusableControl is ICursorAdmit cursorControl &&
-                wndParams.Window?.FocusableControl is Control control)
-            {
-                var cursorPosition = control.Location + cursorControl.CursorPosition;
-                pseudographicsProvider.SetCursorPosition(cursorPosition.X, cursorPosition.Y);
-                pseudographicsProvider.CursorVisible = true;
-            }
-        }
-
         /// <summary>
         /// Going through all the elements and looking for those that need to be re-size
         /// and re-render
@@ -58,10 +38,14 @@ namespace ClForms.Core
             // 3- if it needed re-render, or re-size was called, call ReleaseDrawingContext
             if (shouldMeasure || shouldRender)
             {
+                pseudographicsProvider.CursorVisible = false;
                 var bufferForRender = new ScreenDrawingContext(wndParams.Window.Bounds);
                 bufferForRender.Release(Color.NotSet, Color.NotSet);
-                ReleaseDrawingContext(wndParams, bufferForRender);
+
+                // Run on all controls and for those who have !IsVisualValid calling BeforeRender
+                DetectVisualInvalidate(wndParams.Window, Point.Empty, bufferForRender);
                 TransferToScreen(wndParams, bufferForRender, wndParams.Window.Bounds != previousWndSize);
+                SetFocusableBehavior(wndParams);
             }
         }
 
@@ -232,6 +216,22 @@ namespace ClForms.Core
             }
             pseudographicsProvider.SetCursorPosition(0, 0);
             windowParameters.CurrentBuffer = bufferForRender;
+        }
+
+        private void SetFocusableBehavior(WindowParameters wndParams)
+        {
+            pseudographicsProvider.SetCursorPosition(0, 0);
+            pseudographicsProvider.BackgroundColor = systemColors.WindowBackground;
+            pseudographicsProvider.ForegroundColor = systemColors.WindowForeground;
+
+            // Now we are looking for a control that the cursor will work for and put it there
+            if (wndParams.Window?.FocusableControl is ICursorAdmit cursorControl &&
+                wndParams.Window?.FocusableControl is Control control)
+            {
+                var cursorPosition = control.GetScreenLocation() + cursorControl.CursorPosition;
+                pseudographicsProvider.SetCursorPosition(cursorPosition.X, cursorPosition.Y);
+                pseudographicsProvider.CursorVisible = true;
+            }
         }
     }
 }
