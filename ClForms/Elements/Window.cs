@@ -263,10 +263,10 @@ namespace ClForms.Elements
                      (mainMenu?.DesiredSize ?? Size.Empty) +
                      (statusBar?.DesiredSize ?? Size.Empty))
                     .Height);
-                minContentSize.Width = Math.Min(Width ?? minContentSize.Width, minContentSize.Width);
-                minContentSize.Height = Math.Min(Height ?? minContentSize.Height, minContentSize.Height);
                 if (AutoSize)
                 {
+                    minContentSize.Width = Math.Min(Width ?? minContentSize.Width, minContentSize.Width);
+                    minContentSize.Height = Math.Min(Height ?? minContentSize.Height, minContentSize.Height);
                     base.Measure(new Size(
                         Math.Min(minContentSize.Width + (Padding + BorderThickness).Horizontal, availableSize.Width),
                         Math.Min(minContentSize.Height + (Padding + BorderThickness).Vertical, availableSize.Height)));
