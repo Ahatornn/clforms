@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ClForms" Version="1.0.20" />
+    <ProjectReference Include="..\MazeCommon\MazeCommon.csproj" />
   </ItemGroup>
 
 </Project>

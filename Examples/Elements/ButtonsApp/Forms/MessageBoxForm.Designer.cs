@@ -25,8 +25,8 @@ namespace ButtonsApp.Forms
             grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.Percent, 20));
             grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.Percent, 80));
 
-            grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 5));
-            grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 2));
+            grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 4));
+            grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 1));
             grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 1));
             grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 3));
             grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 4));
@@ -35,7 +35,7 @@ namespace ButtonsApp.Forms
             var lb1 = new Label
             {
                 WordWrap = true,
-                Text = "MessageBox displays a message window, also known as a dialog box, which presents a message to the user. It is a modal window, blocking other actions in the application until the user closes it. A MessageBox can contain text, buttons, and symbols that inform and instruct the user",
+                Text = "MessageBox displays a message window, also known as a dialog box, which presents a message to the user. It is a modal window, blocking other actions in the application until the user closes it.",
             };
             grid.AddContent(lb1, 0, 0, 2);
 
