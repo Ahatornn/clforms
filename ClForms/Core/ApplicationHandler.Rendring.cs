@@ -94,9 +94,11 @@ namespace ClForms.Core
                 return;
             }
 
+            var wasRendered = false;
             if (!element.IsVisualValid)
             {
                 element.BeforeRender();
+                wasRendered = true;
             }
             InvalidateScreenArea(element.DrawingContext, startPoint, bufferContext);
 
@@ -104,6 +106,10 @@ namespace ClForms.Core
             {
                 foreach (var control in contentControl)
                 {
+                    if (wasRendered && (control.BackgroundIsTransparent || control.ForegroundIsTransparent))
+                    {
+                        control.InvalidateVisual();
+                    }
                     var location = control.Location + startPoint;
                     DetectVisualInvalidate(control, location, bufferContext);
                 }

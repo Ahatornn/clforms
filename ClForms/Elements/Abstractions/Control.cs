@@ -84,9 +84,19 @@ namespace ClForms.Elements.Abstractions
         public Rect Bounds => bounds;
 
         /// <summary>
-        /// Gets a value indicating the drawing context
+        /// Gets a value of the drawing context
         /// </summary>
         public IDrawingContext DrawingContext { get; private set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="Background"/> has <see cref="Color.NotSet"/>
+        /// </summary>
+        public bool BackgroundIsTransparent => background == Color.NotSet;
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="Foreground"/> has <see cref="Color.NotSet"/>
+        /// </summary>
+        public bool ForegroundIsTransparent => foreground == Color.NotSet;
 
         #region Parent
 

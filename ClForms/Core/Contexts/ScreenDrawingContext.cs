@@ -44,7 +44,6 @@ namespace ClForms.Core.Contexts
             {
                 throw new ArgumentException($"The point [{point}] does not contains in work area {renderArea}");
             }
-
             cursorPosition = point;
         }
 

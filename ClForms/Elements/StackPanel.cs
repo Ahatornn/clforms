@@ -125,19 +125,28 @@ namespace ClForms.Elements
             }
             else
             {
-                base.Measure(new Size(Math.Min((Width ?? Padding.Horizontal) + Margin.Horizontal, availableSize.Width),
-                    Math.Min((Height ?? Padding.Vertical) + Margin.Vertical, availableSize.Height)));
+                if (AutoSize)
+                {
+                    base.Measure(new Size(
+                        Math.Min((Width ?? Padding.Horizontal) + Margin.Horizontal, availableSize.Width),
+                        Math.Min((Height ?? Padding.Vertical) + Margin.Vertical, availableSize.Height)));
+                }
+                else
+                {
+                    base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width) - Margin.Horizontal,
+                        Math.Min(Height ?? availableSize.Height, availableSize.Height) - Margin.Vertical));
+                }
             }
         }
 
         /// <inheritdoc cref="Control.Arrange"/>
         public override void Arrange(Rect finalRect, bool reduceMargin = true)
         {
-            var contentRect = new Rect(0, 0, finalRect.Width, finalRect.Height)
-                .Reduce(Margin)
-                .Reduce(Padding);
-            StackChildrenArrange(contentRect);
-            base.Arrange(finalRect, reduceMargin: false);
+            var rect = reduceMargin
+                ? finalRect.Reduce(Margin)
+                : finalRect;
+            StackChildrenArrange(rect);
+            base.Arrange(finalRect, reduceMargin: reduceMargin);
         }
 
         /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
@@ -147,10 +156,7 @@ namespace ClForms.Elements
         {
             var internalChildren = this.ToList();
             var isHorizontal = Orientation == Orientation.Horizontal;
-            var finalRect = new Rect(contentRect.X - Margin.Left,
-                contentRect.Y - Margin.Top,
-                contentRect.Width,
-                contentRect.Height);
+            var finalRect = new Rect(0, 0, contentRect.Width, contentRect.Height);
             var num = 0;
             var index = 0;
             for (var count = internalChildren.Count; index < count; ++index)

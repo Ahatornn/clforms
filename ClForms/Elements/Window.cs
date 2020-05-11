@@ -228,11 +228,12 @@ namespace ClForms.Elements
             }
             else
             {
-                var contentArea = new Rect(new Size(availableSize.Width, availableSize.Height))
+                var contentArea = new Rect(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                        Math.Min(Height ?? availableSize.Height, availableSize.Height)))
                     .Reduce(Margin)
                     .Reduce(BorderThickness);
-                contentArea.Width = Math.Max(0, (Width ?? contentArea.Width) - Padding.Horizontal);
-                contentArea.Height = Math.Max(0, (Height ?? contentArea.Height) - Padding.Vertical);
+                contentArea.Width = Math.Max(0, contentArea.Width - Padding.Horizontal);
+                contentArea.Height = Math.Max(0, contentArea.Height - Padding.Vertical);
                 desiredContentSize = contentArea.Size;
             }
 
@@ -257,22 +258,25 @@ namespace ClForms.Elements
             }
             else
             {
-                var size = new Size((Content?.DesiredSize ?? Size.Empty).Width,
+                var minContentSize = new Size((Content?.DesiredSize ?? Size.Empty).Width,
                     ((Content?.DesiredSize ?? Size.Empty) +
                      (mainMenu?.DesiredSize ?? Size.Empty) +
                      (statusBar?.DesiredSize ?? Size.Empty))
                     .Height);
+                minContentSize.Width = Math.Min(Width ?? minContentSize.Width, minContentSize.Width);
+                minContentSize.Height = Math.Min(Height ?? minContentSize.Height, minContentSize.Height);
+                if (AutoSize)
+                {
+                    base.Measure(new Size(
+                        Math.Min(minContentSize.Width + (Padding + BorderThickness).Horizontal, availableSize.Width),
+                        Math.Min(minContentSize.Height + (Padding + BorderThickness).Vertical, availableSize.Height)));
 
-                size.Width = Math.Min(Width.HasValue
-                        ? Width.Value + (Margin + BorderThickness).Horizontal
-                        : size.Width + (Margin + Padding + BorderThickness).Horizontal,
-                    availableSize.Width);
-                size.Height = Math.Min(Height.HasValue
-                        ? Height.Value + (Margin + BorderThickness).Vertical
-                        : size.Height + (Margin + Padding + BorderThickness).Vertical,
-                    availableSize.Height);
-
-                base.Measure(size);
+                }
+                else
+                {
+                    base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                        Math.Min(Height ?? availableSize.Height, availableSize.Height)));
+                }
             }
         }
 
@@ -280,7 +284,6 @@ namespace ClForms.Elements
         public override void Arrange(Rect finalRect, bool reduceMargin = true)
         {
             var contentRect = new Rect(0, 0, finalRect.Width, finalRect.Height)
-                .Reduce(Margin)
                 .Reduce(Padding);
             if (WindowState != ControlState.Maximized)
             {
