@@ -9,6 +9,15 @@
 
 <img src="Images/windowExample.gif" />
 
+# Installation:
+
+### Nuget | Dotnet Templates
+
+Find the template through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
+
+> You can also download [Visual Studio Extension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
+
+
 ## Quick start
 #### First
 Prepare the `Startup` file. Its represents platform specific configuration that will be applied to a `IAppBuilder` when building an `IApp`. This class should be inherit from `IStartup` interface. Use `ConfigureServices` method for configure **IoC** of application. In runtime you can get specified instances like this:
