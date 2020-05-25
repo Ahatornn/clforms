@@ -9,11 +9,9 @@
 
 <img src="Images/windowExample.gif" />
 
-# Installation:
+## Installation:
 
-### Nuget | Dotnet Templates
-
-Find the template through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
+Find the **ClForms** package through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
 
 > You can also download [Visual Studio Extension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
 
