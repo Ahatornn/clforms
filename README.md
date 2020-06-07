@@ -22,8 +22,8 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for mo informati
 ## Controls
 - [x] [Button](https://github.com/Ahatornn/clforms/wiki/Button)
 - [x] [Canvas](https://github.com/Ahatornn/clforms/wiki/Canvas)
-- [x] CheckBox
-- [x] DockPanel
+- [x] [CheckBox](https://github.com/Ahatornn/clforms/wiki/CheckBox)
+- [x] [DockPanel](https://github.com/Ahatornn/clforms/wiki/DockPanel)
 - [x] GlyphLabel
 - [x] Grid
 - [x] GroupBox
