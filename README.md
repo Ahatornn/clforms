@@ -9,19 +9,19 @@
 
 <img src="Images/windowExample.gif" />
 
-## Installation:
+## Installation
 
 Find the **ClForms** package through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
 
 > You can also download [ClFormsExtension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
 > <img src="Images/clforms-extension.png" />
 
-## Documentation:
+## Documentation
 Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for mo information about **clforms**
 
 ## Controls
-- [x] Button
-- [x] Canvas
+- [x] [Button](https://github.com/Ahatornn/clforms/wiki/Button)
+- [x] [Canvas](https://github.com/Ahatornn/clforms/wiki/Canvas)
 - [x] CheckBox
 - [x] DockPanel
 - [x] GlyphLabel
