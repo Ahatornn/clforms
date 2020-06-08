@@ -27,10 +27,10 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [Canvas](https://github.com/Ahatornn/clforms/wiki/Canvas)
 - [x] [CheckBox](https://github.com/Ahatornn/clforms/wiki/CheckBox)
 - [x] [DockPanel](https://github.com/Ahatornn/clforms/wiki/DockPanel)
-- [x] GlyphLabel
+- [x] [GlyphLabel](https://github.com/Ahatornn/clforms/wiki/GlyphLabel)
 - [x] Grid
 - [x] GroupBox
-- [x] Label
+- [x] [Label](https://github.com/Ahatornn/clforms/wiki/Label)
 - [x] ListBox
 - [x] MessageBox
 - [x] Panel
