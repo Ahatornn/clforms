@@ -34,7 +34,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] ListBox
 - [x] MessageBox
 - [x] [Panel](https://github.com/Ahatornn/clforms/wiki/Panel)
-- [x] ProgressBar
+- [x] [ProgressBar](https://github.com/Ahatornn/clforms/wiki/ProgressBar)
 - [x] RadioButton
 - [x] StackPanel
 - [x] StatusBar
