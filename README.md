@@ -33,7 +33,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [Label](https://github.com/Ahatornn/clforms/wiki/Label)
 - [x] ListBox
 - [x] MessageBox
-- [x] Panel
+- [x] [Panel](https://github.com/Ahatornn/clforms/wiki/Panel)
 - [x] ProgressBar
 - [x] RadioButton
 - [x] StackPanel
