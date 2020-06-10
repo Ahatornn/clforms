@@ -29,7 +29,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [DockPanel](https://github.com/Ahatornn/clforms/wiki/DockPanel)
 - [x] [GlyphLabel](https://github.com/Ahatornn/clforms/wiki/GlyphLabel)
 - [x] [Grid](https://github.com/Ahatornn/clforms/wiki/Grid)
-- [x] GroupBox
+- [x] [GroupBox](https://github.com/Ahatornn/clforms/wiki/GroupBox)
 - [x] [Label](https://github.com/Ahatornn/clforms/wiki/Label)
 - [x] ListBox
 - [x] MessageBox
