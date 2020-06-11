@@ -31,7 +31,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [Grid](https://github.com/Ahatornn/clforms/wiki/Grid)
 - [x] [GroupBox](https://github.com/Ahatornn/clforms/wiki/GroupBox)
 - [x] [Label](https://github.com/Ahatornn/clforms/wiki/Label)
-- [x] ListBox
+- [x] [ListBox](https://github.com/Ahatornn/clforms/wiki/ListBox)
 - [x] MessageBox
 - [x] [Panel](https://github.com/Ahatornn/clforms/wiki/Panel)
 - [x] [ProgressBar](https://github.com/Ahatornn/clforms/wiki/ProgressBar)
