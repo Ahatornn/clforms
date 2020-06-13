@@ -37,7 +37,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [ProgressBar](https://github.com/Ahatornn/clforms/wiki/ProgressBar)
 - [x] [RadioButton](https://github.com/Ahatornn/clforms/wiki/RadioButton)
 - [x] [StackPanel](https://github.com/Ahatornn/clforms/wiki/StackPanel)
-- [x] [StatusBar=(https://github.com/Ahatornn/clforms/wiki/StatusBar)
+- [x] [StatusBar](https://github.com/Ahatornn/clforms/wiki/StatusBar)
 - [x] StatusBarButton
 - [x] TextBox
 - [x] TilePanel
