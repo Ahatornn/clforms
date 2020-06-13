@@ -38,7 +38,6 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [RadioButton](https://github.com/Ahatornn/clforms/wiki/RadioButton)
 - [x] [StackPanel](https://github.com/Ahatornn/clforms/wiki/StackPanel)
 - [x] [StatusBar](https://github.com/Ahatornn/clforms/wiki/StatusBar)
-- [x] StatusBarButton
 - [x] TextBox
 - [x] TilePanel
 - [x] Window
