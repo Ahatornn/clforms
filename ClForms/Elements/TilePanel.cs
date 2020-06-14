@@ -13,7 +13,7 @@ namespace ClForms.Elements
         private char tile;
 
         /// <summary>
-        /// Initialize a new instance <see cref="TilePanel"/>
+        /// Initialize a new instance <see cref="TilePanel"/> with empty Tile property
         /// </summary>
         public TilePanel()
         {
@@ -21,7 +21,7 @@ namespace ClForms.Elements
         }
 
         /// <summary>
-        /// Initialize a new instance <see cref="TilePanel"/>
+        /// Initialize a new instance <see cref="TilePanel"/> with specified Tile property
         /// </summary>
         public TilePanel(char tile)
             : this()

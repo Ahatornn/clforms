@@ -296,7 +296,7 @@ namespace ClForms.Elements
         public void SetStyle(Action<Grid> styleAction) => styleAction?.Invoke(this);
 
         /// <summary>
-        /// Добавляет контент в ячейку таблицы
+        /// Adds content to a table cell
         /// </summary>
         public virtual void AddContent(Control content, int column, int row, int columnSpan = 1, int rowSpan = 1,
             HorizontalAlignment horizontal = HorizontalAlignment.Left, VerticalAlignment vertical = VerticalAlignment.Top)
@@ -442,7 +442,7 @@ namespace ClForms.Elements
         }
 
         /// <summary>
-        ///  Get the vertical alignment of specified control
+        /// Get the vertical alignment of specified control
         /// </summary>
         public VerticalAlignment GetVerticalAlignment(Control content)
             => gridInfos.First(x => x.Id == content.Id).VerticalAlignment;

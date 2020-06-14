@@ -149,7 +149,7 @@ namespace ClForms.Elements.Abstractions
         #region DisabledForeground
 
         /// <summary>
-        /// Gets or sets a value to display of foreground when the control is disabled
+        /// Gets or sets a value to display of text color when the control is disabled
         /// </summary>
         public Color DisabledForeground
         {

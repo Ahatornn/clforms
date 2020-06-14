@@ -33,7 +33,7 @@ namespace ClForms.Elements
         }
 
         /// <summary>
-        /// Initialize a new instance <see cref="CheckBox"/>
+        /// Initialize a new instance <see cref="CheckBox"/> with specified text
         /// </summary>
         public CheckBox(string text)
         : this()

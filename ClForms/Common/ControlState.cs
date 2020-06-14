@@ -6,7 +6,7 @@ namespace ClForms.Common
     public enum ControlState
     {
         /// <summary>
-        /// Common
+        /// Common size
         /// </summary>
         Normal,
 

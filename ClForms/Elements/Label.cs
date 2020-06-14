@@ -32,7 +32,7 @@ namespace ClForms.Elements
         }
 
         /// <summary>
-        /// Initialize a new instance <see cref="Label"/>
+        /// Initialize a new instance <see cref="Label"/> with text
         /// </summary>
         public Label(string text)
             : this()

@@ -43,7 +43,7 @@ namespace ClForms.Common
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="Rect" /> A structure that has the specified size and coordinates (0,0).
+        /// Initializes a new instance of <see cref="Rect" /> structure that has the specified size and coordinates (0,0).
         /// </summary>
         public Rect(Size size)
         {
@@ -248,7 +248,7 @@ namespace ClForms.Common
         }
 
         /// <summary>
-        /// Indicates an empty dimension along any of the axes. <see cref="Width" /> или <see cref="Height" />
+        /// Indicates an empty dimension along any of the axes <see cref="Width" /> or <see cref="Height" />
         /// </summary>
         public bool HasEmptyDimension() => Size.HasEmptyDimension();
 

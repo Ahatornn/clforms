@@ -60,7 +60,6 @@ namespace ClForms.Themes
         /// </summary>
         Blue = 9,
 
-
         /// <summary>
         /// The color green
         /// </summary>

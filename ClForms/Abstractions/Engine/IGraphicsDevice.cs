@@ -16,7 +16,7 @@ namespace ClForms.Abstractions.Engine
         }
 
         /// <summary>
-        /// Defines a value at a point based on the coordinates
+        /// Defines a value at a point based on the <see cref="Point"/>
         /// </summary>
         T this[Point point]
         {

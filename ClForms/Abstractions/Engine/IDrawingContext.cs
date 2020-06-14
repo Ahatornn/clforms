@@ -15,7 +15,7 @@ namespace ClForms.Abstractions.Engine
         IGraphicsDevice<Color> Background { get; }
 
         /// <summary>
-        /// Gets <see cref="IGraphicsDevice{Color}"/> of foreground
+        /// Gets <see cref="IGraphicsDevice{Color}"/> of text color
         /// </summary>
         IGraphicsDevice<Color> Foreground { get; }
 
@@ -25,17 +25,17 @@ namespace ClForms.Abstractions.Engine
         IGraphicsDevice<char> Chars { get; }
 
         /// <summary>
-        /// Rectangular drawing context area
+        /// Gets the rectangular drawing context area
         /// </summary>
         Rect ContextBounds { get; }
 
         /// <summary>
-        /// The identifier of the component that represents current drawing context
+        /// Gets the identifier of the component that represents current drawing context
         /// </summary>
         long ControlId { get; }
 
         /// <summary>
-        /// Parent context reference
+        /// Gets parent context reference
         /// </summary>
         IDrawingContext Parent { get; }
 
@@ -52,6 +52,6 @@ namespace ClForms.Abstractions.Engine
         /// <summary>
         /// Creates a shallow copy of the <see cref="IDrawingContext"/>
         /// </summary>
-        IDrawingContext Clone(long controlId, Guid renderSessionId);
+        IDrawingContext Clone(long controlId);
     }
 }

@@ -9,7 +9,7 @@ namespace ClForms.Elements.Abstractions
     public abstract class ContentControl: Control, IEnumerable<Control>
     {
         /// <summary>
-        /// Adds the specified control to the control collection.
+        /// Adds the specified control to the control collection
         /// </summary>
         public abstract void AddContent(Control content);
 

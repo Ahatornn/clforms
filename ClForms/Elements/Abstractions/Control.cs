@@ -79,7 +79,7 @@ namespace ClForms.Elements.Abstractions
 
         /// <summary>
         /// Gets the size and location of the control including its nonclient elements,
-        /// in pixels, relative to the parent control
+        /// in points, relative to the parent control
         /// </summary>
         public Rect Bounds => bounds;
 
@@ -199,7 +199,7 @@ namespace ClForms.Elements.Abstractions
         #region Foreground
 
         /// <summary>
-        /// Возвращает или задает значение, указывающее цвет текста
+        /// Gets or sets a brush that describes the text of a control
         /// </summary>
         public Color Foreground
         {
@@ -319,13 +319,13 @@ namespace ClForms.Elements.Abstractions
 
         /// <summary>
         /// Invalidates the rendering of the element, and forces a complete new layout pass.
-        /// OnRender(DrawingContext) is called after the layout cycle is completed
+        /// OnRender(IDrawingContext) is called after the layout cycle is completed
         /// </summary>
         public void InvalidateVisual() => IsVisualValid = false;
 
         /// <summary>
         /// Updates the <see cref="DesiredSize" /> of a <see cref="Control" />. Parent elements call
-        /// this method from their own MeasureCore(Size) implementations to form a recursive layout update
+        /// this method from their own Measure(Size) implementations to form a recursive layout update
         /// </summary>
         /// <param name="availableSize">The available space that a parent element can allocate a child element</param>
         public virtual void Measure(Size availableSize)
@@ -337,10 +337,10 @@ namespace ClForms.Elements.Abstractions
 
         /// <summary>
         /// Positions child elements and determines a size for a <see cref="Control" />. Parent elements call
-        /// this method from their ArrangeCore(Rect) implementation to form a recursive layout update
+        /// this method from their Arrange(Rect) implementation to form a recursive layout update
         /// </summary>
         /// <param name="finalRect">The final size that the parent computes for the child element,
-        /// provided as a <see cref="Rect"/> instance without <see cref="Margin"/> property value</param>
+        /// provided as a <see cref="Rect"/> instance</param>
         /// <param name="reduceMargin">Indicates if should reduce margin from final rect value</param>
         public virtual void Arrange(Rect finalRect, bool reduceMargin = true)
         {

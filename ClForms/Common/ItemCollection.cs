@@ -10,6 +10,9 @@ namespace ClForms.Common
     {
         private readonly ListBoxBase<T> owner;
 
+        /// <summary>
+        /// Initialize a new instance <see cref="ItemCollection{T}"/>
+        /// </summary>
         public ItemCollection(ListBoxBase<T> owner)
         {
             this.owner = owner;

@@ -69,7 +69,7 @@ namespace ClForms.Common
         }
 
         /// <summary>
-        /// Compares the value of the <see cref="Size" /> instance to equality
+        /// Compares the value of the <see cref="Point" /> instance to equality
         /// </summary>
         public bool Equals(Point value) => Point.Equals(this, value);
 

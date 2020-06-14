@@ -25,7 +25,7 @@ namespace ClForms.Elements
         }
 
         /// <summary>
-        /// Initialize a new instance <see cref="GlyphLabel"/>
+        /// Initialize a new instance <see cref="GlyphLabel"/> with text
         /// </summary>
         public GlyphLabel(string text)
             : base(text)
@@ -34,7 +34,7 @@ namespace ClForms.Elements
         }
 
         /// <summary>
-        /// Initialize a new instance <see cref="GlyphLabel"/>
+        /// Initialize a new instance <see cref="GlyphLabel"/> with glyph and text
         /// </summary>
         public GlyphLabel(string glyph, string text)
             : base(text)

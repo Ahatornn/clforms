@@ -130,7 +130,7 @@ namespace ClForms.Common
         }
 
         /// <summary>
-        /// Indicates an empty dimension along any of the axes. <see cref="Width" /> или <see cref="Height" />
+        /// Indicates an empty dimension along any of the axes <see cref="Width" /> or <see cref="Height" />
         /// </summary>
         public bool HasEmptyDimension() => width == 0 || height == 0;
     }
