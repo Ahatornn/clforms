@@ -234,7 +234,7 @@ namespace ClForms.Elements
         {
             base.OnRender(context);
             var reducedArea = context.ContextBounds.Reduce(Padding);
-            if (reducedArea.HasEmptyDimension() && value > minimum)
+            if (reducedArea.HasEmptyDimension())
             {
                 return;
             }

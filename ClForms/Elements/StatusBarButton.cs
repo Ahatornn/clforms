@@ -9,7 +9,7 @@ namespace ClForms.Elements
     /// <summary>
     /// Base button for <see cref="StatusBar"/> control
     /// </summary>
-    public class StatusBarButton: ButtonBase, IElementStyle<StatusBarButton>
+    internal class StatusBarButton: ButtonBase, IElementStyle<StatusBarButton>
     {
         private readonly StatusBar owner;
 
