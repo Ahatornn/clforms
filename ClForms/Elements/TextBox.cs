@@ -19,6 +19,9 @@ namespace ClForms.Elements
         private bool readOnly;
         private CharacterCasing characterCasing;
 
+        /// <summary>
+        /// Initialize a new instance <see cref="TextBox"/>
+        /// </summary>
         public TextBox()
         {
             Height = 1;
@@ -73,6 +76,7 @@ namespace ClForms.Elements
                 }
                 if (maxLength != value)
                 {
+                    OnMaxLengthChanged?.Invoke(this, new PropertyChangedEventArgs<int>(maxLength, value));
                     maxLength = value;
                 }
             }
@@ -91,6 +95,7 @@ namespace ClForms.Elements
             {
                 if (passwordChar != value)
                 {
+                    OnPasswordCharChanged?.Invoke(this, new PropertyChangedEventArgs<char>(passwordChar, value));
                     passwordChar = value;
                     InvalidateVisual();
                 }
@@ -194,6 +199,7 @@ namespace ClForms.Elements
             }
         }
 
+        /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
         {
             var backColor = GetRenderBackColor();
@@ -292,6 +298,16 @@ namespace ClForms.Elements
         /// Occurs when the value of the <see cref="CharacterCasing" /> property changes
         /// </summary>
         public event EventHandler<PropertyChangedEventArgs<CharacterCasing>> OnCharacterCasingChanged;
+
+        /// <summary>
+        /// Occurs when the value of the <see cref="MaxLength" /> property changes
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs<int>> OnMaxLengthChanged;
+
+        /// <summary>
+        /// Occurs when the value of the <see cref="PasswordChar" /> property changes
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs<char>> OnPasswordCharChanged;
 
         #endregion
     }
