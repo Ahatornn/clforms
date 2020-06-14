@@ -7,100 +7,80 @@
 
 **Pseudographics interface for console window by .Net Core 3.1**
 
-**Attention!**
-_After I finished making the project and was ready to put it on github, I was horrified to find that all the comments and summary in the code were written in Russian. I am currently rewriting comments file by file and will be adding them here soon_
+<img src="Images/windowExample.gif" />
 
-Some examples about what I did by clforms:
-<br/>
-_Maze map editor_
-<img src="Images/mme01.png" />
-<br/>
-_Maze game_
-<img src="Images/mg02.png" />
-<br/>
-<br/>
+## Installation
 
-Already have the components in the list below
--------------
-- [x] Button
-- [x] Canvas
-- [x] CheckBox
-- [x] DockPanel
-- [x] GlyphLabel
-- [x] Grid
-- [x] GroupBox
-- [x] Label
-- [x] ListBox
-- [x] MessageBox
-- [x] Panel
-- [x] ProgressBar
-- [x] RadioButton
-- [x] StackPanel
-- [x] StatusBar
-- [x] StatusBarButton
-- [x] TextBox
-- [x] TilePanel
-- [x] Window
-
-#### Planned date to release
-------------
-was: 30.04.2020
-new: 12.05.2020 (making double buffer)
-
-
-## Quick start
-#### First
-Prepare the `Startup` file. Its represents platform specific configuration that will be applied to a `IAppBuilder` when building an `IApp`. This class should be inherit from `IStartup` interface. Use `ConfigureServices` method for configure **IoC** of application. In runtime you can get specified instances like this:
-```C#
-using Microsoft.Extensions.DependencyInjection
-.
-.
-var service = Application.ServiceProvider.GetService<instance_type>();
-.
-.
+Find the **ClForms** package through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
 ```
-Also you can override core implementations of any types like `ISystemColors`, `IEventLoop`, `IPseudographicsProvider`, `IControlLifeCycle`, `IEnvironment` and `IApp`.
-The `Configure` method allow set additional properties of added instances. For example, if you want to set `OutputEncoding` of `IPseudographicsProvider` but haven't own implemented, do like this:
-```C#
-provider.SetConfigure<IPseudographicsProvider>(configure =>
-{
-    configure.OutputEncoding = Encoding.GetEncoding("Utf-8");
-});
+PM> Install-Package ClForms -Version 1.0.23
 ```
-Look at the `Startup` file example below
-```C#
-/// <inheritdoc cref="IStartup"/>
-public class Startup : IStartup
-{
-    /// <inheritdoc cref="IStartup.ConfigureServices"/>
-    public void ConfigureServices(IServiceCollection services)
-    {
-        // Optional
-        // Called by the application to configure the app's services.
-    }
 
-    /// <inheritdoc cref="IStartup.Configure"/>
-    public void Configure(IServiceProvider provider)
-    {
-        provider.SetConfigure<IPseudographicsProvider>(configure =>
-        {
-            configure.OutputEncoding = Encoding.GetEncoding("Utf-8");
-        });
-    }
-}
-```
-#### Second
-Prepare **MainWindow** class inherited from `Window` and implement your business logic using any exists or custom controls for making user interfaces
+> You can also download [ClFormsExtension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
+> <img src="Images/clforms-extension.png" />
 
-#### Third
-Set your `Program` class like this:
-```C#
-internal class Program
-{
-    private static void Main(string[] args)
-        => AppLoader.CreateDefaultBuilder(args)
-            .UseStartup<Startup>()
-            .Build()
-            .Start(new MainWindow());
-}
-```
+## Documentation
+Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more information about **clforms**
+
+## Controls
+- [x] [Button](https://github.com/Ahatornn/clforms/wiki/Button)
+- [x] [Canvas](https://github.com/Ahatornn/clforms/wiki/Canvas)
+- [x] [CheckBox](https://github.com/Ahatornn/clforms/wiki/CheckBox)
+- [x] [DockPanel](https://github.com/Ahatornn/clforms/wiki/DockPanel)
+- [x] [GlyphLabel](https://github.com/Ahatornn/clforms/wiki/GlyphLabel)
+- [x] [Grid](https://github.com/Ahatornn/clforms/wiki/Grid)
+- [x] [GroupBox](https://github.com/Ahatornn/clforms/wiki/GroupBox)
+- [x] [Label](https://github.com/Ahatornn/clforms/wiki/Label)
+- [x] [ListBox](https://github.com/Ahatornn/clforms/wiki/ListBox)
+- [x] [MainMenu](https://github.com/Ahatornn/clforms/wiki/MainMenu)
+- [x] [MessageBox](https://github.com/Ahatornn/clforms/wiki/MessageBox)
+- [x] [Panel](https://github.com/Ahatornn/clforms/wiki/Panel)
+- [x] [ProgressBar](https://github.com/Ahatornn/clforms/wiki/ProgressBar)
+- [x] [RadioButton](https://github.com/Ahatornn/clforms/wiki/RadioButton)
+- [x] [StackPanel](https://github.com/Ahatornn/clforms/wiki/StackPanel)
+- [x] [StatusBar](https://github.com/Ahatornn/clforms/wiki/StatusBar)
+- [x] [TextBox](https://github.com/Ahatornn/clforms/wiki/TextBox)
+- [x] [TilePanel](https://github.com/Ahatornn/clforms/wiki/TilePanel)
+- [x] [Window](https://github.com/Ahatornn/clforms/wiki/Window)
+- [ ] RadioGroup
+- [ ] ListView
+<img src="Images/panelExample.gif" />
+
+## Release Notes
+* 1.0.23
+    * Fix Window Measure with empty content
+* 1.0.22
+    * Fix invalidate visual elements when bg or fg are NotSet
+    * Added BackgroundIsTransparent and ForegroundIsTransparent properties into Control
+    * Fix Measure and Arrange of StackPanel
+    * Fix Measure and Arrange of Window
+* 1.0.21
+    * Fix cursor position for focusing TextBox
+* 1.0.20
+    * Inject draw buffering
+    * Refactoring ApplicationHandler
+    * Refactoring IDrawingContext
+* 1.0.19
+    * FixPopupMenuContent autosize
+    * Fix ListBoxBase methods
+* 1.0.18
+    * Added ProgressBar
+    * Added TextBox
+* 1.0.17
+    * Added GlyphLabel
+    * Implemented ListBox
+* 1.0.16
+    * Set DialogWindowBackground and DialogWindowForeground of HelpWindow
+* 1.0.15
+    * Fix Button render
+    * Added DialogWindowBackground and DialogWindowForeground
+    * Fix MessageBox size
+* 1.0.14
+    * Added MessageBox
+* 1.0.13
+    * Added GetRadioCheckChar in IEnvironment. 
+    * Added PaintEventArgs
+    * Added panels: Canvas, TilePanel
+    * Added Buttons  
+
+[More versions](https://www.nuget.org/packages/ClForms/)
