@@ -1,28 +1,27 @@
 using System;
-using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
-using ClForms.Elements.Abstractions;
 using ClForms.Themes;
 
-namespace ClForms.Elements
+namespace ClForms.Elements.Abstractions
 {
     /// <summary>
-    /// Represents a Windows control that displays a frame around a control with an optional caption
+    /// Base class for group controls
     /// </summary>
-    public class GroupBox: SingleContentControl, IElementStyle<GroupBox>
+    public abstract class GroupItemControl: BaseFocusableControl
     {
         private readonly GroupBase groupBase;
+        private int columns;
 
         /// <summary>
-        /// Initialize a new instance <see cref="GroupBox"/>
+        /// Initialize a new instance <see cref="GroupItemControl"/>
         /// </summary>
-        public GroupBox()
+        protected GroupItemControl()
         {
-            Background = Color.NotSet;
-            Foreground = Color.NotSet;
             groupBase = new GroupBase(this);
+            Items = new GroupItemCollection(this);
+            columns = 1;
         }
 
         #region Properties
@@ -129,6 +128,36 @@ namespace ClForms.Elements
         }
 
         #endregion
+        #region Columns
+
+        /// <summary>
+        /// The number of columns in the switch group
+        /// </summary>
+        public int Columns
+        {
+            get => columns;
+            set
+            {
+                if (columns != value)
+                {
+                    if (value < 1)
+                    {
+                        throw new InvalidOperationException($"{nameof(Columns)}'s value must be greater than one or equal");
+                    }
+                    OnColumnsChanged?.Invoke(this, new PropertyChangedEventArgs<int>(columns, value));
+                    columns = value;
+                    InvalidateMeasure();
+                }
+            }
+
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Gets all elements in <see cref="GroupItemControl" />
+        /// </summary>
+        public GroupItemCollection Items { get; }
 
         #endregion
 
@@ -136,32 +165,33 @@ namespace ClForms.Elements
 
         /// <inheritdoc cref="Control.Measure"/>
         public override void Measure(Size availableSize)
-            => base.Measure(groupBase.Measure(availableSize, (contentSize) =>
-                {
-                    Content.Measure(contentSize);
-                    return Content.DesiredSize;
-                },
-                Content != null));
+            => base.Measure(groupBase.Measure(availableSize,
+                contentSize => ContentMeasureDelegate(contentSize),
+                ApplyMeasureDelegate));
+
+        protected abstract bool ApplyMeasureDelegate { get; }
+
+        protected abstract Func<Size, Size> ContentMeasureDelegate { get; }
 
         /// <inheritdoc cref="Control.Arrange"/>
         public override void Arrange(Rect finalRect, bool reduceMargin = true) =>
-            base.Arrange(groupBase.Arrange(finalRect, clientRect =>
-            {
-                Content.Arrange(clientRect);
-            }, Content != null));
+            base.Arrange(groupBase.Arrange(finalRect,
+                clientRect => ContentArrangeDelegate(clientRect),
+                ApplyArrangeDelegate), reduceMargin);
+
+        protected abstract bool ApplyArrangeDelegate { get; }
+
+        protected abstract Action<Rect> ContentArrangeDelegate { get; }
 
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
         {
             base.OnRender(context);
             groupBase.OnRender(context);
+            OnContentRender(context);
         }
 
-        /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
-        public void SetStyle(Action<GroupBox> styleAction) => styleAction?.Invoke(this);
-
-        /// <inheritdoc cref="object.ToString"/>
-        public override string ToString() => base.ToString() + ", Text: " + this.Text;
+        protected abstract void OnContentRender(IDrawingContext context);
 
         #endregion
 
@@ -191,6 +221,11 @@ namespace ClForms.Elements
         /// Occurs when the value of the <see cref="BorderChars" /> property changes
         /// </summary>
         public event EventHandler<PropertyChangedEventArgs<BorderChars>> OnBorderCharsChanged;
+
+        /// <summary>
+        /// Occurs when the value of the <see cref="Columns" /> property changes
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs<int>> OnColumnsChanged;
 
         #endregion
     }
