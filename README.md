@@ -26,6 +26,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [Button](https://github.com/Ahatornn/clforms/wiki/Button)
 - [x] [Canvas](https://github.com/Ahatornn/clforms/wiki/Canvas)
 - [x] [CheckBox](https://github.com/Ahatornn/clforms/wiki/CheckBox)
+- [x] [CheckBoxGroup](https://github.com/Ahatornn/clforms/wiki/CheckBoxGroup)
 - [x] [DockPanel](https://github.com/Ahatornn/clforms/wiki/DockPanel)
 - [x] [GlyphLabel](https://github.com/Ahatornn/clforms/wiki/GlyphLabel)
 - [x] [Grid](https://github.com/Ahatornn/clforms/wiki/Grid)
