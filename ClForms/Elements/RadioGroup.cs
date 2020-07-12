@@ -16,7 +16,6 @@ namespace ClForms.Elements
     /// </summary>
     public class RadioGroup: GroupItemControl, IElementStyle<RadioGroup>
     {
-        private int focusedIndex = -1;
         private int selectedIndex = -1;
 
         /// <summary>
@@ -58,10 +57,7 @@ namespace ClForms.Elements
         #endregion
 
         /// <inheritdoc />
-        protected override bool ApplyMeasureDelegate => true;
-
-        /// <inheritdoc />
-        protected override bool ApplyArrangeDelegate => false;
+        protected override int ContentMeasureItemIndent => 3;
 
         #endregion
 
@@ -72,142 +68,44 @@ namespace ClForms.Elements
         {
             if (focusedIndex == -1)
             {
-                var firstElement = Items.FirstOrDefault(x => !x.IsDisabled);
+                var visibleItems = chunks.AllList;
+                var firstElement = visibleItems.FirstOrDefault(x => !x.IsDisabled);
                 if (firstElement != null)
                 {
-                    focusedIndex = Items.IndexOf(firstElement);
+                    focusedIndex = visibleItems.IndexOf(firstElement);
                 }
             }
-            var leftIndent = BorderThickness.Left + Padding.Left;
-            var topIndent = BorderThickness.Top + Padding.Top;
+            var renderArea = new Rect(context.ContextBounds.Size)
+                .Reduce(BorderThickness)
+                .Reduce(Padding);
+            var leftIndent = renderArea.Left + (renderArea.Width - contentSize.Width) / 2;
+            var topIndent = renderArea.Top + (renderArea.Height - contentSize.Height) / 2;
 
-            var maxColumns = Math.Min(Columns, Items.Count);
-            var columnHeight = (int) Math.Ceiling((decimal) Items.Count / maxColumns);
-            var skip = 0;
-            for (var col = 0; col < maxColumns; col++)
+            for (var col = 0; col < chunks.Count; col++)
             {
-                var stackHeight = Math.Min((Items.Count - skip) - (maxColumns - (col + 1)), columnHeight);
-
-                var items = Items.Skip(skip).Take(stackHeight).ToList();
+                var items = chunks[col].ToList();
                 for (var i = 0; i < items.Count; i++)
                 {
-                    if (!context.ContextBounds.Contains(leftIndent, topIndent + i))
+                    if (!renderArea.Contains(leftIndent, topIndent + i))
                     {
                         break;
                     }
-
                     var foreColor = IsDisabled || items[i].IsDisabled
                         ? DisabledForeground
                         : IsFocus && Items.IndexOf(items[i]) == focusedIndex
                             ? FocusForeground
                             : Foreground;
-
                     context.SetCursorPos(leftIndent, topIndent + i);
                     context.DrawText($"{GetGlyph(Items.IndexOf(items[i]) == SelectedIndex)}  {items[i].Text}", foreColor);
                 }
                 leftIndent += items.Max(x => x.Text.Length + 3) + 2;
-                skip += stackHeight;
             }
         }
 
         /// <inheritdoc />
         protected override void InputActionInternal(ConsoleKeyInfo keyInfo)
         {
-            GroupItemElement item = null;
-            if (keyInfo.Key == ConsoleKey.Home)
-            {
-                item = Items.FirstOrDefault(x => !x.IsDisabled);
-            }
-
-            if (keyInfo.Key == ConsoleKey.End)
-            {
-                item = Items.LastOrDefault(x => !x.IsDisabled);
-            }
-
-            if (keyInfo.Key == ConsoleKey.UpArrow)
-            {
-                item = Items
-                    .Take(focusedIndex)
-                    .LastOrDefault(x => !x.IsDisabled)
-                       ?? Items.LastOrDefault(x => !x.IsDisabled);
-            }
-
-            if (keyInfo.Key == ConsoleKey.DownArrow)
-            {
-                item = Items
-                    .Skip(focusedIndex + 1)
-                    .FirstOrDefault(x => !x.IsDisabled)
-                       ?? Items.FirstOrDefault(x => !x.IsDisabled);
-            }
-
-            var maxColumns = Math.Min(Columns, Items.Count);
-            var columnHeight = (int) Math.Ceiling((decimal) Items.Count / maxColumns);
-
-            if (keyInfo.Key == ConsoleKey.RightArrow && maxColumns > 1)
-            {
-                var currentColumnIndex = GetFocusedItemColumnIndex(columnHeight);
-                if (currentColumnIndex != -1)
-                {
-                    var stack = Items.Skip(currentColumnIndex * columnHeight)
-                        .Take(columnHeight)
-                        .ToList();
-                    var indent = stack.IndexOf(Items[focusedIndex]);
-                    var columnInfo = GetIndexItemsOfColumn(currentColumnIndex + 1 >= maxColumns
-                            ? 0
-                            : currentColumnIndex + 1,
-                        maxColumns,
-                        columnHeight);
-
-                    item = Items
-                               .Skip(columnInfo.StartIndex)
-                               .Take(columnInfo.ItemCount)
-                               .Skip(Math.Min(indent, columnInfo.ItemCount - 1))
-                               .FirstOrDefault(x => !x.IsDisabled)
-                           ?? Items
-                               .Skip(columnInfo.StartIndex)
-                               .FirstOrDefault(x => !x.IsDisabled)
-                           ?? Items
-                               .FirstOrDefault(x => !x.IsDisabled);
-                }
-            }
-
-            if (keyInfo.Key == ConsoleKey.LeftArrow && maxColumns > 1)
-            {
-                var currentColumnIndex = GetFocusedItemColumnIndex(columnHeight);
-                if (currentColumnIndex != -1)
-                {
-                    var stack = Items.Skip(currentColumnIndex * columnHeight)
-                        .Take(columnHeight)
-                        .ToList();
-                    var indent = stack.IndexOf(Items[focusedIndex]);
-                    var columnInfo = GetIndexItemsOfColumn(currentColumnIndex - 1 < 0
-                            ? maxColumns
-                            : currentColumnIndex - 1,
-                        maxColumns,
-                        columnHeight);
-
-                    item = Items
-                               .Skip(columnInfo.StartIndex - (columnInfo.StartIndex == Items.Count ? 1 : 0))
-                               .Take(indent + 1)
-                               .LastOrDefault(x => !x.IsDisabled)
-                           ?? Items
-                               .Skip(columnInfo.StartIndex - -(columnInfo.StartIndex == Items.Count ? 1 : 0))
-                               .Take(columnInfo.ItemCount)
-                               .FirstOrDefault(x => !x.IsDisabled)
-                           ?? Items
-                               .LastOrDefault(x => !x.IsDisabled);
-                }
-            }
-
-            if (item != null)
-            {
-                var newIndex = Items.IndexOf(item);
-                if (newIndex != focusedIndex)
-                {
-                    focusedIndex = newIndex;
-                    InvalidateVisual();
-                }
-            }
+            base.InputActionInternal(keyInfo);
 
             if (keyInfo.Key == ConsoleKey.Spacebar || keyInfo.Key == ConsoleKey.Enter)
             {
@@ -223,60 +121,6 @@ namespace ClForms.Elements
         public void SetStyle(Action<RadioGroup> styleAction) => styleAction?.Invoke(this);
 
         private char GetGlyph(bool isChecked) => Application.Environment.GetRadioCheckChar(isChecked);
-
-        /// <inheritdoc />
-        protected override Func<Size, Size> ContentMeasureDelegate =>
-            contentSize =>
-            {
-                var maxColumns = Math.Min(Columns, Items.Count);
-                var resultSize = Size.Empty;
-                resultSize.Height = (int) Math.Ceiling((decimal) Items.Count / maxColumns);
-
-                var skip = 0;
-                for (var i = 0; i < maxColumns; i++)
-                {
-                    var stackHeight = Math.Min((Items.Count - skip) - (maxColumns - (i + 1)), resultSize.Height);
-
-                    var items = Items.Skip(skip).Take(stackHeight);
-                    resultSize.Width += items.Max(x => x.Text.Length + 3);
-                    skip += stackHeight;
-                }
-
-                resultSize.Width += (maxColumns - 1) * 2;
-
-                return new Size(Math.Min(contentSize.Width, resultSize.Width),
-                    Math.Min(contentSize.Height, resultSize.Height));
-            };
-
-        /// <inheritdoc />
-        protected override Action<Rect> ContentArrangeDelegate => null;
-
-        private int GetFocusedItemColumnIndex(int columnHeight)
-        {
-            var focusedItem = Items[focusedIndex];
-            if (focusedItem == null || Items.Count(x => !x.IsDisabled) == 0)
-            {
-                return -1;
-            }
-
-            return Items.IndexOf(focusedItem) / columnHeight;
-        }
-
-        private (int StartIndex, int ItemCount) GetIndexItemsOfColumn(int column, int maxColumns, int height)
-        {
-            var skip = 0;
-            for (var col = 0; col <= column; col++)
-            {
-                var stackHeight = Math.Min((Items.Count - skip) - (maxColumns - (col + 1)), height);
-                if (col == column)
-                {
-                    return (skip, stackHeight);
-                }
-                skip += stackHeight;
-            }
-
-            throw new IndexOutOfRangeException();
-        }
 
         #endregion
 

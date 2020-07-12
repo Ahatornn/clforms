@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Data.SqlTypes;
+using System.Linq;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
@@ -12,7 +15,10 @@ namespace ClForms.Elements.Abstractions
     public abstract class GroupItemControl: BaseFocusableControl
     {
         private readonly GroupBase groupBase;
+        protected int focusedIndex = -1;
         private int columns;
+        protected readonly Chunks<GroupItemElement> chunks;
+        protected Size contentSize;
 
         /// <summary>
         /// Initialize a new instance <see cref="GroupItemControl"/>
@@ -22,6 +28,8 @@ namespace ClForms.Elements.Abstractions
             groupBase = new GroupBase(this);
             Items = new GroupItemCollection(this);
             columns = 1;
+            chunks = new Chunks<GroupItemElement>();
+            contentSize = Size.Empty;
         }
 
         #region Properties
@@ -131,7 +139,7 @@ namespace ClForms.Elements.Abstractions
         #region Columns
 
         /// <summary>
-        /// The number of columns in the switch group
+        /// Gets or sets the number of columns in the switch group
         /// </summary>
         public int Columns
         {
@@ -169,9 +177,38 @@ namespace ClForms.Elements.Abstractions
                 contentSize => ContentMeasureDelegate(contentSize),
                 ApplyMeasureDelegate));
 
-        protected abstract bool ApplyMeasureDelegate { get; }
+        protected virtual bool ApplyMeasureDelegate { get; } = true;
 
-        protected abstract Func<Size, Size> ContentMeasureDelegate { get; }
+        protected virtual Func<Size, Size> ContentMeasureDelegate => contentSize =>
+        {
+            if (Items.Count == 0 || !AutoSize)
+            {
+                return AutoSize
+                    ? Size.Empty
+                    : contentSize;
+            }
+
+            var maxColumns = Math.Min(Columns, Items.Count);
+            var resultSize = Size.Empty;
+            resultSize.Height = (int) Math.Ceiling((decimal) Items.Count / maxColumns);
+
+            var skip = 0;
+            for (var i = 0; i < maxColumns; i++)
+            {
+                var stackHeight = Math.Min((Items.Count - skip) - (maxColumns - (i + 1)), resultSize.Height);
+
+                var items = Items.Skip(skip).Take(stackHeight);
+                resultSize.Width += items.Max(x => x.Text.Length + ContentMeasureItemIndent);
+                skip += stackHeight;
+            }
+
+            resultSize.Width += (maxColumns - 1) * 2;
+
+            return new Size(Math.Min(contentSize.Width, resultSize.Width),
+                Math.Min(contentSize.Height, resultSize.Height));
+        };
+
+        protected abstract int ContentMeasureItemIndent { get; }
 
         /// <inheritdoc cref="Control.Arrange"/>
         public override void Arrange(Rect finalRect, bool reduceMargin = true) =>
@@ -179,19 +216,178 @@ namespace ClForms.Elements.Abstractions
                 clientRect => ContentArrangeDelegate(clientRect),
                 ApplyArrangeDelegate), reduceMargin);
 
-        protected abstract bool ApplyArrangeDelegate { get; }
+        protected virtual bool ApplyArrangeDelegate { get; } = true;
 
-        protected abstract Action<Rect> ContentArrangeDelegate { get; }
+        protected virtual Action<Rect> ContentArrangeDelegate => finalSize =>
+        {
+            chunks.Clear();
+            contentSize = Size.Empty;
+            var maxColumns = Math.Min(Columns, Items.Count);
+            contentSize.Height = (int) Math.Ceiling((decimal) Items.Count / maxColumns);
+            var skip = 0;
+            for (var i = 0; i < maxColumns && contentSize.Width < finalSize.Width; i++)
+            {
+                var stackHeight = Math.Min((Items.Count - skip) - (maxColumns - (i + 1)), contentSize.Height);
+
+                var items = Items.Skip(skip).Take(stackHeight);
+                contentSize.Width += items.Max(x => x.Text.Length + ContentMeasureItemIndent);
+                chunks.Add(items.Take(Math.Min(finalSize.Height, stackHeight)));
+                skip += stackHeight;
+            }
+            contentSize.Width = Math.Min(finalSize.Width, contentSize.Width += (maxColumns - 1) * 2);
+            contentSize.Height = Math.Min(finalSize.Height, contentSize.Height);
+        };
 
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
         {
             base.OnRender(context);
             groupBase.OnRender(context);
-            OnContentRender(context);
+            if (Items.Count > 0)
+            {
+                OnContentRender(context);
+            }
         }
 
         protected abstract void OnContentRender(IDrawingContext context);
+
+        /// <inheritdoc />
+        protected override void InputActionInternal(ConsoleKeyInfo keyInfo)
+        {
+            GroupItemElement item = null;
+            if (keyInfo.Key == ConsoleKey.Home)
+            {
+                item = chunks.AllList.FirstOrDefault(x => !x.IsDisabled);
+            }
+
+            if (keyInfo.Key == ConsoleKey.End)
+            {
+                item = chunks.AllList.LastOrDefault(x => !x.IsDisabled);
+            }
+
+            if (keyInfo.Key == ConsoleKey.UpArrow)
+            {
+                var visibleItems = chunks.AllList;
+                item = visibleItems
+                           .Take(focusedIndex)
+                           .LastOrDefault(x => !x.IsDisabled)
+                       ?? visibleItems.LastOrDefault(x => !x.IsDisabled);
+            }
+
+            if (keyInfo.Key == ConsoleKey.DownArrow)
+            {
+                var visibleItems = chunks.AllList;
+                item = visibleItems
+                           .Skip(focusedIndex + 1)
+                           .FirstOrDefault(x => !x.IsDisabled)
+                       ?? visibleItems.FirstOrDefault(x => !x.IsDisabled);
+            }
+
+            if (keyInfo.Key == ConsoleKey.RightArrow && chunks.Count > 1)
+            {
+                var currentValue = GetFocusedItemIndexAndColumn();
+                if (currentValue.Index != -1)
+                {
+                    var targetColumnItems = currentValue.Column < chunks.Count - 1
+                        ? chunks[currentValue.Column + 1]
+                        : chunks[0];
+                    if (targetColumnItems.Any(x => !x.IsDisabled))
+                    {
+                        if (targetColumnItems.Count >= currentValue.Index)
+                        {
+                            item = targetColumnItems.Skip(currentValue.Index).FirstOrDefault(x => !x.IsDisabled);
+                        }
+
+                        item ??= targetColumnItems.LastOrDefault(x => !x.IsDisabled);
+                    }
+
+                    if (item == null)
+                    {
+                        var visibleItems = chunks.AllList;
+                        item = visibleItems
+                                   .Skip(focusedIndex + 1)
+                                   .FirstOrDefault(x => !x.IsDisabled)
+                               ?? visibleItems.FirstOrDefault(x => !x.IsDisabled);
+                    }
+                }
+            }
+
+            if (keyInfo.Key == ConsoleKey.LeftArrow && chunks.Count > 1)
+            {
+                var currentValue = GetFocusedItemIndexAndColumn();
+                if (currentValue.Index != -1)
+                {
+                    var targetColumnItems = currentValue.Column > 0
+                        ? chunks[currentValue.Column - 1]
+                        : chunks[^1];
+                    if (targetColumnItems.Any(x => !x.IsDisabled))
+                    {
+                        if (targetColumnItems.Count >= currentValue.Index)
+                        {
+                            item = targetColumnItems.Take(currentValue.Index + 1).LastOrDefault(x => !x.IsDisabled);
+                        }
+
+                        item ??= targetColumnItems.FirstOrDefault(x => !x.IsDisabled);
+                    }
+
+                    if (item == null)
+                    {
+                        var visibleItems = chunks.AllList;
+                        item = visibleItems
+                                   .Take(focusedIndex)
+                                   .LastOrDefault(x => !x.IsDisabled)
+                               ?? visibleItems.LastOrDefault(x => !x.IsDisabled);
+                    }
+                }
+            }
+
+            if (item != null)
+            {
+                var newIndex = chunks.AllList.IndexOf(item);
+                if (newIndex != focusedIndex)
+                {
+                    focusedIndex = newIndex;
+                    InvalidateVisual();
+                }
+            }
+        }
+
+        internal virtual void ItemsClearInterceptor() { }
+
+        internal virtual void ItemsRemoveInterceptor(GroupItemElement item) { }
+
+        private (int Index, int Column) GetFocusedItemIndexAndColumn()
+        {
+            var focusedItem = Items[focusedIndex];
+            if (focusedItem != null && Items.Any(x => !x.IsDisabled))
+            {
+                for (var i = 0; i < chunks.Count; i++)
+                {
+                    if (chunks[i].Any(x => x == focusedItem))
+                    {
+                        return (chunks[i].IndexOf(focusedItem), i);
+                    }
+                }
+            }
+
+            return (-1, -1);
+        }
+
+        private (int StartIndex, int ItemCount) GetIndexItemsOfColumn(int column, int maxColumns, int height)
+        {
+            var skip = 0;
+            for (var col = 0; col <= column; col++)
+            {
+                var stackHeight = Math.Min((Items.Count - skip) - (maxColumns - (col + 1)), height);
+                if (col == column)
+                {
+                    return (skip, stackHeight);
+                }
+                skip += stackHeight;
+            }
+
+            throw new IndexOutOfRangeException();
+        }
 
         #endregion
 

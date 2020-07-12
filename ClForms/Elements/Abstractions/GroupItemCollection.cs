@@ -46,7 +46,11 @@ namespace ClForms.Elements.Abstractions
         }
 
         /// <inheritdoc cref="ICollection{T}.Clear"/>
-        public void Clear() => items.Clear();
+        public void Clear()
+        {
+            items.Clear();
+            owner.ItemsClearInterceptor();
+        }
 
         /// <inheritdoc cref="ICollection{T}.Contains"/>
         public bool Contains(GroupItemElement item) => items.Contains(item);
@@ -55,7 +59,16 @@ namespace ClForms.Elements.Abstractions
         public void CopyTo(GroupItemElement[] array, int arrayIndex) => items.CopyTo(array, arrayIndex);
 
         /// <inheritdoc cref="ICollection{T}.Remove"/>
-        public bool Remove(GroupItemElement item) => items.Remove(item);
+        public bool Remove(GroupItemElement item)
+        {
+            var result = items.Remove(item);
+            if (result)
+            {
+                owner.ItemsRemoveInterceptor(item);
+            }
+
+            return result;
+        }
 
         /// <inheritdoc cref="ICollection{T}.Count"/>
         public int Count => items.Count;
@@ -86,7 +99,12 @@ namespace ClForms.Elements.Abstractions
             => Insert(index, new GroupItemElement {Text = text, IsDisabled = isDisabled});
 
         /// <inheritdoc cref="IList{T}.RemoveAt"/>
-        public void RemoveAt(int index) => items.RemoveAt(index);
+        public void RemoveAt(int index)
+        {
+            var item = items[index];
+            items.RemoveAt(index);
+            owner.ItemsRemoveInterceptor(item);
+        }
 
         /// <inheritdoc cref="IList{T}.this"/>
         public GroupItemElement this[int index]
