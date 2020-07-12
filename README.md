@@ -47,6 +47,9 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 <img src="Images/panelExample.gif" />
 
 ## Release Notes
+* 1.0.24
+    * Added RadioGroup
+    * Added CheckBoxGroup
 * 1.0.23
     * Fix Window Measure with empty content
 * 1.0.22
