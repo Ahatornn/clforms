@@ -167,7 +167,7 @@ namespace MazeEditor
             if (hasChanged)
             {
                 var messageBoxResult = MessageBox.Show(Consts.SavingHeader,
-                    "Вы желаете сохранить внесённые ранее изменения?",
+                    "Do you want to save your changes?",
                     MessageBoxIcon.Question,
                     MessageBoxButtons.YesNoCancel);
                 if (messageBoxResult == DialogResult.Cancel)
