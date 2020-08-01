@@ -26,6 +26,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [Button](https://github.com/Ahatornn/clforms/wiki/Button)
 - [x] [Canvas](https://github.com/Ahatornn/clforms/wiki/Canvas)
 - [x] [CheckBox](https://github.com/Ahatornn/clforms/wiki/CheckBox)
+- [x] [CheckBoxGroup](https://github.com/Ahatornn/clforms/wiki/CheckBoxGroup)
 - [x] [DockPanel](https://github.com/Ahatornn/clforms/wiki/DockPanel)
 - [x] [GlyphLabel](https://github.com/Ahatornn/clforms/wiki/GlyphLabel)
 - [x] [Grid](https://github.com/Ahatornn/clforms/wiki/Grid)
@@ -37,16 +38,19 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [Panel](https://github.com/Ahatornn/clforms/wiki/Panel)
 - [x] [ProgressBar](https://github.com/Ahatornn/clforms/wiki/ProgressBar)
 - [x] [RadioButton](https://github.com/Ahatornn/clforms/wiki/RadioButton)
+- [x] [RadioGroup](https://github.com/Ahatornn/clforms/wiki/RadioGroup)
 - [x] [StackPanel](https://github.com/Ahatornn/clforms/wiki/StackPanel)
 - [x] [StatusBar](https://github.com/Ahatornn/clforms/wiki/StatusBar)
 - [x] [TextBox](https://github.com/Ahatornn/clforms/wiki/TextBox)
 - [x] [TilePanel](https://github.com/Ahatornn/clforms/wiki/TilePanel)
 - [x] [Window](https://github.com/Ahatornn/clforms/wiki/Window)
-- [ ] RadioGroup
 - [ ] ListView
 <img src="Images/panelExample.gif" />
 
 ## Release Notes
+* 1.0.24
+    * Added RadioGroup
+    * Added CheckBoxGroup
 * 1.0.23
     * Fix Window Measure with empty content
 * 1.0.22
