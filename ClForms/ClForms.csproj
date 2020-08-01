@@ -5,7 +5,7 @@
     <Authors>Konoplev Anatolii</Authors>
     <Product>Command-Line Forms</Product>
     <Description>This is a framework for make console application with pseudographics interface</Description>
-    <Version>1.0.24</Version>
+    <Version>1.0.25</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <RepositoryUrl>https://github.com/Ahatornn/clforms</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
@@ -16,8 +16,8 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>favico.jpg</PackageIcon>
     <PackageProjectUrl>https://github.com/Ahatornn/clforms</PackageProjectUrl>
-    <PackageReleaseNotes>Added RadioGroup
-Added CheckBoxGroup</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix Grid borders (More combination of spanned cells)
+Fix MessageBox icon borders (It has rounded corners, left and right margin)</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
