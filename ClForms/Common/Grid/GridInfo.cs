@@ -109,5 +109,11 @@ namespace ClForms.Common.Grid
             HorizontalAlignment = HorizontalAlignment.Left;
             VerticalAlignment = VerticalAlignment.Top;
         }
+
+        internal bool IsHorizontalCross(int index, int rowIndex)
+            => row == rowIndex && column < index && column + columnSpan > index;
+
+        internal bool IsVerticalCross(int index, int colIndex)
+            => column == colIndex && row < index && row + rowSpan > index;
     }
 }

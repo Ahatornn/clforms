@@ -116,8 +116,12 @@ namespace ClForms.Elements
                 {
                     Margin = new Thickness(0, 0, 2, 0),
                     Height = 3,
+                    BorderChars = new BorderChars('╭', '─', '╮', '│', '│', '╰', '─', '╯'),
                 };
-                var iconLabel = new Label();
+                var iconLabel = new Label
+                {
+                    Margin = new Thickness(1, 0),
+                };
                 switch (messageIcon)
                 {
                     case MessageBoxIcon.Error:

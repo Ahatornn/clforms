@@ -24,7 +24,7 @@ namespace ClForms.Elements
         private int[] measureColumns;
         private int[] measureRows;
         private readonly List<GridInfo> gridInfos;
-        private GridBorderChars gridBorderChars;
+        private GridSpanBorderChars gridBorderChars;
 
         /// <summary>
         /// Initialize a new instance <see cref="Grid"/>
@@ -35,10 +35,11 @@ namespace ClForms.Elements
             RowDefinitions = new GridRowDefinitionCollection(this);
             borderColor = Application.SystemColors.BorderColor;
             gridInfos = new List<GridInfo>();
-            gridBorderChars = new GridBorderChars('┌', '┬', '┐',
-                '├', '┼', '┤',
-                '└', '┴', '┘',
-                '│', '─');
+            gridBorderChars = new GridSpanBorderChars('┌', '─', '┐', '│', '│',
+                '└', '─', '┘', '┬', '┤', '┴', '├',
+                '│', '─', '┼',
+                '┬', '┤', '┴', '├',
+                '┌', '┐', '┘', '└');
         }
 
         #region Properties
@@ -108,7 +109,7 @@ namespace ClForms.Elements
         /// <summary>
         /// Gets or sets a value of border chars
         /// </summary>
-        public GridBorderChars BorderChars
+        public GridSpanBorderChars BorderChars
         {
             get => gridBorderChars;
             set
@@ -116,7 +117,7 @@ namespace ClForms.Elements
                 if (gridBorderChars != value)
                 {
                     OnBorderCharsChanged?.Invoke(this,
-                        new PropertyChangedEventArgs<GridBorderChars>(gridBorderChars, value));
+                        new PropertyChangedEventArgs<GridSpanBorderChars>(gridBorderChars, value));
                     gridBorderChars = value;
                     InvalidateVisual();
                 }
@@ -154,8 +155,10 @@ namespace ClForms.Elements
                     measureRows.Skip(info.Row).Take(info.RowSpan).Sum() - amendment));
             }
 
-            base.Measure(new Size(measureColumns.Sum() + amendment + (Margin + Padding).Horizontal,
-                measureRows.Sum() + amendment + (Margin + Padding).Vertical));
+            var result = new Size(measureColumns.Sum() + amendment + (Margin + Padding).Horizontal,
+                measureRows.Sum() + amendment + (Margin + Padding).Vertical);
+
+            base.Measure(result);
         }
 
         /// <inheritdoc cref="Control.Arrange"/>
@@ -224,72 +227,73 @@ namespace ClForms.Elements
             {
                 return;
             }
+
             var printedRowText = new StringBuilder(reducedArea.Width);
-            var printedFillingRowText = new StringBuilder(reducedArea.Width);
+            var printedFillText = new StringBuilder(reducedArea.Width);
             var topIndent = 0;
-            for (var rowIndex = 0; rowIndex < measureRows.Length; rowIndex++)
+            for (var rowIndex = 0; rowIndex <= measureRows.Length; rowIndex++)
             {
                 printedRowText.Clear();
-                printedFillingRowText.Clear();
+                printedFillText.Clear();
+                printedFillText.Append(new string(' ', reducedArea.Width));
                 for (var columnIndex = 0; columnIndex < measureColumns.Length; columnIndex++)
                 {
+                    var printedColText = new StringBuilder(measureColumns[columnIndex] + (columnIndex == measureColumns.Length - 1 ? 1 : 0));
+
+                    printedColText.Append(new string(rowIndex == 0
+                        ? gridBorderChars.TopMiddle
+                        : rowIndex == measureRows.Length
+                            ? gridBorderChars.BottomMiddle
+                            : GetHorizontalInnerChar(columnIndex, rowIndex),
+                        measureColumns[columnIndex] + (columnIndex == measureColumns.Length - 1 ? 1 : 0)));
+
+                    var columnStartIndex = measureColumns.Take(columnIndex).DefaultIfEmpty(0).Sum();
+                    if (!gridInfos.Any(x => x.IsHorizontalCross(columnIndex, rowIndex)))
+                    {
+                        printedFillText[columnStartIndex] = gridBorderChars.VerticalInner;
+                    }
+
+                    printedColText[0] = rowIndex == 0
+                        ? GetTopInnerChar(columnIndex)
+                        : rowIndex == measureRows.Length
+                            ? GetBottomInnerChar(columnIndex)
+                            : GetCrossInnerChar(columnIndex, rowIndex);
+
                     if (columnIndex == 0)
                     {
-                        printedRowText.Append(rowIndex == 0 ? gridBorderChars.TopLeft : gridBorderChars.MiddleLeft);
-                    }
-                    else
-                    {
-                        printedRowText.Append(rowIndex == 0 ? gridBorderChars.TopMiddle : gridBorderChars.MiddleCenter);
-                    }
-                    printedRowText.Append(new string(gridBorderChars.HorizontalLine, measureColumns[columnIndex] - 1));
+                        printedColText[0] = rowIndex == 0
+                            ? gridBorderChars.TopLeft
+                            : rowIndex == measureRows.Length
+                                ? gridBorderChars.BottomLeft
+                                : GetLeftInnerChar(rowIndex);
 
-                    printedFillingRowText.Append(gridBorderChars.VerticalLine);
-                    printedFillingRowText.Append(new string('\0', measureColumns[columnIndex] - 1));
-
-                    if (columnIndex == measureColumns.Length - 1)
-                    {
-                        if (printedRowText.Length == reducedArea.Width)
-                        {
-                            printedRowText[printedRowText.Length - 1] = rowIndex == 0 ? gridBorderChars.TopRight : gridBorderChars.MiddleRight;
-                            printedFillingRowText[printedRowText.Length - 1] = gridBorderChars.VerticalLine;
-                        }
-                        else
-                        {
-                            printedRowText.Append(rowIndex == 0 ? gridBorderChars.TopRight : gridBorderChars.MiddleRight);
-                            printedFillingRowText.Append(gridBorderChars.HorizontalLine);
-                        }
+                        printedFillText[columnStartIndex] = gridBorderChars.MiddleLeft;
                     }
+                    else if (columnIndex == measureColumns.Length - 1)
+                    {
+                        printedColText[^1] = rowIndex == 0
+                            ? gridBorderChars.TopRight
+                            : rowIndex == measureRows.Length
+                                ? gridBorderChars.BottomRight
+                                : GetRightInnerChar(rowIndex);
+                        printedFillText[^1] = gridBorderChars.MiddleRight;
+                    }
+
+                    printedRowText.Append(printedColText.ToString());
                 }
+
                 context.SetCursorPos(Padding.Left, Padding.Top + topIndent);
                 context.DrawText(printedRowText.ToString(), Background, borderColor);
-                for (var edge = 1; edge < measureRows[rowIndex]; edge++)
+                if (rowIndex < measureRows.Length)
                 {
-                    context.SetCursorPos(Padding.Left, Padding.Top + topIndent + edge);
-                    context.DrawText(printedFillingRowText.ToString(), Background, borderColor);
-                }
-                topIndent += measureRows[rowIndex];
-            }
-
-            var printedFillingBottomRowText = new StringBuilder(reducedArea.Width);
-            for (var columnIndex = 0; columnIndex < measureColumns.Length; columnIndex++)
-            {
-                printedFillingBottomRowText.Append(columnIndex == 0 ? gridBorderChars.BottomLeft : gridBorderChars.BottomMiddle);
-                printedFillingBottomRowText.Append(new string(gridBorderChars.HorizontalLine, measureColumns[columnIndex] - 1));
-                if (columnIndex == measureColumns.Length - 1)
-                {
-                    if (printedFillingBottomRowText.Length == reducedArea.Width)
+                    for (var rowFilling = 1; rowFilling < measureRows[rowIndex]; rowFilling++)
                     {
-                        printedFillingBottomRowText[printedFillingBottomRowText.Length - 1] = gridBorderChars.BottomRight;
+                        context.SetCursorPos(Padding.Left, Padding.Top + topIndent + rowFilling);
+                        context.DrawText(printedFillText.ToString(), Background, borderColor);
                     }
-                    else
-                    {
-                        printedFillingBottomRowText.Append(gridBorderChars.BottomRight);
-                    }
+                    topIndent += measureRows[rowIndex];
                 }
             }
-
-            context.SetCursorPos(Padding.Left, Math.Min(Padding.Top + topIndent, reducedArea.Bottom - 1));
-            context.DrawText(printedFillingBottomRowText.ToString(), Background, borderColor);
         }
 
         /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
@@ -346,6 +350,133 @@ namespace ClForms.Elements
                     (size - processedWidth) / otherColumns.Count();
             }
         }
+
+        #region GetBorderChars
+
+        private char GetTopInnerChar(int columnIndex)
+        {
+            if (gridInfos.Any(x => x.IsHorizontalCross(columnIndex, 0)))
+            {
+                return gridBorderChars.TopMiddle;
+            }
+            return gridBorderChars.TopInner;
+        }
+
+        private char GetBottomInnerChar(int columnIndex)
+        {
+            if (gridInfos.Any(x => x.IsHorizontalCross(columnIndex, ColumnCount - 1)))
+            {
+                return gridBorderChars.BottomMiddle;
+            }
+            return gridBorderChars.BottomInner;
+        }
+
+        private char GetHorizontalInnerChar(int columnIndex, int rowIndex)
+        {
+            if (gridInfos.Any(x => x.IsVerticalCross(rowIndex, columnIndex)))
+            {
+                return '\0';
+            }
+
+            return gridBorderChars.HorizontalInner;
+        }
+
+        private char GetLeftInnerChar(int rowIndex)
+        {
+            if (gridInfos.Any(x => x.IsVerticalCross(rowIndex, 0)))
+            {
+                return gridBorderChars.MiddleLeft;
+            }
+
+            return gridBorderChars.LeftInner;
+        }
+
+        private char GetRightInnerChar(int rowIndex)
+        {
+            if (gridInfos.Any(x => x.IsVerticalCross(rowIndex, ColumnCount - 1)))
+            {
+                return gridBorderChars.MiddleRight;
+            }
+
+            return gridBorderChars.RightInner;
+        }
+
+        private char GetCrossInnerChar(int columnIndex, int rowIndex)
+        {
+            var anyPreHValue = gridInfos.Any(x => x.IsHorizontalCross(columnIndex, rowIndex - 1));
+            var anyCurHValue = gridInfos.Any(x => x.IsHorizontalCross(columnIndex, rowIndex));
+            var anyPreVValue = gridInfos.Any(x => x.IsVerticalCross(rowIndex, columnIndex - 1));
+            var anyCurVValue = gridInfos.Any(x => x.IsVerticalCross(rowIndex, columnIndex));
+
+            if (anyPreHValue && anyCurHValue && anyPreVValue && anyCurVValue)
+            {
+                return '\0';
+            }
+
+            if ((anyPreHValue || anyCurHValue) && anyPreVValue && anyCurVValue)
+            {
+                return gridBorderChars.VerticalInner;
+            }
+
+            if (anyPreHValue && anyCurHValue && (anyPreVValue || anyCurVValue))
+            {
+                return gridBorderChars.HorizontalInner;
+            }
+
+            if (anyPreHValue && anyCurVValue)
+            {
+                return gridBorderChars.CrossSpanCornerRightInner;
+            }
+
+            if (anyPreHValue && anyPreVValue)
+            {
+                return gridBorderChars.CrossSpanCornerTopInner;
+            }
+
+            if (anyCurHValue && anyCurVValue)
+            {
+                return gridBorderChars.CrossSpanCornerBottomInner;
+            }
+
+            if (anyCurHValue && anyPreVValue)
+            {
+                return gridBorderChars.CrossSpanCornerLeftInner;
+            }
+
+            if (anyPreHValue && anyCurHValue)
+            {
+                return gridBorderChars.HorizontalInner;
+            }
+
+            if (anyPreHValue && !anyCurHValue)
+            {
+                return gridBorderChars.CrossSpanTopInner;
+            }
+
+            if (!anyPreHValue && anyCurHValue)
+            {
+                return gridBorderChars.CrossSpanBottomInner;
+            }
+
+            if (anyPreVValue && anyCurVValue)
+            {
+                return gridBorderChars.VerticalInner;
+            }
+
+            if (anyPreVValue && !anyCurVValue)
+            {
+                return gridBorderChars.CrossSpanLeftInner;
+            }
+
+            if (!anyPreVValue && anyCurVValue)
+            {
+                return gridBorderChars.CrossSpanRightInner;
+            }
+
+            return gridBorderChars.CrossInner;
+        }
+
+        #endregion
 
         #endregion
 
@@ -464,7 +595,7 @@ namespace ClForms.Elements
         /// <summary>
         /// Occurs when the value of the <see cref="BorderChars" /> property changes
         /// </summary>
-        public event EventHandler<PropertyChangedEventArgs<GridBorderChars>> OnBorderCharsChanged;
+        public event EventHandler<PropertyChangedEventArgs<GridSpanBorderChars>> OnBorderCharsChanged;
 
         #endregion
     }
