@@ -48,6 +48,9 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 <img src="Images/panelExample.gif" />
 
 ## Release Notes
+* 1.0.25
+    * Fix Grid borders (More combination of spanned cells)
+    * Fix MessageBox icon borders (It has rounded corners, left and right margin)
 * 1.0.24
     * Added RadioGroup
     * Added CheckBoxGroup
