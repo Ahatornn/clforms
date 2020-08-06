@@ -20,7 +20,10 @@ namespace ClForms.Common
             this.targetControl = targetControl;
             borderThickness = new Thickness(1);
             borderChars = Application.Environment.BorderChars;
+            TextArea = Rect.Empty;
         }
+
+        internal Rect TextArea { get; private set; }
 
         internal Size Measure(Size availableSize, Func<Size, Size> contentMeasureDelegate, bool applyDelegate)
         {
@@ -66,7 +69,7 @@ namespace ClForms.Common
             {
                 contentArrangeDelegate.Invoke(clientRect);
             }
-            
+
             return finalRect;
         }
 
@@ -90,21 +93,23 @@ namespace ClForms.Common
                     switch (textAlignment)
                     {
                         case TextAlignment.Right:
-                            context.SetCursorPos(
-                                context.ContextBounds.Width - borderThickness.Right - presenterText.Length,
-                                borderThickness.Top - 1);
+                            TextArea = new Rect(context.ContextBounds.Width - borderThickness.Right - presenterText.Length,
+                                borderThickness.Top - 1, text.Length, 1);
                             break;
                         case TextAlignment.Center:
-                            context.SetCursorPos(
-                                (context.ContextBounds.Width - borderThickness.Horizontal - presenterText.Length) / 2 +
-                                1, borderThickness.Top - 1);
+                            TextArea = new Rect((context.ContextBounds.Width - borderThickness.Horizontal - presenterText.Length) / 2 + 1,
+                                borderThickness.Top - 1, text.Length, 1);
                             break;
                         default:
-                            context.SetCursorPos(borderThickness.Left, borderThickness.Top - 1);
+                            TextArea = new Rect(borderThickness.Left, borderThickness.Top - 1, text.Length, 1);
                             break;
                     }
 
-                    context.DrawText(presenterText, borderColor);
+                    DrawHeaderText(context, presenterText, TextArea.X, TextArea.Y);
+                }
+                else
+                {
+                    TextArea = Rect.Empty;
                 }
             }
 
@@ -135,6 +140,12 @@ namespace ClForms.Common
                                 borderChars.BottomRight;
                 context.DrawText(bottomStr, borderColor);
             }
+        }
+
+        internal virtual void DrawHeaderText(IDrawingContext context, string presenterText, int x, int y)
+        {
+            context.SetCursorPos(x, y);
+            context.DrawText(presenterText, borderColor);
         }
     }
 }

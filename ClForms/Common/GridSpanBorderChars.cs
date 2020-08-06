@@ -2,6 +2,9 @@ using ClForms.Helpers;
 
 namespace ClForms.Common
 {
+    /// <summary>
+    /// Defines border characters of table with spanned cells
+    /// </summary>
     public class GridSpanBorderChars: GridBorderChars
     {
         /// <summary>
