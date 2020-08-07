@@ -21,7 +21,7 @@ namespace ListViewApp
             grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.AutoSize));
             grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.AutoSize));
 
-            listView1 = new ListView
+            listView1 = new ListView<DiskItem>
             {
                 Background = Color.Blue,
                 BorderColor = Color.White,
@@ -42,7 +42,7 @@ namespace ListViewApp
             AddContent(grid);
         }
 
-        private ListView listView1;
+        private ListView<DiskItem> listView1;
         private ListView listView2;
     }
 }

@@ -19,48 +19,70 @@ namespace ClForms.Common
             items = new List<T>();
         }
 
+        /// <inheritdoc />
         public IEnumerator<T> GetEnumerator() => items.GetEnumerator();
 
+        /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
+        /// <inheritdoc />
         public void Add(T item)
         {
             items.Add(item);
             owner.InvalidateVisualIfItemVisible(Count);
         }
 
+        /// <inheritdoc cref="List{T}.AddRange"/>
+        public void AddRange(IEnumerable<T> item)
+        {
+            items.AddRange(item);
+            owner.InvalidateVisualIfItemVisible(Count);
+        }
+
+        /// <inheritdoc />
         public void Clear()
         {
             items.Clear();
             owner.InvalidateVisual();
         }
 
+        /// <inheritdoc />
         public bool Contains(T item) => items.Contains(item);
 
+        /// <inheritdoc />
         public void CopyTo(T[] array, int arrayIndex) => items.CopyTo(array, arrayIndex);
 
+        /// <inheritdoc />
         public bool Remove(T item)
         {
             owner.InvalidateVisualIfItemVisible(IndexOf(item));
             return items.Remove(item);
         }
 
+        /// <inheritdoc />
         public int Count => items.Count;
+
+        /// <inheritdoc />
         public bool IsReadOnly { get; } = false;
+
+        /// <inheritdoc />
         public int IndexOf(T item) => items.IndexOf(item);
 
+        /// <inheritdoc />
         public void Insert(int index, T item)
         {
             items.Insert(index, item);
             owner.InvalidateVisualIfItemVisible(index);
         }
 
+        /// <inheritdoc />
         public void RemoveAt(int index)
         {
             items.RemoveAt(index);
             owner.InvalidateVisualIfItemVisible(index);
         }
 
+        /// <inheritdoc />
         public T this[int index]
         {
             get => items[index];
