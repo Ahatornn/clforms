@@ -19,7 +19,7 @@ namespace ListViewApp
         {
             InitializeComponent();
             var path = "C:\\Windows";
-            var items = GetDiskItems(path);
+            var items = GetDiskItems(path).ToList();
 
             listView1.Text = $" {path} ";
             listView1.SummaryText = "This is a summary of the left panel and it's testing of very longest text ever";
