@@ -13,7 +13,7 @@
 
 Find the **ClForms** package through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
 ```
-PM> Install-Package ClForms -Version 1.0.23
+PM> Install-Package ClForms -Version 1.0.25
 ```
 
 > You can also download [ClFormsExtension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
@@ -48,6 +48,9 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 <img src="Images/panelExample.gif" />
 
 ## Release Notes
+* 1.0.25
+    * Fix Grid borders (More combination of spanned cells in [GridSpanBorderChars](https://github.com/Ahatornn/clforms/wiki/GridSpanBorderChars))
+    * Fix MessageBox icon borders (It has rounded corners, left and right margin)
 * 1.0.24
     * Added RadioGroup
     * Added CheckBoxGroup
