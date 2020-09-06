@@ -50,8 +50,8 @@ namespace ClForms.Common
         /// <summary>
         /// Add an item to the collection
         /// </summary>
-        public void Add(string text, Func<T, string> displayMember, int? width) =>
-            Add(new ColumnHeader<T> {Text = text, DisplayMember = displayMember, Width = width});
+        public void Add(string text, Func<T, string> displayMember, int? width, TextAlignment alignment = TextAlignment.Left) =>
+            Add(new ColumnHeader<T> {Text = text, DisplayMember = displayMember, Alignment = alignment, Width = width});
 
         /// <inheritdoc />
         public void Clear()

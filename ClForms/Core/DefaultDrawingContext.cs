@@ -9,7 +9,7 @@ namespace ClForms.Core
     /// <summary>
     /// Default <see cref="IDrawingContext"/> resolver
     /// </summary>
-    internal class DefaultDrawingContext: IDrawingContext
+    internal class DefaultDrawingContext: IDrawingContext, IDrawingContextDescriptor
     {
         /// <summary>
         /// Empty drawing context
@@ -137,6 +137,13 @@ namespace ClForms.Core
             result.chars.Release(chars);
 
             return result;
+        }
+
+        public void SetValues(int col, int row, Color backColor, Color foreColor, char @char, bool ignoreEmpty)
+        {
+            background[col, row] = ignoreEmpty && backColor == Color.NotSet ? background[col, row] : backColor;
+            foreground[col, row] = ignoreEmpty && foreColor == Color.NotSet ? foreground[col, row] : foreColor;
+            chars[col, row] = ignoreEmpty && @char == '\0' ? chars[col, row] : @char;
         }
     }
 }

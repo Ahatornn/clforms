@@ -70,6 +70,31 @@ namespace ClForms.Common
                 contentArrangeDelegate.Invoke(clientRect);
             }
 
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                var presenterText = text.Length > finalRect.Width - borderThickness.Horizontal
+                    ? text.Substring(0, finalRect.Width - borderThickness.Horizontal - 1) + "…"
+                    : text;
+                switch (textAlignment)
+                {
+                    case TextAlignment.Right:
+                        TextArea = new Rect(finalRect.Width - borderThickness.Right - presenterText.Length,
+                            borderThickness.Top - 1, text.Length, 1);
+                        break;
+                    case TextAlignment.Center:
+                        TextArea = new Rect((finalRect.Width - borderThickness.Horizontal - presenterText.Length) / 2 + 1,
+                            borderThickness.Top - 1, text.Length, 1);
+                        break;
+                    default:
+                        TextArea = new Rect(borderThickness.Left, borderThickness.Top - 1, text.Length, 1);
+                        break;
+                }
+            }
+            else
+            {
+                TextArea = Rect.Empty;
+            }
+
             return finalRect;
         }
 
@@ -85,32 +110,15 @@ namespace ClForms.Common
                                  : string.Empty) +
                              borderChars.TopRight;
                 context.DrawText(topStr, borderColor);
-                if (!string.IsNullOrWhiteSpace(text))
-                {
-                    var presenterText = text.Length > context.ContextBounds.Width - borderThickness.Horizontal
-                        ? text.Substring(0, context.ContextBounds.Width - borderThickness.Horizontal - 1) + "…"
-                        : text;
-                    switch (textAlignment)
-                    {
-                        case TextAlignment.Right:
-                            TextArea = new Rect(context.ContextBounds.Width - borderThickness.Right - presenterText.Length,
-                                borderThickness.Top - 1, text.Length, 1);
-                            break;
-                        case TextAlignment.Center:
-                            TextArea = new Rect((context.ContextBounds.Width - borderThickness.Horizontal - presenterText.Length) / 2 + 1,
-                                borderThickness.Top - 1, text.Length, 1);
-                            break;
-                        default:
-                            TextArea = new Rect(borderThickness.Left, borderThickness.Top - 1, text.Length, 1);
-                            break;
-                    }
+            }
 
-                    DrawHeaderText(context, presenterText, TextArea.X, TextArea.Y);
-                }
-                else
-                {
-                    TextArea = Rect.Empty;
-                }
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                var presenterText = text.Length > context.ContextBounds.Width - borderThickness.Horizontal
+                    ? text.Substring(0, context.ContextBounds.Width - borderThickness.Horizontal - 1) + "…"
+                    : text;
+
+                DrawHeaderText(context, presenterText, TextArea.X, TextArea.Y);
             }
 
             for (var row = borderThickness.Top; row < context.ContextBounds.Height - borderThickness.Bottom; row++)

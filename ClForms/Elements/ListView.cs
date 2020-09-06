@@ -7,6 +7,7 @@ using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
 using ClForms.Core;
+using ClForms.Core.Contexts;
 using ClForms.Elements.Abstractions;
 using ClForms.Helpers;
 using ClForms.Themes;
@@ -25,6 +26,13 @@ namespace ClForms.Elements
         private string summaryText;
         private int columns;
         private Color headerForeground;
+        private ScreenDrawingContext bufferedLinesContext;
+        private ScreenDrawingContext bufferedContentContext;
+        private int firstVisibleItemIndex = 0;
+        private int selectedIndex = -1;
+        private Rect selectedRect = Rect.Empty;
+        private int[] drawingColumnWidths;
+        private int segmentHeight = 0;
 
         /// <summary>
         /// Initialize a new instance <see cref="ListView"/>
@@ -51,6 +59,7 @@ namespace ClForms.Elements
                 borderColor = Application.SystemColors.BorderColor,
                 borderChars = gridBorderChars,
             };
+            OnFocusChanged += InternalFocusChanged;
         }
 
         #region Properties
@@ -237,15 +246,26 @@ namespace ClForms.Elements
 
         #endregion
 
+        #region Methods
+
         /// <inheritdoc cref="Control.Measure"/>
         public override void Measure(Size availableSize)
             => base.Measure(groupBase.Measure(availableSize, (contentSize) => availableSize, true));
 
         /// <inheritdoc cref="Control.Arrange"/>
-        public override void Arrange(Rect finalRect, bool reduceMargin = true) =>
-            base.Arrange(groupBase.Arrange(finalRect, null, false));
+        public override void Arrange(Rect finalRect, bool reduceMargin = true)
+        {
+            var calculatedRect = groupBase.Arrange(finalRect, null, false);
+            bufferedLinesContext = new ScreenDrawingContext(calculatedRect);
+            bufferedLinesContext.Release(Color.NotSet, Color.NotSet);
+            if (showGridLine)
+            {
+                CreateGrids(bufferedLinesContext);
+            }
 
-        #region Methods
+            InvalidateBufferedContentContext(calculatedRect);
+            base.Arrange(calculatedRect, reduceMargin);
+        }
 
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)
@@ -257,117 +277,10 @@ namespace ClForms.Elements
                 return;
             }
 
-            var drawingWidth = context.ContextBounds.Width - (showGridLine ? 2 : 0);
-            var segmentResidue = drawingWidth % columns;
-            var segmentHeight = context.ContextBounds.Height - (!string.IsNullOrWhiteSpace(SummaryText) ? 3 : 1);
-
             if (showGridLine)
             {
                 groupBase.OnRender(context);
-                var segmentWidth = drawingWidth / columns;
-                if (segmentWidth < 1)
-                {
-                    return;
-                }
-
-                if (!string.IsNullOrWhiteSpace(SummaryText))
-                {
-                    context.SetCursorPos(0, context.ContextBounds.Height - 3);
-                    var bottomStr = new StringBuilder(gridBorderChars.LeftInner +
-                                                      new string(gridBorderChars.HorizontalInner, drawingWidth) +
-                                                      gridBorderChars.RightInner);
-                    context.DrawText(bottomStr.ToString(), BorderColor);
-                }
-
-                var segmentIndent = 1;
-                for (var column = 0; column < Columns; column++)
-                {
-                    var actualSegmentWidth = drawingWidth / columns;
-                    if (segmentResidue != 0 && column >= Columns - segmentResidue)
-                    {
-                        actualSegmentWidth++;
-                    }
-
-                    var headerInfos = GetHeaderInfo(actualSegmentWidth).ToList();
-                    var isLastBorderVisible = headerInfos.Sum() < actualSegmentWidth;
-                    var headersRow = new StringBuilder(actualSegmentWidth  - (isLastBorderVisible ? 0 : headerInfos[^1]));
-
-                    for (var headerIndex = 0; headerIndex < headerInfos.Count - 1; headerIndex++)
-                    {
-                        if (headerInfos[headerIndex] > 1)
-                        {
-                            var formattedString = "{0, " + headerInfos[headerIndex] + "}";
-                            headersRow.Append(string.Format(formattedString, gridBorderChars.VerticalInner));
-                        }
-                    }
-
-                    if (isLastBorderVisible && headerInfos.Any())
-                    {
-                        var formattedString = "{0, " + headerInfos[^1] + "}";
-                        headersRow.Append(string.Format(formattedString, gridBorderChars.VerticalInner));
-                    }
-
-                    for (var rowIndex = 0; rowIndex <= segmentHeight; rowIndex++)
-                    {
-                        if (rowIndex == 0 && groupBase.TextArea.Contains(segmentIndent + actualSegmentWidth, rowIndex))
-                        {
-                            continue;
-                        }
-
-                        if (rowIndex > 0 && rowIndex < segmentHeight)
-                        {
-                            context.SetCursorPos(segmentIndent + 1, rowIndex);
-                            context.DrawText(headersRow.ToString(), BorderColor);
-                        }
-
-                        if (rowIndex == 1)
-                        {
-                            var headerIndent = 0;
-                            for (var headerIndex = 0; headerIndex < headerInfos.Count; headerIndex++)
-                            {
-                                if (headerInfos[headerIndex] > 0)
-                                {
-                                    var headerTextIndent = Math.Max((headerInfos[headerIndex] - ColumnHeaders[headerIndex].Text.Length) / 2, 0);
-                                    context.SetCursorPos(segmentIndent + headerIndent + headerTextIndent + 1, rowIndex);
-                                    context.DrawText(ColumnHeaders[headerIndex].Text.Substring(0,
-                                        Math.Min(ColumnHeaders[headerIndex].Text.Length, headerInfos[headerIndex] - 1)), headerForeground);
-                                    headerIndent += headerInfos[headerIndex];
-                                }
-                            }
-                        }
-
-                        if (column < Columns - 1)
-                        {
-                            context.SetCursorPos(segmentIndent + actualSegmentWidth, rowIndex);
-                            context.DrawText(rowIndex == 0
-                                ? gridBorderChars.TopInner
-                                : rowIndex != segmentHeight
-                                    ? gridBorderChars.VerticalInner
-                                    : string.IsNullOrWhiteSpace(summaryText)
-                                        ? gridBorderChars.BottomInner
-                                        : gridBorderChars.CrossSpanBottomInner, BorderColor);
-                        }
-
-                        if (rowIndex == segmentHeight)
-                        {
-                            var headerIndent = 0;
-                            for (var headerIndex = 0; headerIndex < headerInfos.Count; headerIndex++)
-                            {
-                                if (headerInfos[headerIndex] == 0 || headerIndex == headerInfos.Count - 1 && !isLastBorderVisible)
-                                {
-                                    continue;
-                                }
-                                context.SetCursorPos(segmentIndent + headerInfos[headerIndex] + headerIndent, rowIndex);
-                                context.DrawText(string.IsNullOrWhiteSpace(summaryText)
-                                    ? gridBorderChars.BottomInner
-                                    : gridBorderChars.CrossSpanBottomInner, BorderColor);
-                                headerIndent += headerInfos[headerIndex];
-                            }
-                        }
-                    }
-
-                    segmentIndent += actualSegmentWidth;
-                }
+                ((IDrawingContextDescriptor) context).MergeWith(Point.Empty, bufferedLinesContext, true);
             }
 
             if (!string.IsNullOrWhiteSpace(SummaryText))
@@ -376,15 +289,175 @@ namespace ClForms.Elements
                 context.DrawText(SummaryText.Substring(0, Math.Min(SummaryText.Length, context.ContextBounds.Width - 2)), Background, Foreground);
             }
 
-            /*
-            if (ColumnHeaders.Count == 0)
+            ((IDrawingContextDescriptor) context).MergeWith(Point.Empty, bufferedContentContext, true);
+        }
+
+        /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
+        public void SetStyle(Action<ListView<T>> styleAction) => styleAction?.Invoke(this);
+
+        /// <inheritdoc cref="BaseFocusableControl.InputActionInternal"/>
+        protected override void InputActionInternal(ConsoleKeyInfo keyInfo)
+        {
+            if (keyInfo.Key == ConsoleKey.DownArrow)
             {
-                DrawItemsWithoutHeaders(context, drawingWidth, segmentWidth, segmentHeight);
+                if (Items.Count - 1 > selectedIndex)
+                {
+                    ErasePreviousSelectedBackground();
+                    var itemsCount = segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1;
+                    if ((selectedIndex + 1) - firstVisibleItemIndex > itemsCount)
+                    {
+                        firstVisibleItemIndex++;
+                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                    }
+
+                    selectedIndex++;
+                    SetSelectedBackground();
+                    InvalidateVisual();
+                }
+            }
+
+            if (keyInfo.Key == ConsoleKey.UpArrow)
+            {
+                if (selectedIndex > 0)
+                {
+                    ErasePreviousSelectedBackground();
+                    if (selectedIndex - 1 < firstVisibleItemIndex)
+                    {
+                        firstVisibleItemIndex--;
+                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                    }
+                    selectedIndex--;
+                    SetSelectedBackground();
+                    InvalidateVisual();
+                }
+            }
+
+            if (keyInfo.Key == ConsoleKey.RightArrow && Columns > 1)
+            {
+
+            }
+
+            if (keyInfo.Key == ConsoleKey.LeftArrow && Columns > 1)
+            {
+
+            }
+
+            if (keyInfo.Key == ConsoleKey.Home)
+            {
+                firstVisibleItemIndex = 0;
+                InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                selectedIndex = 0;
+                SetSelectedBackground();
+                InvalidateVisual();
+            }
+
+            if (keyInfo.Key == ConsoleKey.End)
+            {
+                firstVisibleItemIndex = Math.Max(0, Items.Count - segmentHeight + 2);
+                InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                selectedIndex = Items.Count - 1;
+                SetSelectedBackground();
+                InvalidateVisual();
+            }
+
+            if (keyInfo.Key == ConsoleKey.PageUp)
+            {
+                if (selectedIndex + segmentHeight - 2 < Items.Count)
+                {
+                    var currentDiff = selectedIndex - firstVisibleItemIndex;
+                    var newSelectedIndex = selectedIndex + segmentHeight - 2;
+                    firstVisibleItemIndex = Math.Min(newSelectedIndex - currentDiff, Items.Count - segmentHeight + 2);
+                    InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                    selectedIndex = newSelectedIndex;
+                    SetSelectedBackground();
+                    InvalidateVisual();
+                }
+            }
+
+            if (keyInfo.Key == ConsoleKey.PageDown)
+            {
+                if (selectedIndex - segmentHeight + 2 >= 0)
+                {
+                    var currentDiff = selectedIndex - firstVisibleItemIndex;
+                    var newSelectedIndex = selectedIndex - segmentHeight + 2;
+                    firstVisibleItemIndex = Math.Max(0, newSelectedIndex - currentDiff);
+                    InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                    selectedIndex = newSelectedIndex;
+                    SetSelectedBackground();
+                    InvalidateVisual();
+                }
+            }
+        }
+
+        internal void InvalidateVisualIfItemVisible(int index) =>
+            /*
+            *
+            * Надо тут расчитать, нужно ли перерендрить сетку, элементы и прочее когда AED операции идут
+            *
+            */
+            InvalidateVisual();
+
+        private void InternalFocusChanged(object sender, PropertyChangedEventArgs<bool> e)
+        {
+            if (e.NewValue)
+            {
+                SetSelectedBackground();
             }
             else
             {
-                //DrawItemsWithHeaders(context, drawingWidth, segmentWidth, segmentHeight);
-            }*/
+                ErasePreviousSelectedBackground();
+            }
+        }
+
+        private void SetSelectedBackground()
+        {
+            if (selectedIndex == -1 && Items.Any())
+            {
+                selectedIndex = firstVisibleItemIndex;
+            }
+
+            if (selectedIndex == -1)
+            {
+                return;
+            }
+
+            var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
+            var columnIndex = (selectedIndex - firstVisibleItemIndex) / segmentItems;
+            var leftIndent = drawingColumnWidths.Take(columnIndex).Sum() + 1;
+
+            selectedRect = ColumnHeaders.Any()
+                ? new Rect(leftIndent, 2 + (selectedIndex - firstVisibleItemIndex - segmentItems * columnIndex), drawingColumnWidths[columnIndex], 1)
+                : new Rect(leftIndent, 1 + (selectedIndex - firstVisibleItemIndex - segmentItems * columnIndex), drawingColumnWidths[columnIndex], 1);
+
+            bufferedContentContext.SetBackgroundValues(selectedRect, FocusBackground);
+            bufferedContentContext.SetForegroundValues(selectedRect, FocusForeground);
+        }
+
+        private void ErasePreviousSelectedBackground()
+        {
+            if (selectedRect != Rect.Empty)
+            {
+                bufferedContentContext.SetBackgroundValues(selectedRect, Color.NotSet);
+                bufferedContentContext.SetForegroundValues(selectedRect, Color.NotSet);
+                selectedRect = Rect.Empty;
+            }
+        }
+
+        #region Drawing
+
+        private void InvalidateBufferedContentContext(Rect areaRect)
+        {
+            bufferedContentContext = new ScreenDrawingContext(areaRect);
+            bufferedContentContext.Release(Color.NotSet, Color.NotSet);
+
+            if (ColumnHeaders.Count == 0)
+            {
+                DrawItemsWithoutHeaders(bufferedContentContext);
+            }
+            else
+            {
+                DrawItemsWithHeaders(bufferedContentContext);
+            }
         }
 
         private IEnumerable<int> GetHeaderInfo(int actualSegmentWidth)
@@ -446,102 +519,222 @@ namespace ClForms.Elements
             }
         }
 
-        /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
-        public void SetStyle(Action<ListView<T>> styleAction) => styleAction?.Invoke(this);
-
-        /// <inheritdoc cref="BaseFocusableControl.InputActionInternal"/>
-        protected override void InputActionInternal(ConsoleKeyInfo keyInfo)
+        private void CreateGrids(ScreenDrawingContext context)
         {
+            var drawingWidth = context.ContextBounds.Width - (showGridLine ? 2 : 0);
+            var segmentResidue = drawingWidth % columns;
+            segmentHeight = context.ContextBounds.Height - (!string.IsNullOrWhiteSpace(SummaryText) ? 3 : 1);
 
-        }
-
-        internal void InvalidateVisualIfItemVisible(int index) => InvalidateVisual();
-
-        private void DrawItemsWithHeaders(IDrawingContext context, int drawingWidth, int segmentWidth, int segmentHeight)
-        {
-            var actualSegmentWidth = segmentWidth;
-            var segmentIndent = 0;
-            for (var colIndex = 0; colIndex < Columns; colIndex++)
+            var segmentWidth = drawingWidth / columns;
+            if (segmentWidth < 1)
             {
-                if (colIndex == Columns - 1)
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(SummaryText))
+            {
+                context.SetCursorPos(0, context.ContextBounds.Height - 3);
+                var bottomStr = new StringBuilder(gridBorderChars.LeftInner +
+                                                  new string(gridBorderChars.HorizontalInner, drawingWidth) +
+                                                  gridBorderChars.RightInner);
+                context.DrawText(bottomStr.ToString(), BorderColor);
+            }
+
+            var segmentIndent = 1;
+            for (var column = 0; column < Columns; column++)
+            {
+                var actualSegmentWidth = drawingWidth / columns;
+                if (segmentResidue != 0 && column >= Columns - segmentResidue)
                 {
-                    actualSegmentWidth = drawingWidth - (columns - 1) * segmentWidth;
+                    actualSegmentWidth++;
                 }
 
-                var drawItems = Items.Skip(colIndex * (segmentHeight - 2)).Take(segmentHeight - 2);
-                var topIndent = 2;
-                foreach (var item in drawItems)
+                var headerInfos = GetHeaderInfo(actualSegmentWidth).ToList();
+                var isLastBorderVisible = headerInfos.Sum() < actualSegmentWidth;
+                var headersRow = new StringBuilder(actualSegmentWidth - (isLastBorderVisible ? 0 : headerInfos[^1]));
+
+                for (var headerIndex = 0; headerIndex < headerInfos.Count - 1; headerIndex++)
                 {
-                    context.SetCursorPos(1, topIndent);
-                    var defaultHeaderWidth = (actualSegmentWidth - ColumnHeaders.Where(x => x.Width.HasValue)
-                                                 .Sum(x => x.Width.Value)) /
-                                             ColumnHeaders.Where(x => !x.Width.HasValue)
-                                                 .DefaultIfEmpty(new ColumnHeader<T> { Width = 1 }).Count();
-                    var allHeaderWidth = 0;
-                    for (var headerIndex = 0; headerIndex < ColumnHeaders.Count; headerIndex++)
+                    if (headerInfos[headerIndex] > 1)
                     {
-                        var headerWidth = ColumnHeaders[headerIndex].Width ?? defaultHeaderWidth;
-                        if (headerIndex == ColumnHeaders.Count - 1)
-                        {
-                            headerWidth = actualSegmentWidth - allHeaderWidth;
-                        }
-
-                        var drawingText = ColumnHeaders[headerIndex].DisplayMember != null
-                            ? ColumnHeaders[headerIndex].DisplayMember(item)
-                            : item.ToString() ?? string.Empty;
-                        var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, headerWidth - 1));
-
-                        context.SetCursorPos(segmentIndent + allHeaderWidth + 1, topIndent);
-                        if (drawingText.Length > cropDrawingText.Length)
-                        {
-                            context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…");
-                        }
-                        else
-                        {
-                            context.DrawText(cropDrawingText);
-                        }
-
-                        allHeaderWidth += headerWidth;
+                        var formattedString = "{0, " + headerInfos[headerIndex] + "}";
+                        headersRow.Append(string.Format(formattedString, gridBorderChars.VerticalInner));
                     }
-                    topIndent++;
+                }
+
+                if (isLastBorderVisible && headerInfos.Any())
+                {
+                    var formattedString = "{0, " + headerInfos[^1] + "}";
+                    headersRow.Append(string.Format(formattedString, gridBorderChars.VerticalInner));
+                }
+
+                for (var rowIndex = 0; rowIndex <= segmentHeight; rowIndex++)
+                {
+                    if (rowIndex == 0 && groupBase.TextArea.Contains(segmentIndent + actualSegmentWidth, rowIndex))
+                    {
+                        continue;
+                    }
+
+                    if (rowIndex > 0 && rowIndex < segmentHeight)
+                    {
+                        context.SetCursorPos(segmentIndent + 1, rowIndex);
+                        context.DrawText(headersRow.ToString(), BorderColor);
+                    }
+
+                    if (rowIndex == 1)
+                    {
+                        var headerIndent = 0;
+                        for (var headerIndex = 0; headerIndex < headerInfos.Count; headerIndex++)
+                        {
+                            if (headerInfos[headerIndex] > 0)
+                            {
+                                var headerTextIndent = Math.Max((headerInfos[headerIndex] - ColumnHeaders[headerIndex].Text.Length) / 2, 0);
+                                context.SetCursorPos(segmentIndent + headerIndent + headerTextIndent + 1, rowIndex);
+                                context.DrawText(ColumnHeaders[headerIndex].Text.Substring(0,
+                                    Math.Min(ColumnHeaders[headerIndex].Text.Length, headerInfos[headerIndex] - 1)), headerForeground);
+                                headerIndent += headerInfos[headerIndex];
+                            }
+                        }
+                    }
+
+                    if (column < Columns - 1)
+                    {
+                        context.SetCursorPos(segmentIndent + actualSegmentWidth, rowIndex);
+                        context.DrawText(rowIndex == 0
+                            ? gridBorderChars.TopInner
+                            : rowIndex != segmentHeight
+                                ? gridBorderChars.VerticalInner
+                                : string.IsNullOrWhiteSpace(summaryText)
+                                    ? gridBorderChars.BottomInner
+                                    : gridBorderChars.CrossSpanBottomInner, BorderColor);
+                    }
+
+                    if (rowIndex == segmentHeight)
+                    {
+                        var headerIndent = 0;
+                        for (var headerIndex = 0; headerIndex < headerInfos.Count; headerIndex++)
+                        {
+                            if (headerInfos[headerIndex] == 0 || headerIndex == headerInfos.Count - 1 && !isLastBorderVisible)
+                            {
+                                continue;
+                            }
+                            context.SetCursorPos(segmentIndent + headerInfos[headerIndex] + headerIndent, rowIndex);
+                            context.DrawText(string.IsNullOrWhiteSpace(summaryText)
+                                ? gridBorderChars.BottomInner
+                                : gridBorderChars.CrossSpanBottomInner, BorderColor);
+                            headerIndent += headerInfos[headerIndex];
+                        }
+                    }
                 }
 
                 segmentIndent += actualSegmentWidth;
             }
         }
 
-        private void DrawItemsWithoutHeaders(IDrawingContext context, int drawingWidth, int segmentWidth, int segmentHeight)
+        private void DrawItemsWithHeaders(ScreenDrawingContext context)
         {
-            var actualSegmentWidth = segmentWidth;
-            var colIndent = 0;
-            for (var colIndex = 0; colIndex < Columns; colIndex ++)
+            drawingColumnWidths = new int[Columns];
+            var drawingWidth = context.ContextBounds.Width - (showGridLine ? 2 : 0);
+            var segmentResidue = drawingWidth % columns;
+            segmentHeight = context.ContextBounds.Height - (!string.IsNullOrWhiteSpace(SummaryText) ? 3 : 1);
+
+            var segmentWidth = drawingWidth / columns;
+            if (segmentWidth < 1)
             {
-                if (colIndex == Columns - 1)
+                drawingColumnWidths = Enumerable.Repeat(0, Columns).ToArray();
+                return;
+            }
+            
+            var segmentIndent = 1;
+            for (var column = 0; column < Columns; column++)
+            {
+                var actualSegmentWidth = drawingWidth / columns;
+                if (segmentResidue != 0 && column >= Columns - segmentResidue)
                 {
-                    actualSegmentWidth = (drawingWidth - (columns - 1) * segmentWidth) - 2;
+                    actualSegmentWidth++;
                 }
 
-                var drawItems = Items.Skip(colIndex * (segmentHeight - 1)).Take(segmentHeight - 1);
+                var headerInfos = GetHeaderInfo(actualSegmentWidth).ToList();
+                var drawItems = Items.Skip(column * (segmentHeight - 2) + firstVisibleItemIndex).Take(segmentHeight - 2);
+                var topIndent = 2;
+                foreach (var item in drawItems)
+                {
+                    var allHeaderWidth = 0;
+                    for (var headerInfoIndex = 0; headerInfoIndex < headerInfos.Count; headerInfoIndex++)
+                    {
+                        var drawingText = ColumnHeaders[headerInfoIndex].DisplayMember != null
+                            ? ColumnHeaders[headerInfoIndex].DisplayMember(item)
+                            : item.ToString() ?? string.Empty;
+                        var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, headerInfos[headerInfoIndex] - 1));
+
+                        context.SetCursorPos(segmentIndent + allHeaderWidth + (headerInfoIndex == 0 ? 0 : 1), topIndent);
+                        if (drawingText.Length > cropDrawingText.Length)
+                        {
+                            context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", Color.NotSet, Color.NotSet);
+                        }
+                        else
+                        {
+                            context.DrawText(TextHelper.GetTextWithAlignment(cropDrawingText, headerInfos[headerInfoIndex] - 1, ColumnHeaders[headerInfoIndex].Alignment), Color.NotSet, Color.NotSet);
+                        }
+
+                        allHeaderWidth += headerInfos[headerInfoIndex];
+                    }
+
+                    topIndent++;
+                }
+
+                segmentIndent += actualSegmentWidth + (column == 0 ? 1 : 0);
+                drawingColumnWidths[column] = actualSegmentWidth;
+            }
+        }
+
+        private void DrawItemsWithoutHeaders(ScreenDrawingContext context)
+        {
+            drawingColumnWidths = new int[Columns];
+            var drawingWidth = context.ContextBounds.Width - (showGridLine ? 2 : 0);
+            var segmentResidue = drawingWidth % columns;
+            segmentHeight = context.ContextBounds.Height - (!string.IsNullOrWhiteSpace(SummaryText) ? 3 : 1);
+
+            var segmentWidth = drawingWidth / columns;
+            if (segmentWidth < 1)
+            {
+                drawingColumnWidths = Enumerable.Repeat(0, Columns).ToArray();
+                return;
+            }
+
+            var segmentIndent = 1;
+            for (var column = 0; column < Columns; column++)
+            {
+                var actualSegmentWidth = drawingWidth / columns;
+                if (segmentResidue != 0 && column >= Columns - segmentResidue)
+                {
+                    actualSegmentWidth++;
+                }
+
+                var drawItems = Items.Skip(column * (segmentHeight - 1) + firstVisibleItemIndex).Take(segmentHeight - 1);
                 var topIndent = 1;
                 foreach (var item in drawItems)
                 {
-                    context.SetCursorPos(colIndent + 1, topIndent);
+                    context.SetCursorPos(segmentIndent, topIndent);
                     var drawingText = item?.ToString() ?? string.Empty;
-                    var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, actualSegmentWidth - 1));
+                    var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, actualSegmentWidth - (column == 0 ? 0 : 1)));
                     if (drawingText.Length > cropDrawingText.Length)
                     {
-                        context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…");
+                        context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", Color.NotSet, Color.NotSet);
                     }
                     else
                     {
-                        context.DrawText(cropDrawingText);
+                        context.DrawText(cropDrawingText, Color.NotSet, Color.NotSet);
                     }
                     topIndent++;
                 }
 
-                colIndent += actualSegmentWidth;
+                segmentIndent += actualSegmentWidth + (column == 0 ? 1 : 0);
+                drawingColumnWidths[column] = actualSegmentWidth;
             }
         }
+
+        #endregion
 
         #endregion
 

@@ -22,5 +22,10 @@ namespace ClForms.Common
         /// Gets or sets the width of the column
         /// </summary>
         public int? Width { get; set; }
+
+        /// <summary>
+        /// Gets or sets the horizontal alignment of the content
+        /// </summary>
+        public TextAlignment Alignment { get; set; }
     }
 }
