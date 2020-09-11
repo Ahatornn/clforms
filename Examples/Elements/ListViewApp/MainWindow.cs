@@ -39,12 +39,22 @@ namespace ListViewApp
         {
             foreach (var directoryName in Directory.EnumerateDirectories(path))
             {
-                yield return new DiskItem()
+                yield return new DiskItem
                 {
                     Path = directoryName,
                     Name = directoryName.Substring(directoryName.LastIndexOf('\\') + 1),
                     IsFolder = true,
                     DateTime = Directory.GetCreationTime(directoryName),
+                };
+            }
+            foreach (var file in Directory.GetFiles(path))
+            {
+                yield return new DiskItem
+                {
+                    Path = Path.GetFullPath(file),
+                    Name = Path.GetFileName(file),
+                    IsFolder = false,
+                    DateTime = File.GetCreationTime(file),
                 };
             }
         }

@@ -303,7 +303,7 @@ namespace ClForms.Elements
                 if (Items.Count - 1 > selectedIndex)
                 {
                     ErasePreviousSelectedBackground();
-                    var itemsCount = segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1;
+                    var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1) * Columns;
                     if ((selectedIndex + 1) - firstVisibleItemIndex > itemsCount)
                     {
                         firstVisibleItemIndex++;
@@ -334,12 +334,36 @@ namespace ClForms.Elements
 
             if (keyInfo.Key == ConsoleKey.RightArrow && Columns > 1)
             {
-
+                var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
+                if(firstVisibleItemIndex + (segmentItems * Columns) < Items.Count - 1)
+                {
+                    ErasePreviousSelectedBackground();
+                    selectedIndex = Math.Min(Items.Count - 1, selectedIndex + (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)));
+                    if(selectedIndex - firstVisibleItemIndex > (segmentItems * Columns))
+                    {
+                        firstVisibleItemIndex += segmentItems;
+                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                    }
+                    SetSelectedBackground();
+                    InvalidateVisual();
+                }
             }
 
             if (keyInfo.Key == ConsoleKey.LeftArrow && Columns > 1)
             {
-
+                var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
+                if(selectedIndex - segmentItems > 0)
+                {
+                    ErasePreviousSelectedBackground();
+                    selectedIndex -= segmentItems;
+                    if(selectedIndex < firstVisibleItemIndex)
+                    {
+                        firstVisibleItemIndex = Math.Max(0, firstVisibleItemIndex - segmentItems);
+                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                    }
+                    SetSelectedBackground();
+                    InvalidateVisual();
+                }
             }
 
             if (keyInfo.Key == ConsoleKey.Home)
@@ -353,7 +377,8 @@ namespace ClForms.Elements
 
             if (keyInfo.Key == ConsoleKey.End)
             {
-                firstVisibleItemIndex = Math.Max(0, Items.Count - segmentHeight + 2);
+                var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
+                firstVisibleItemIndex = Math.Max(0, Items.Count - itemsCount);
                 InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
                 selectedIndex = Items.Count - 1;
                 SetSelectedBackground();
@@ -362,11 +387,12 @@ namespace ClForms.Elements
 
             if (keyInfo.Key == ConsoleKey.PageUp)
             {
-                if (selectedIndex + segmentHeight - 2 < Items.Count)
+                var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
+                if (selectedIndex + itemsCount < Items.Count)
                 {
                     var currentDiff = selectedIndex - firstVisibleItemIndex;
-                    var newSelectedIndex = selectedIndex + segmentHeight - 2;
-                    firstVisibleItemIndex = Math.Min(newSelectedIndex - currentDiff, Items.Count - segmentHeight + 2);
+                    var newSelectedIndex = selectedIndex + itemsCount;
+                    firstVisibleItemIndex = Math.Min(newSelectedIndex - currentDiff, Items.Count - itemsCount);
                     InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
                     selectedIndex = newSelectedIndex;
                     SetSelectedBackground();
@@ -376,10 +402,11 @@ namespace ClForms.Elements
 
             if (keyInfo.Key == ConsoleKey.PageDown)
             {
-                if (selectedIndex - segmentHeight + 2 >= 0)
+                var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
+                if (selectedIndex - itemsCount >= 0)
                 {
                     var currentDiff = selectedIndex - firstVisibleItemIndex;
-                    var newSelectedIndex = selectedIndex - segmentHeight + 2;
+                    var newSelectedIndex = selectedIndex - itemsCount;
                     firstVisibleItemIndex = Math.Max(0, newSelectedIndex - currentDiff);
                     InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
                     selectedIndex = newSelectedIndex;
@@ -423,11 +450,12 @@ namespace ClForms.Elements
 
             var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
             var columnIndex = (selectedIndex - firstVisibleItemIndex) / segmentItems;
-            var leftIndent = drawingColumnWidths.Take(columnIndex).Sum() + 1;
+            var leftIndent = drawingColumnWidths.Take(columnIndex).Sum() + (columnIndex == 0 ? 1 : 2);
 
-            selectedRect = ColumnHeaders.Any()
-                ? new Rect(leftIndent, 2 + (selectedIndex - firstVisibleItemIndex - segmentItems * columnIndex), drawingColumnWidths[columnIndex], 1)
-                : new Rect(leftIndent, 1 + (selectedIndex - firstVisibleItemIndex - segmentItems * columnIndex), drawingColumnWidths[columnIndex], 1);
+            selectedRect = new Rect(leftIndent, 
+                (ColumnHeaders.Any() ? 2 : 1) + (selectedIndex - firstVisibleItemIndex - segmentItems * columnIndex), 
+                drawingColumnWidths[columnIndex] - (columnIndex == 0 ? 0 : 1), 
+                1);
 
             bufferedContentContext.SetBackgroundValues(selectedRect, FocusBackground);
             bufferedContentContext.SetForegroundValues(selectedRect, FocusForeground);
