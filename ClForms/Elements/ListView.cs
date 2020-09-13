@@ -74,6 +74,23 @@ namespace ClForms.Elements
         /// </summary>
         public ListViewItemCollection<T> Items { get; }
 
+        /// <summary>
+        /// Gets the index of first visibled item 
+        /// </summary>
+        public int FirstVisibledItemIndex => firstVisibleItemIndex;
+
+        /// <summary>
+        /// Gets the all visibled items
+        /// </summary>
+        public IEnumerable<T> VisibledItems
+        {
+            get
+            {
+                var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1) * Columns;
+                return Items.Skip(firstVisibleItemIndex).Take(itemsCount);
+            }
+        }
+
         #region Text
 
         /// <summary>
