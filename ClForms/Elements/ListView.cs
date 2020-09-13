@@ -243,6 +243,46 @@ namespace ClForms.Elements
         }
 
         #endregion
+        #region SelectedIndex
+
+        /// <summary>
+        /// Gets or sets the index of the selected item in a <see cref="ListView"/> control
+        /// </summary>
+        public int SelectedIndex
+        {
+            get => selectedIndex;
+            set
+            {
+                if(selectedIndex != value)
+                {
+                    if(value < -1 || value > Items.Count - 1)
+                    {
+                        throw new IndexOutOfRangeException();
+                    }
+                    ErasePreviousSelectedBackground();
+                    var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
+                    if(!(value > firstVisibleItemIndex && value < firstVisibleItemIndex + segmentItems))
+                    {
+                        var fittedColumnItems = value < firstVisibleItemIndex
+                            ? segmentHeight
+                            : segmentHeight * Columns;
+                        var firstIndex = 0;
+                        while(!(value > firstIndex && value < firstIndex + fittedColumnItems))
+                        {
+                            firstIndex += fittedColumnItems;
+                        }
+                        firstVisibleItemIndex = firstIndex;
+                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                    }
+
+                    OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(selectedIndex, value));
+                    SelectedIndex = value;
+                    SetSelectedBackground();
+                    InvalidateVisual();
+                }
+            }
+        }
+        #endregion
 
         #endregion
 
@@ -298,21 +338,22 @@ namespace ClForms.Elements
         /// <inheritdoc cref="BaseFocusableControl.InputActionInternal"/>
         protected override void InputActionInternal(ConsoleKeyInfo keyInfo)
         {
+            var previousSelectedIndex = selectedIndex;
+            var nextSelectedIndex = selectedIndex;
+            var previousFirstVisibleItemIndex = firstVisibleItemIndex;
+            var nextFirstVisibleItemIndex = firstVisibleItemIndex;
+
             if (keyInfo.Key == ConsoleKey.DownArrow)
             {
                 if (Items.Count - 1 > selectedIndex)
                 {
-                    ErasePreviousSelectedBackground();
                     var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1) * Columns;
                     if ((selectedIndex + 1) - firstVisibleItemIndex > itemsCount)
                     {
-                        firstVisibleItemIndex++;
-                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                        nextFirstVisibleItemIndex = firstVisibleItemIndex + 1;
                     }
 
-                    selectedIndex++;
-                    SetSelectedBackground();
-                    InvalidateVisual();
+                    nextSelectedIndex = selectedIndex + 1;
                 }
             }
 
@@ -320,15 +361,11 @@ namespace ClForms.Elements
             {
                 if (selectedIndex > 0)
                 {
-                    ErasePreviousSelectedBackground();
                     if (selectedIndex - 1 < firstVisibleItemIndex)
                     {
-                        firstVisibleItemIndex--;
-                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                        nextFirstVisibleItemIndex = firstVisibleItemIndex - 1;
                     }
-                    selectedIndex--;
-                    SetSelectedBackground();
-                    InvalidateVisual();
+                    nextSelectedIndex = selectedIndex - 1;
                 }
             }
 
@@ -337,15 +374,11 @@ namespace ClForms.Elements
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
                 if(firstVisibleItemIndex + (segmentItems * Columns) < Items.Count - 1)
                 {
-                    ErasePreviousSelectedBackground();
-                    selectedIndex = Math.Min(Items.Count - 1, selectedIndex + (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)));
-                    if(selectedIndex - firstVisibleItemIndex > (segmentItems * Columns))
+                    nextSelectedIndex = Math.Min(Items.Count - 1, selectedIndex + (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)));
+                    if(nextSelectedIndex - firstVisibleItemIndex > (segmentItems * Columns))
                     {
-                        firstVisibleItemIndex += segmentItems;
-                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                        nextFirstVisibleItemIndex = firstVisibleItemIndex + segmentItems;
                     }
-                    SetSelectedBackground();
-                    InvalidateVisual();
                 }
             }
 
@@ -354,35 +387,25 @@ namespace ClForms.Elements
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
                 if(selectedIndex - segmentItems > 0)
                 {
-                    ErasePreviousSelectedBackground();
-                    selectedIndex -= segmentItems;
-                    if(selectedIndex < firstVisibleItemIndex)
+                    nextSelectedIndex = selectedIndex - segmentItems;
+                    if(nextSelectedIndex < firstVisibleItemIndex)
                     {
-                        firstVisibleItemIndex = Math.Max(0, firstVisibleItemIndex - segmentItems);
-                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                        nextFirstVisibleItemIndex = Math.Max(0, firstVisibleItemIndex - segmentItems);
                     }
-                    SetSelectedBackground();
-                    InvalidateVisual();
                 }
             }
 
             if (keyInfo.Key == ConsoleKey.Home)
             {
-                firstVisibleItemIndex = 0;
-                InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
-                selectedIndex = 0;
-                SetSelectedBackground();
-                InvalidateVisual();
+                nextFirstVisibleItemIndex = 0;
+                nextSelectedIndex = 0;
             }
 
             if (keyInfo.Key == ConsoleKey.End)
             {
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
-                firstVisibleItemIndex = Math.Max(0, Items.Count - itemsCount);
-                InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
-                selectedIndex = Items.Count - 1;
-                SetSelectedBackground();
-                InvalidateVisual();
+                nextFirstVisibleItemIndex = Math.Max(0, Items.Count - itemsCount);
+                nextSelectedIndex = Items.Count - 1;
             }
 
             if (keyInfo.Key == ConsoleKey.PageUp)
@@ -391,12 +414,8 @@ namespace ClForms.Elements
                 if (selectedIndex + itemsCount < Items.Count)
                 {
                     var currentDiff = selectedIndex - firstVisibleItemIndex;
-                    var newSelectedIndex = selectedIndex + itemsCount;
-                    firstVisibleItemIndex = Math.Min(newSelectedIndex - currentDiff, Items.Count - itemsCount);
-                    InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
-                    selectedIndex = newSelectedIndex;
-                    SetSelectedBackground();
-                    InvalidateVisual();
+                    nextSelectedIndex = selectedIndex + itemsCount;
+                    nextFirstVisibleItemIndex = Math.Min(nextSelectedIndex - currentDiff, Items.Count - itemsCount);
                 }
             }
 
@@ -406,13 +425,23 @@ namespace ClForms.Elements
                 if (selectedIndex - itemsCount >= 0)
                 {
                     var currentDiff = selectedIndex - firstVisibleItemIndex;
-                    var newSelectedIndex = selectedIndex - itemsCount;
-                    firstVisibleItemIndex = Math.Max(0, newSelectedIndex - currentDiff);
-                    InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
-                    selectedIndex = newSelectedIndex;
-                    SetSelectedBackground();
-                    InvalidateVisual();
+                    nextSelectedIndex = selectedIndex - itemsCount;
+                    nextFirstVisibleItemIndex = Math.Max(0, nextSelectedIndex - currentDiff);
                 }
+            }
+
+            if(previousSelectedIndex != nextSelectedIndex)
+            {
+                ErasePreviousSelectedBackground();
+                if (previousFirstVisibleItemIndex != nextFirstVisibleItemIndex)
+                {
+                    firstVisibleItemIndex = nextFirstVisibleItemIndex;
+                    InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                }
+                selectedIndex = nextSelectedIndex;
+                OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(previousSelectedIndex, nextSelectedIndex));
+                SetSelectedBackground();
+                InvalidateVisual();
             }
         }
 
@@ -807,6 +836,11 @@ namespace ClForms.Elements
         /// Occurs when the value of the <see cref="HeaderForeground" /> property changes
         /// </summary>
         public event EventHandler<PropertyChangedEventArgs<Color>> OnHeaderForegroundChanged;
+
+        /// <summary>
+        /// Occurs when the value of the <see cref="SelectedIndex" /> property changes
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs<int>> OnSelectedIndexChanged;
 
         #endregion
     }
