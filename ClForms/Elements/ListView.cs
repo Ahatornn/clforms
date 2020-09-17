@@ -28,9 +28,8 @@ namespace ClForms.Elements
         private Color headerForeground;
         private ScreenDrawingContext bufferedLinesContext;
         private ScreenDrawingContext bufferedContentContext;
-        private int firstVisibleItemIndex = 0;
         private int selectedIndex = -1;
-        private Rect selectedRect = Rect.Empty;
+        private SelectedRectDescription selectedRectDescription = new SelectedRectDescription();
         private int[] drawingColumnWidths;
         private int segmentHeight = 0;
 
@@ -77,7 +76,7 @@ namespace ClForms.Elements
         /// <summary>
         /// Gets the index of first visibled item 
         /// </summary>
-        public int FirstVisibledItemIndex => firstVisibleItemIndex;
+        public int FirstVisibledItemIndex { get; private set; } = 0;
 
         /// <summary>
         /// Gets the all visibled items
@@ -87,7 +86,7 @@ namespace ClForms.Elements
             get
             {
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1) * Columns;
-                return Items.Skip(firstVisibleItemIndex).Take(itemsCount);
+                return Items.Skip(FirstVisibledItemIndex).Take(itemsCount);
             }
         }
 
@@ -278,9 +277,9 @@ namespace ClForms.Elements
                     }
                     ErasePreviousSelectedBackground();
                     var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-                    if(!(value > firstVisibleItemIndex && value < firstVisibleItemIndex + segmentItems))
+                    if(!(value > FirstVisibledItemIndex && value < FirstVisibledItemIndex + segmentItems))
                     {
-                        var fittedColumnItems = value < firstVisibleItemIndex
+                        var fittedColumnItems = value < FirstVisibledItemIndex
                             ? segmentHeight
                             : segmentHeight * Columns;
                         var firstIndex = 0;
@@ -288,7 +287,7 @@ namespace ClForms.Elements
                         {
                             firstIndex += fittedColumnItems;
                         }
-                        firstVisibleItemIndex = firstIndex;
+                        FirstVisibledItemIndex = firstIndex;
                         InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
                     }
 
@@ -357,17 +356,17 @@ namespace ClForms.Elements
         {
             var previousSelectedIndex = selectedIndex;
             var nextSelectedIndex = selectedIndex;
-            var previousFirstVisibleItemIndex = firstVisibleItemIndex;
-            var nextFirstVisibleItemIndex = firstVisibleItemIndex;
+            var previousFirstVisibleItemIndex = FirstVisibledItemIndex;
+            var nextFirstVisibleItemIndex = FirstVisibledItemIndex;
 
             if (keyInfo.Key == ConsoleKey.DownArrow)
             {
                 if (Items.Count - 1 > selectedIndex)
                 {
                     var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1) * Columns;
-                    if ((selectedIndex + 1) - firstVisibleItemIndex > itemsCount)
+                    if ((selectedIndex + 1) - FirstVisibledItemIndex > itemsCount)
                     {
-                        nextFirstVisibleItemIndex = firstVisibleItemIndex + 1;
+                        nextFirstVisibleItemIndex = FirstVisibledItemIndex + 1;
                     }
 
                     nextSelectedIndex = selectedIndex + 1;
@@ -378,9 +377,9 @@ namespace ClForms.Elements
             {
                 if (selectedIndex > 0)
                 {
-                    if (selectedIndex - 1 < firstVisibleItemIndex)
+                    if (selectedIndex - 1 < FirstVisibledItemIndex)
                     {
-                        nextFirstVisibleItemIndex = firstVisibleItemIndex - 1;
+                        nextFirstVisibleItemIndex = FirstVisibledItemIndex - 1;
                     }
                     nextSelectedIndex = selectedIndex - 1;
                 }
@@ -389,12 +388,12 @@ namespace ClForms.Elements
             if (keyInfo.Key == ConsoleKey.RightArrow && Columns > 1)
             {
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-                if(firstVisibleItemIndex + (segmentItems * Columns) < Items.Count - 1)
+                if(FirstVisibledItemIndex + (segmentItems * Columns) < Items.Count - 1)
                 {
                     nextSelectedIndex = Math.Min(Items.Count - 1, selectedIndex + (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)));
-                    if(nextSelectedIndex - firstVisibleItemIndex > (segmentItems * Columns))
+                    if(nextSelectedIndex - FirstVisibledItemIndex >= (segmentItems * Columns))
                     {
-                        nextFirstVisibleItemIndex = firstVisibleItemIndex + segmentItems;
+                        nextFirstVisibleItemIndex = FirstVisibledItemIndex + segmentItems;
                     }
                 }
             }
@@ -402,12 +401,12 @@ namespace ClForms.Elements
             if (keyInfo.Key == ConsoleKey.LeftArrow && Columns > 1)
             {
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-                if(selectedIndex - segmentItems > 0)
+                if(selectedIndex - segmentItems >= 0)
                 {
                     nextSelectedIndex = selectedIndex - segmentItems;
-                    if(nextSelectedIndex < firstVisibleItemIndex)
+                    if(nextSelectedIndex < FirstVisibledItemIndex)
                     {
-                        nextFirstVisibleItemIndex = Math.Max(0, firstVisibleItemIndex - segmentItems);
+                        nextFirstVisibleItemIndex = Math.Max(0, FirstVisibledItemIndex - segmentItems);
                     }
                 }
             }
@@ -430,7 +429,7 @@ namespace ClForms.Elements
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
                 if (selectedIndex + itemsCount < Items.Count)
                 {
-                    var currentDiff = selectedIndex - firstVisibleItemIndex;
+                    var currentDiff = selectedIndex - FirstVisibledItemIndex;
                     nextSelectedIndex = selectedIndex + itemsCount;
                     nextFirstVisibleItemIndex = Math.Min(nextSelectedIndex - currentDiff, Items.Count - itemsCount);
                 }
@@ -441,7 +440,7 @@ namespace ClForms.Elements
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
                 if (selectedIndex - itemsCount >= 0)
                 {
-                    var currentDiff = selectedIndex - firstVisibleItemIndex;
+                    var currentDiff = selectedIndex - FirstVisibledItemIndex;
                     nextSelectedIndex = selectedIndex - itemsCount;
                     nextFirstVisibleItemIndex = Math.Max(0, nextSelectedIndex - currentDiff);
                 }
@@ -452,7 +451,7 @@ namespace ClForms.Elements
                 ErasePreviousSelectedBackground();
                 if (previousFirstVisibleItemIndex != nextFirstVisibleItemIndex)
                 {
-                    firstVisibleItemIndex = nextFirstVisibleItemIndex;
+                    FirstVisibledItemIndex = nextFirstVisibleItemIndex;
                     InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
                 }
                 selectedIndex = nextSelectedIndex;
@@ -486,7 +485,7 @@ namespace ClForms.Elements
         {
             if (selectedIndex == -1 && Items.Any())
             {
-                selectedIndex = firstVisibleItemIndex;
+                selectedIndex = FirstVisibledItemIndex;
             }
 
             if (selectedIndex == -1)
@@ -495,25 +494,26 @@ namespace ClForms.Elements
             }
 
             var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-            var columnIndex = (selectedIndex - firstVisibleItemIndex) / segmentItems;
+            var columnIndex = (selectedIndex - FirstVisibledItemIndex) / segmentItems;
             var leftIndent = drawingColumnWidths.Take(columnIndex).Sum() + (columnIndex == 0 ? 1 : 2);
 
-            selectedRect = new Rect(leftIndent, 
-                (ColumnHeaders.Any() ? 2 : 1) + (selectedIndex - firstVisibleItemIndex - segmentItems * columnIndex), 
+            selectedRectDescription.SelectedRect = new Rect(leftIndent, 
+                (ColumnHeaders.Any() ? 2 : 1) + (selectedIndex - FirstVisibledItemIndex - segmentItems * columnIndex), 
                 drawingColumnWidths[columnIndex] - (columnIndex == 0 ? 0 : 1), 
                 1);
-
-            bufferedContentContext.SetBackgroundValues(selectedRect, FocusBackground);
-            bufferedContentContext.SetForegroundValues(selectedRect, FocusForeground);
+            selectedRectDescription.Background = bufferedContentContext.Background[selectedRectDescription.SelectedRect.Location];
+            selectedRectDescription.Foreground = bufferedContentContext.Foreground[selectedRectDescription.SelectedRect.Location];
+            bufferedContentContext.SetBackgroundValues(selectedRectDescription.SelectedRect, FocusBackground);
+            bufferedContentContext.SetForegroundValues(selectedRectDescription.SelectedRect, FocusForeground);
         }
 
         private void ErasePreviousSelectedBackground()
         {
-            if (selectedRect != Rect.Empty)
+            if (selectedRectDescription.SelectedRect != Rect.Empty)
             {
-                bufferedContentContext.SetBackgroundValues(selectedRect, Color.NotSet);
-                bufferedContentContext.SetForegroundValues(selectedRect, Color.NotSet);
-                selectedRect = Rect.Empty;
+                bufferedContentContext.SetBackgroundValues(selectedRectDescription.SelectedRect, selectedRectDescription.Background);
+                bufferedContentContext.SetForegroundValues(selectedRectDescription.SelectedRect, selectedRectDescription.Foreground);
+                selectedRectDescription.SelectedRect = Rect.Empty;
             }
         }
 
@@ -729,11 +729,15 @@ namespace ClForms.Elements
                 }
 
                 var headerInfos = GetHeaderInfo(actualSegmentWidth).ToList();
-                var drawItems = Items.Skip(column * (segmentHeight - 2) + firstVisibleItemIndex).Take(segmentHeight - 2);
+                var drawItems = Items.Skip(column * (segmentHeight - 2) + FirstVisibledItemIndex).Take(segmentHeight - 2);
                 var topIndent = 2;
+                
                 foreach (var item in drawItems)
                 {
                     var allHeaderWidth = 0;
+                    var eventErgs = new ListBoxItemStyleEventArgs<T>(item, Color.NotSet, Color.NotSet);
+                    OnStyleItem?.Invoke(this, eventErgs);
+
                     for (var headerInfoIndex = 0; headerInfoIndex < headerInfos.Count; headerInfoIndex++)
                     {
                         var drawingText = ColumnHeaders[headerInfoIndex].DisplayMember != null
@@ -744,11 +748,11 @@ namespace ClForms.Elements
                         context.SetCursorPos(segmentIndent + allHeaderWidth + (headerInfoIndex == 0 ? 0 : 1), topIndent);
                         if (drawingText.Length > cropDrawingText.Length)
                         {
-                            context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", Color.NotSet, Color.NotSet);
+                            context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", eventErgs.Background, eventErgs.Foreground);
                         }
                         else
                         {
-                            context.DrawText(TextHelper.GetTextWithAlignment(cropDrawingText, headerInfos[headerInfoIndex] - 1, ColumnHeaders[headerInfoIndex].Alignment), Color.NotSet, Color.NotSet);
+                            context.DrawText(TextHelper.GetTextWithAlignment(cropDrawingText, headerInfos[headerInfoIndex] - 1, ColumnHeaders[headerInfoIndex].Alignment), eventErgs.Background, eventErgs.Foreground);
                         }
 
                         allHeaderWidth += headerInfos[headerInfoIndex];
@@ -785,20 +789,22 @@ namespace ClForms.Elements
                     actualSegmentWidth++;
                 }
 
-                var drawItems = Items.Skip(column * (segmentHeight - 1) + firstVisibleItemIndex).Take(segmentHeight - 1);
+                var drawItems = Items.Skip(column * (segmentHeight - 1) + FirstVisibledItemIndex).Take(segmentHeight - 1);
                 var topIndent = 1;
                 foreach (var item in drawItems)
                 {
                     context.SetCursorPos(segmentIndent, topIndent);
                     var drawingText = item?.ToString() ?? string.Empty;
                     var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, actualSegmentWidth - (column == 0 ? 0 : 1)));
+                    var eventErgs = new ListBoxItemStyleEventArgs<T>(item, Color.NotSet, Color.NotSet);
+                    OnStyleItem?.Invoke(this, eventErgs);
                     if (drawingText.Length > cropDrawingText.Length)
                     {
-                        context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", Color.NotSet, Color.NotSet);
+                        context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", eventErgs.Background, eventErgs.Foreground);
                     }
                     else
                     {
-                        context.DrawText(cropDrawingText, Color.NotSet, Color.NotSet);
+                        context.DrawText(cropDrawingText, eventErgs.Background, eventErgs.Foreground);
                     }
                     topIndent++;
                 }
@@ -859,7 +865,19 @@ namespace ClForms.Elements
         /// </summary>
         public event EventHandler<PropertyChangedEventArgs<int>> OnSelectedIndexChanged;
 
+        /// <summary>
+        /// Occurs when the any items will draw
+        /// </summary>
+        public event EventHandler<ListBoxItemStyleEventArgs<T>> OnStyleItem;
+
         #endregion
+
+        private struct SelectedRectDescription
+        {
+            public Rect SelectedRect { get; set; }
+            public Color Background { get; set; }
+            public Color Foreground { get; set; }
+        }
     }
 
     /// <summary>

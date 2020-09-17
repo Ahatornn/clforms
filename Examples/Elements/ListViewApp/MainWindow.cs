@@ -28,11 +28,40 @@ namespace ListViewApp
             listView1.ColumnHeaders.Add("Date", x => x.DateTime.ToString("dd.MM.yy"), 10, TextAlignment.Center);
             listView1.ColumnHeaders.Add("Time", x => x.DateTime.ToString("HH:mm"), 6, TextAlignment.Right);
             listView1.Items.AddRange(items);
+            listView1.OnSelectedIndexChanged += SelectedIndexChanged;
+            listView1.OnStyleItem += ListView2StyleItem;
 
             listView2.Text = $" {path} ";
             listView2.SummaryText = "This is a summary of the right panel";
             listView2.Columns = 4;
             listView2.Items.AddRange(items);
+            listView2.OnStyleItem += ListView2StyleItem;
+            listView2.OnSelectedIndexChanged += SelectedIndexChanged;
+        }
+
+        private void SelectedIndexChanged(object sender, ClForms.Common.EventArgs.PropertyChangedEventArgs<int> e)
+        {
+            var targetList = sender as ListView<DiskItem>;
+            if(e.NewValue == -1)
+            {
+                targetList.SummaryText = string.Empty;
+            }
+            else
+            {
+                targetList.SummaryText = targetList.Items[e.NewValue].Name;
+            }
+        }
+
+        private void ListView2StyleItem(object sender, ClForms.Common.EventArgs.ListBoxItemStyleEventArgs<DiskItem> e)
+        {
+            if (e.Item.IsFolder)
+            {
+                e.Foreground = Color.Yellow;
+            }
+            else
+            {
+                e.Foreground = Color.Gray;
+            }
         }
 
         private IEnumerable<DiskItem> GetDiskItems(string path)
@@ -55,6 +84,7 @@ namespace ListViewApp
                     Name = Path.GetFileName(file),
                     IsFolder = false,
                     DateTime = File.GetCreationTime(file),
+                    Size = (int)new FileInfo(file).Length,
                 };
             }
         }

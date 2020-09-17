@@ -30,7 +30,7 @@ namespace ListViewApp
             };
             grid.AddContent(listView1);
 
-            listView2 = new ListView
+            listView2 = new ListView<DiskItem>
             {
                 Background = Color.Blue,
                 BorderColor = Color.White,
@@ -43,6 +43,6 @@ namespace ListViewApp
         }
 
         private ListView<DiskItem> listView1;
-        private ListView listView2;
+        private ListView<DiskItem> listView2;
     }
 }
