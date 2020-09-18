@@ -424,7 +424,7 @@ namespace ClForms.Elements
                 nextSelectedIndex = Items.Count - 1;
             }
 
-            if (keyInfo.Key == ConsoleKey.PageUp)
+            if (keyInfo.Key == ConsoleKey.PageDown)
             {
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
                 if (selectedIndex + itemsCount < Items.Count)
@@ -435,7 +435,7 @@ namespace ClForms.Elements
                 }
             }
 
-            if (keyInfo.Key == ConsoleKey.PageDown)
+            if (keyInfo.Key == ConsoleKey.PageUp)
             {
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
                 if (selectedIndex - itemsCount >= 0)
@@ -458,6 +458,11 @@ namespace ClForms.Elements
                 OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(previousSelectedIndex, nextSelectedIndex));
                 SetSelectedBackground();
                 InvalidateVisual();
+            }
+
+            if((keyInfo.Key == ConsoleKey.Spacebar || keyInfo.Key == ConsoleKey.Enter) && selectedIndex > -1)
+            {
+                OnItemClick?.Invoke(this, Items[selectedIndex]);
             }
         }
 
@@ -731,30 +736,40 @@ namespace ClForms.Elements
                 var headerInfos = GetHeaderInfo(actualSegmentWidth).ToList();
                 var drawItems = Items.Skip(column * (segmentHeight - 2) + FirstVisibledItemIndex).Take(segmentHeight - 2);
                 var topIndent = 2;
-                
+
                 foreach (var item in drawItems)
                 {
                     var allHeaderWidth = 0;
-                    var eventErgs = new ListBoxItemStyleEventArgs<T>(item, Color.NotSet, Color.NotSet);
-                    OnStyleItem?.Invoke(this, eventErgs);
+                    var styleEventArgs = new ListBoxItemStyleEventArgs<T>(item, Color.NotSet, Color.NotSet);
+                    OnItemDraw?.Invoke(this, styleEventArgs);
 
                     for (var headerInfoIndex = 0; headerInfoIndex < headerInfos.Count; headerInfoIndex++)
                     {
-                        var drawingText = ColumnHeaders[headerInfoIndex].DisplayMember != null
-                            ? ColumnHeaders[headerInfoIndex].DisplayMember(item)
-                            : item.ToString() ?? string.Empty;
-                        var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, headerInfos[headerInfoIndex] - 1));
+                        var leftIndent = segmentIndent + allHeaderWidth + (headerInfoIndex == 0 ? 0 : 1);
+                        context.SetCursorPos(leftIndent, topIndent);
 
-                        context.SetCursorPos(segmentIndent + allHeaderWidth + (headerInfoIndex == 0 ? 0 : 1), topIndent);
-                        if (drawingText.Length > cropDrawingText.Length)
+                        var drawingEventArgs = new ListBoxItemDrawingEventArgs<T>(item, 
+                            styleEventArgs.Background, 
+                            styleEventArgs.Foreground,
+                            new Rect(leftIndent, topIndent, headerInfos[headerInfoIndex] - 1, 1), 
+                            ColumnHeaders[headerInfoIndex], 
+                            context);
+                        OnItemDrawing?.Invoke(this, drawingEventArgs);
+                        if (!drawingEventArgs.Handled)
                         {
-                            context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", eventErgs.Background, eventErgs.Foreground);
+                            var drawingText = ColumnHeaders[headerInfoIndex].DisplayMember != null
+                                ? ColumnHeaders[headerInfoIndex].DisplayMember(item)
+                                : item.ToString() ?? string.Empty;
+                            var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, headerInfos[headerInfoIndex] - 1));
+                            if (drawingText.Length > cropDrawingText.Length)
+                            {
+                                context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", styleEventArgs.Background, styleEventArgs.Foreground);
+                            }
+                            else
+                            {
+                                context.DrawText(TextHelper.GetTextWithAlignment(cropDrawingText, headerInfos[headerInfoIndex] - 1, ColumnHeaders[headerInfoIndex].Alignment), styleEventArgs.Background, styleEventArgs.Foreground);
+                            }
                         }
-                        else
-                        {
-                            context.DrawText(TextHelper.GetTextWithAlignment(cropDrawingText, headerInfos[headerInfoIndex] - 1, ColumnHeaders[headerInfoIndex].Alignment), eventErgs.Background, eventErgs.Foreground);
-                        }
-
                         allHeaderWidth += headerInfos[headerInfoIndex];
                     }
 
@@ -794,18 +809,30 @@ namespace ClForms.Elements
                 foreach (var item in drawItems)
                 {
                     context.SetCursorPos(segmentIndent, topIndent);
-                    var drawingText = item?.ToString() ?? string.Empty;
-                    var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, actualSegmentWidth - (column == 0 ? 0 : 1)));
-                    var eventErgs = new ListBoxItemStyleEventArgs<T>(item, Color.NotSet, Color.NotSet);
-                    OnStyleItem?.Invoke(this, eventErgs);
-                    if (drawingText.Length > cropDrawingText.Length)
+                    var styleEventArgs = new ListBoxItemStyleEventArgs<T>(item, Color.NotSet, Color.NotSet);
+                    OnItemDraw?.Invoke(this, styleEventArgs);
+
+                    var drawingEventArgs = new ListBoxItemDrawingEventArgs<T>(item,
+                            styleEventArgs.Background,
+                            styleEventArgs.Foreground,
+                            new Rect(segmentIndent, topIndent, actualSegmentWidth - (column == 0 ? 0 : 1), 1),
+                            null,
+                            context);
+                    OnItemDrawing?.Invoke(this, drawingEventArgs);
+                    if (!drawingEventArgs.Handled)
                     {
-                        context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", eventErgs.Background, eventErgs.Foreground);
+                        var drawingText = item?.ToString() ?? string.Empty;
+                        var cropDrawingText = drawingText.Substring(0, Math.Min(drawingText.Length, actualSegmentWidth - (column == 0 ? 0 : 1)));
+                        if (drawingText.Length > cropDrawingText.Length)
+                        {
+                            context.DrawText(cropDrawingText.Substring(0, cropDrawingText.Length - 1) + "…", styleEventArgs.Background, styleEventArgs.Foreground);
+                        }
+                        else
+                        {
+                            context.DrawText(cropDrawingText, styleEventArgs.Background, styleEventArgs.Foreground);
+                        }
                     }
-                    else
-                    {
-                        context.DrawText(cropDrawingText, eventErgs.Background, eventErgs.Foreground);
-                    }
+                    
                     topIndent++;
                 }
 
@@ -868,7 +895,17 @@ namespace ClForms.Elements
         /// <summary>
         /// Occurs when the any items will draw
         /// </summary>
-        public event EventHandler<ListBoxItemStyleEventArgs<T>> OnStyleItem;
+        public event EventHandler<ListBoxItemStyleEventArgs<T>> OnItemDraw;
+
+        /// <summary>
+        /// Occurs when the any items drawing
+        /// </summary>
+        public event EventHandler<ListBoxItemDrawingEventArgs<T>> OnItemDrawing;
+
+        /// <summary>
+        /// Occurs when clicked on selected item
+        /// </summary>
+        public event EventHandler<T> OnItemClick;
 
         #endregion
 

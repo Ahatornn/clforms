@@ -5,7 +5,7 @@ using ClForms.Themes;
 
 namespace ClForms.Core.Contexts
 {
-    internal sealed class ScreenDrawingContext: IDrawingContextDescriptor
+    internal sealed class ScreenDrawingContext: IDrawingContextDescriptor, IPaintContext
     {
         private readonly ArrayDevice<Color> background;
         private readonly ArrayDevice<Color> foreground;
@@ -23,12 +23,16 @@ namespace ClForms.Core.Contexts
             cursorPosition = Point.Empty;
         }
 
+        /// <see cref="IDrawingContextDescriptor.Background"/>
         public IGraphicsDevice<Color> Background => background;
 
+        /// <see cref="IDrawingContextDescriptor.Foreground"/>
         public IGraphicsDevice<Color> Foreground => foreground;
 
+        /// <see cref="IDrawingContextDescriptor.Chars"/>
         public IGraphicsDevice<char> Chars => chars;
 
+        /// <see cref="IDrawingContextDescriptor.ContextBounds"/>
         public Rect ContextBounds { get; }
 
         internal void Release(Color backgroundColor, Color foregroundColor)
@@ -38,7 +42,8 @@ namespace ClForms.Core.Contexts
             chars.Release('\0');
         }
 
-        internal void SetCursorPos(Point point)
+        /// <see cref="IPaintContext.SetCursorPos(Point)"/>
+        public void SetCursorPos(Point point)
         {
             if (!renderArea.Contains(point))
             {
@@ -47,15 +52,19 @@ namespace ClForms.Core.Contexts
             cursorPosition = point;
         }
 
-        internal void SetCursorPos(int x, int y) => SetCursorPos(new Point(x, y));
+        /// <see cref="IPaintContext.SetCursorPos(int, int)"/>
+        public void SetCursorPos(int x, int y) => SetCursorPos(new Point(x, y));
 
-        internal ContextColorPoint GetColorPoint(int col, int row)
+        /// <see cref="IPaintContext.GetColorPoint(int, int)"/>
+        public ContextColorPoint GetColorPoint(int col, int row)
             => new ContextColorPoint(background[col, row], foreground[col, row]);
 
-        internal void DrawText(char @char, Color backgroundColor, Color foregroundColor)
+        /// <see cref="IPaintContext.DrawText(char, Color, Color)"/>
+        public void DrawText(char @char, Color backgroundColor, Color foregroundColor)
             => DrawText(@char.ToString(), backgroundColor, foregroundColor);
 
-        internal void DrawText(string text, Color backgroundColor, Color foregroundColor)
+        /// <see cref="IPaintContext.DrawText(string, Color, Color)"/>
+        public void DrawText(string text, Color backgroundColor, Color foregroundColor)
         {
             var right = Math.Min(cursorPosition.X + text.Length, renderArea.Width);
             for (var i = cursorPosition.X; i < right; i++)
@@ -67,10 +76,12 @@ namespace ClForms.Core.Contexts
             cursorPosition = new Point(right, cursorPosition.Y);
         }
 
-        internal void DrawText(char @char, Color foregroundColor)
+        /// <see cref="IPaintContext.DrawText(char, Color)"/>
+        public void DrawText(char @char, Color foregroundColor)
             => DrawText(@char.ToString(), foregroundColor);
 
-        internal void DrawText(string text, Color foregroundColor)
+        /// <see cref="IPaintContext.DrawText(string, Color)"/>
+        public void DrawText(string text, Color foregroundColor)
         {
             var right = Math.Min(cursorPosition.X + text.Length, renderArea.Width);
             for (var i = cursorPosition.X; i < right; i++)
@@ -81,6 +92,21 @@ namespace ClForms.Core.Contexts
             cursorPosition = new Point(right, cursorPosition.Y);
         }
 
+        /// <see cref="IPaintContext.DrawText(string)"/>
+        public void DrawText(string text)
+        {
+            var right = Math.Min(cursorPosition.X + text.Length, renderArea.Width);
+            for (var i = cursorPosition.X; i < right; i++)
+            {
+                chars[i, cursorPosition.Y] = text[i - cursorPosition.X];
+            }
+            cursorPosition = new Point(right, cursorPosition.Y);
+        }
+
+        /// <see cref="IPaintContext.DrawText(char)"/>
+        public void DrawText(char @char) => DrawText(@char.ToString());
+
+        /// <see cref="IDrawingContextDescriptor.SetValues(int, int, Color, Color, char, bool)"/>
         public void SetValues(int col, int row, Color backColor, Color foreColor, char @char, bool ignoreEmpty)
         {
             background[col, row] = ignoreEmpty && backColor == Color.NotSet ? background[col, row] : backColor;
@@ -88,9 +114,9 @@ namespace ClForms.Core.Contexts
             chars[col, row] = ignoreEmpty && @char == '\0' ? chars[col, row] : @char;
         }
 
-        public void SetBackgroundValues(Rect rect, Color backColor) => SetValuesInternal(background, rect, backColor);
+        internal void SetBackgroundValues(Rect rect, Color backColor) => SetValuesInternal(background, rect, backColor);
 
-        public void SetForegroundValues(Rect rect, Color foreColor) => SetValuesInternal(foreground, rect, foreColor);
+        internal void SetForegroundValues(Rect rect, Color foreColor) => SetValuesInternal(foreground, rect, foreColor);
 
         private void SetValuesInternal(ArrayDevice<Color> device, Rect rect, Color value)
         {

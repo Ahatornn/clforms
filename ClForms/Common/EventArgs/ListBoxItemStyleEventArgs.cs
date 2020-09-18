@@ -3,7 +3,7 @@
 namespace ClForms.Common.EventArgs
 {
     /// <summary>
-    /// Provides data for an event of drawing item
+    /// Provides data for an event of draw item
     /// </summary>
     public class ListBoxItemStyleEventArgs<T>: System.EventArgs
     {

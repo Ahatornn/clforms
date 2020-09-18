@@ -8,7 +8,7 @@ namespace ListViewApp
     {
         public string Path { get; set; }
         public string Name { get; set; }
-        public int Size { get; set; }
+        public long Size { get; set; }
         public DateTime DateTime { get; set; }
         public bool IsFolder { get; set; }
 
