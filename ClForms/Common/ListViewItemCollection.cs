@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using ClForms.Elements;
 
 namespace ClForms.Common
@@ -7,7 +8,6 @@ namespace ClForms.Common
     /// <summary>
     /// Represents the collection of items in a <see cref="ListView"/> control
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class ListViewItemCollection<T>: IList<T>
     {
         private readonly ListView<T> owner;
@@ -29,21 +29,22 @@ namespace ClForms.Common
         public void Add(T item)
         {
             items.Add(item);
-            owner.InvalidateVisualIfItemVisible(Count);
+            owner.InvalidateVisualIfItemVisible(Count - 1, 1, ListViewItemCollectionAction.Add);
         }
 
         /// <inheritdoc cref="List{T}.AddRange"/>
         public void AddRange(IEnumerable<T> item)
         {
+            var count = item.Count();
             items.AddRange(item);
-            owner.InvalidateVisualIfItemVisible(Count);
+            owner.InvalidateVisualIfItemVisible(Count - count, count, ListViewItemCollectionAction.Add);
         }
 
         /// <inheritdoc />
         public void Clear()
         {
             items.Clear();
-            owner.InvalidateVisual();
+            owner.ClearItemsInternal();
         }
 
         /// <inheritdoc />
@@ -55,7 +56,7 @@ namespace ClForms.Common
         /// <inheritdoc />
         public bool Remove(T item)
         {
-            owner.InvalidateVisualIfItemVisible(IndexOf(item));
+            owner.InvalidateVisualIfItemVisible(IndexOf(item), 1, ListViewItemCollectionAction.Remove);
             return items.Remove(item);
         }
 
@@ -72,14 +73,14 @@ namespace ClForms.Common
         public void Insert(int index, T item)
         {
             items.Insert(index, item);
-            owner.InvalidateVisualIfItemVisible(index);
+            owner.InvalidateVisualIfItemVisible(index, 1, ListViewItemCollectionAction.Add);
         }
 
         /// <inheritdoc />
         public void RemoveAt(int index)
         {
             items.RemoveAt(index);
-            owner.InvalidateVisualIfItemVisible(index);
+            owner.InvalidateVisualIfItemVisible(index, 1, ListViewItemCollectionAction.Remove);
         }
 
         /// <inheritdoc />
@@ -88,5 +89,11 @@ namespace ClForms.Common
             get => items[index];
             set => items[index] = value;
         }
+    }
+
+    internal enum ListViewItemCollectionAction
+    {
+        Add,
+        Remove,
     }
 }

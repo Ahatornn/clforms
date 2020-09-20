@@ -24,6 +24,7 @@ namespace ClForms.Elements
         private bool showGridLine;
         private GridSpanBorderChars gridBorderChars;
         private string summaryText;
+        private bool showSummary;
         private int columns;
         private Color headerForeground;
         private ScreenDrawingContext bufferedLinesContext;
@@ -32,6 +33,7 @@ namespace ClForms.Elements
         private SelectedRectDescription selectedRectDescription = new SelectedRectDescription();
         private int[] drawingColumnWidths;
         private int segmentHeight = 0;
+        private bool wasConstructed = false;
 
         /// <summary>
         /// Initialize a new instance <see cref="ListView"/>
@@ -41,6 +43,8 @@ namespace ClForms.Elements
             Background = Color.NotSet;
             Foreground = Color.NotSet;
             headerForeground = Color.Yellow;
+            summaryText = string.Empty;
+            showSummary = false;
             AutoSize = false;
             showGridLine = true;
             columns = 1;
@@ -145,6 +149,26 @@ namespace ClForms.Elements
                 {
                     OnSummaryTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(summaryText, value));
                     summaryText = value;
+                    InvalidateVisual();
+                }
+            }
+        }
+
+        #endregion
+        #region ShowSummary
+
+        /// <summary>
+        /// Gets or sets a value indicating whether show summary area for <see cref="SummaryText"/>
+        /// </summary>
+        public bool ShowSummary
+        {
+            get => showSummary;
+            set
+            {
+                if(showSummary != value)
+                {
+                    OnShowSummaryChanged?.Invoke(this, new PropertyChangedEventArgs<bool>(showSummary, value));
+                    showSummary = value;
                     InvalidateVisual();
                 }
             }
@@ -275,26 +299,30 @@ namespace ClForms.Elements
                     {
                         throw new IndexOutOfRangeException();
                     }
-                    ErasePreviousSelectedBackground();
-                    var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-                    if(!(value > FirstVisibledItemIndex && value < FirstVisibledItemIndex + segmentItems))
-                    {
-                        var fittedColumnItems = value < FirstVisibledItemIndex
-                            ? segmentHeight
-                            : segmentHeight * Columns;
-                        var firstIndex = 0;
-                        while(!(value > firstIndex && value < firstIndex + fittedColumnItems))
-                        {
-                            firstIndex += fittedColumnItems;
-                        }
-                        FirstVisibledItemIndex = firstIndex;
-                        InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
-                    }
 
                     OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(selectedIndex, value));
-                    SelectedIndex = value;
-                    SetSelectedBackground();
-                    InvalidateVisual();
+                    selectedIndex = value;
+                    
+                    if (wasConstructed)
+                    {
+                        ErasePreviousSelectedBackground();
+                        var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
+                        if (!(value > FirstVisibledItemIndex && value < FirstVisibledItemIndex + segmentItems))
+                        {
+                            var fittedColumnItems = value < FirstVisibledItemIndex
+                                ? segmentHeight
+                                : segmentHeight * Columns;
+                            var firstIndex = 0;
+                            while (!(value >= firstIndex && value <= firstIndex + fittedColumnItems))
+                            {
+                                firstIndex += fittedColumnItems;
+                            }
+                            FirstVisibledItemIndex = firstIndex;
+                            InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+                        }
+                        SetSelectedBackground();
+                        InvalidateVisual();
+                    }
                 }
             }
         }
@@ -320,7 +348,12 @@ namespace ClForms.Elements
             }
 
             InvalidateBufferedContentContext(calculatedRect);
+            if(selectedIndex > -1 && IsFocus)
+            {
+                SetSelectedBackground();
+            }
             base.Arrange(calculatedRect, reduceMargin);
+            wasConstructed = true;
         }
 
         /// <inheritdoc cref="Control.OnRender"/>
@@ -336,16 +369,16 @@ namespace ClForms.Elements
             if (showGridLine)
             {
                 groupBase.OnRender(context);
-                ((IDrawingContextDescriptor) context).MergeWith(Point.Empty, bufferedLinesContext, true);
+                ((IDrawingContextDescriptor)context).MergeWith(Point.Empty, bufferedLinesContext, true);
             }
 
-            if (!string.IsNullOrWhiteSpace(SummaryText))
+            if (showSummary)
             {
                 context.SetCursorPos(1, context.ContextBounds.Height - 2);
                 context.DrawText(SummaryText.Substring(0, Math.Min(SummaryText.Length, context.ContextBounds.Width - 2)), Background, Foreground);
             }
 
-            ((IDrawingContextDescriptor) context).MergeWith(Point.Empty, bufferedContentContext, true);
+            ((IDrawingContextDescriptor)context).MergeWith(Point.Empty, bufferedContentContext, true);
         }
 
         /// <inheritdoc cref="IElementStyle{T}.SetStyle"/>
@@ -354,6 +387,10 @@ namespace ClForms.Elements
         /// <inheritdoc cref="BaseFocusableControl.InputActionInternal"/>
         protected override void InputActionInternal(ConsoleKeyInfo keyInfo)
         {
+            if (Items.Count == 0)
+            {
+                return;
+            }
             var previousSelectedIndex = selectedIndex;
             var nextSelectedIndex = selectedIndex;
             var previousFirstVisibleItemIndex = FirstVisibledItemIndex;
@@ -383,12 +420,20 @@ namespace ClForms.Elements
                     }
                     nextSelectedIndex = selectedIndex - 1;
                 }
+                else
+                {
+                    nextSelectedIndex = FirstVisibledItemIndex;
+                }
             }
 
             if (keyInfo.Key == ConsoleKey.RightArrow && Columns > 1)
             {
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-                if(FirstVisibledItemIndex + (segmentItems * Columns) < Items.Count - 1)
+                if(selectedIndex == -1)
+                {
+                    nextSelectedIndex = FirstVisibledItemIndex;
+                }
+                else if(FirstVisibledItemIndex + (segmentItems * Columns) < Items.Count - 1)
                 {
                     nextSelectedIndex = Math.Min(Items.Count - 1, selectedIndex + (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)));
                     if(nextSelectedIndex - FirstVisibledItemIndex >= (segmentItems * Columns))
@@ -401,7 +446,11 @@ namespace ClForms.Elements
             if (keyInfo.Key == ConsoleKey.LeftArrow && Columns > 1)
             {
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-                if(selectedIndex - segmentItems >= 0)
+                if(selectedIndex == -1)
+                {
+                    nextSelectedIndex = FirstVisibledItemIndex;
+                }
+                else if(selectedIndex - segmentItems >= 0)
                 {
                     nextSelectedIndex = selectedIndex - segmentItems;
                     if(nextSelectedIndex < FirstVisibledItemIndex)
@@ -427,7 +476,11 @@ namespace ClForms.Elements
             if (keyInfo.Key == ConsoleKey.PageDown)
             {
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
-                if (selectedIndex + itemsCount < Items.Count)
+                if (selectedIndex == -1)
+                {
+                    nextSelectedIndex = FirstVisibledItemIndex;
+                }
+                else if (selectedIndex + itemsCount < Items.Count)
                 {
                     var currentDiff = selectedIndex - FirstVisibledItemIndex;
                     nextSelectedIndex = selectedIndex + itemsCount;
@@ -438,7 +491,11 @@ namespace ClForms.Elements
             if (keyInfo.Key == ConsoleKey.PageUp)
             {
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
-                if (selectedIndex - itemsCount >= 0)
+                if(selectedIndex == -1)
+                {
+                    nextSelectedIndex = FirstVisibledItemIndex;
+                }
+                else if (selectedIndex - itemsCount >= 0)
                 {
                     var currentDiff = selectedIndex - FirstVisibledItemIndex;
                     nextSelectedIndex = selectedIndex - itemsCount;
@@ -466,13 +523,58 @@ namespace ClForms.Elements
             }
         }
 
-        internal void InvalidateVisualIfItemVisible(int index) =>
-            /*
-            *
-            * Надо тут расчитать, нужно ли перерендрить сетку, элементы и прочее когда AED операции идут
-            *
-            */
+        internal void InvalidateVisualIfItemVisible(int index, int count, ListViewItemCollectionAction action)
+        {
+            if (!wasConstructed)
+            {
+                return;
+            }
+
+            var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
+            if (index > FirstVisibledItemIndex + itemsCount)
+            {
+                return;
+            }
+            var oldSelectedIndex = selectedIndex;
+            var newSelectedIndex = selectedIndex;
+
+            if (index < FirstVisibledItemIndex)
+            {
+                FirstVisibledItemIndex += count * (action == ListViewItemCollectionAction.Add ? 1 : -1);
+                if(selectedIndex > -1)
+                {
+                    newSelectedIndex += count * (action == ListViewItemCollectionAction.Add ? 1 : -1);
+                }
+            }
+            else
+            {
+                if (selectedIndex > index)
+                {
+                    ErasePreviousSelectedBackground();
+                    if(action == ListViewItemCollectionAction.Remove && selectedIndex <= index + count)
+                    {
+                        newSelectedIndex = -1;
+                    }
+                    else
+                    {
+                        newSelectedIndex += count * (action == ListViewItemCollectionAction.Add ? 1 : -1);
+                    }
+                }
+                if(newSelectedIndex > -1 && newSelectedIndex - itemsCount > FirstVisibledItemIndex)
+                {
+                    FirstVisibledItemIndex = newSelectedIndex - itemsCount;
+                }
+                InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+            }
+
+            if (oldSelectedIndex != newSelectedIndex)
+            {
+                selectedIndex = newSelectedIndex;
+                OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(oldSelectedIndex, newSelectedIndex));
+            }
+            SetSelectedBackground();
             InvalidateVisual();
+        }
 
         private void InternalFocusChanged(object sender, PropertyChangedEventArgs<bool> e)
         {
@@ -488,11 +590,6 @@ namespace ClForms.Elements
 
         private void SetSelectedBackground()
         {
-            if (selectedIndex == -1 && Items.Any())
-            {
-                selectedIndex = FirstVisibledItemIndex;
-            }
-
             if (selectedIndex == -1)
             {
                 return;
@@ -520,6 +617,23 @@ namespace ClForms.Elements
                 bufferedContentContext.SetForegroundValues(selectedRectDescription.SelectedRect, selectedRectDescription.Foreground);
                 selectedRectDescription.SelectedRect = Rect.Empty;
             }
+        }
+
+        internal void ClearItemsInternal()
+        {
+            if (wasConstructed)
+            {
+                ErasePreviousSelectedBackground();
+                FirstVisibledItemIndex = 0;
+                InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
+            }
+
+            if (selectedIndex != -1)
+            {
+                OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(selectedIndex, -1));
+            }
+            selectedIndex = -1;
+            InvalidateVisual();
         }
 
         #region Drawing
@@ -602,7 +716,7 @@ namespace ClForms.Elements
         {
             var drawingWidth = context.ContextBounds.Width - (showGridLine ? 2 : 0);
             var segmentResidue = drawingWidth % columns;
-            segmentHeight = context.ContextBounds.Height - (!string.IsNullOrWhiteSpace(SummaryText) ? 3 : 1);
+            segmentHeight = context.ContextBounds.Height - (showSummary ? 3 : 1);
 
             var segmentWidth = drawingWidth / columns;
             if (segmentWidth < 1)
@@ -610,7 +724,7 @@ namespace ClForms.Elements
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(SummaryText))
+            if (showSummary)
             {
                 context.SetCursorPos(0, context.ContextBounds.Height - 3);
                 var bottomStr = new StringBuilder(gridBorderChars.LeftInner +
@@ -683,9 +797,10 @@ namespace ClForms.Elements
                             ? gridBorderChars.TopInner
                             : rowIndex != segmentHeight
                                 ? gridBorderChars.VerticalInner
-                                : string.IsNullOrWhiteSpace(summaryText)
-                                    ? gridBorderChars.BottomInner
-                                    : gridBorderChars.CrossSpanBottomInner, BorderColor);
+                                : showSummary
+                                    ? gridBorderChars.CrossSpanBottomInner
+                                    : gridBorderChars.BottomInner, 
+                            BorderColor);
                     }
 
                     if (rowIndex == segmentHeight)
@@ -698,9 +813,10 @@ namespace ClForms.Elements
                                 continue;
                             }
                             context.SetCursorPos(segmentIndent + headerInfos[headerIndex] + headerIndent, rowIndex);
-                            context.DrawText(string.IsNullOrWhiteSpace(summaryText)
-                                ? gridBorderChars.BottomInner
-                                : gridBorderChars.CrossSpanBottomInner, BorderColor);
+                            context.DrawText(showSummary
+                                ? gridBorderChars.CrossSpanBottomInner
+                                : gridBorderChars.BottomInner,
+                                BorderColor);
                             headerIndent += headerInfos[headerIndex];
                         }
                     }
@@ -715,7 +831,7 @@ namespace ClForms.Elements
             drawingColumnWidths = new int[Columns];
             var drawingWidth = context.ContextBounds.Width - (showGridLine ? 2 : 0);
             var segmentResidue = drawingWidth % columns;
-            segmentHeight = context.ContextBounds.Height - (!string.IsNullOrWhiteSpace(SummaryText) ? 3 : 1);
+            segmentHeight = context.ContextBounds.Height - (showSummary ? 3 : 1);
 
             var segmentWidth = drawingWidth / columns;
             if (segmentWidth < 1)
@@ -786,7 +902,7 @@ namespace ClForms.Elements
             drawingColumnWidths = new int[Columns];
             var drawingWidth = context.ContextBounds.Width - (showGridLine ? 2 : 0);
             var segmentResidue = drawingWidth % columns;
-            segmentHeight = context.ContextBounds.Height - (!string.IsNullOrWhiteSpace(SummaryText) ? 3 : 1);
+            segmentHeight = context.ContextBounds.Height - (showSummary ? 3 : 1);
 
             var segmentWidth = drawingWidth / columns;
             if (segmentWidth < 1)
@@ -861,6 +977,11 @@ namespace ClForms.Elements
         /// Occurs when the value of the <see cref="SummaryText" /> property changes
         /// </summary>
         public event EventHandler<PropertyChangedEventArgs<string>> OnSummaryTextChanged;
+
+        /// <summary>
+        /// Occurs when the value of the <see cref="ShowSummary" /> property changes
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs<bool>> OnShowSummaryChanged;
 
         /// <summary>
         /// Occurs when the value of the <see cref="ShowGridLine" /> property changes

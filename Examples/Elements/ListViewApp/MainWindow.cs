@@ -20,24 +20,48 @@ namespace ListViewApp
             InitializeComponent();
             var path = "C:\\Windows";
             var items = GetDiskItems(path).ToList();
+            var summaryText = "Use [←], [↑], [→], [↓], [Home], [End] keys for navigation";
 
             listView1.Text = $" {path} ";
-            listView1.SummaryText = "This is a summary of the left panel and it's testing of very longest text ever";
+            listView1.ShowSummary = true;
+            listView1.SummaryText = summaryText;
             listView1.ColumnHeaders.Add("Name");
             listView1.ColumnHeaders.Add("Size", x => GetSizeText(x), 9, TextAlignment.Right);
             listView1.ColumnHeaders.Add("Date", x => x.DateTime.ToString("dd.MM.yy"), 10, TextAlignment.Center);
             listView1.ColumnHeaders.Add("Time", x => x.DateTime.ToString("HH:mm"), 6, TextAlignment.Right);
             listView1.Items.AddRange(items);
+            listView1.SelectedIndex = 0;
             listView1.OnSelectedIndexChanged += SelectedIndexChanged;
             listView1.OnItemDraw += ListView2StyleItem;
+            listView1.OnItemClick += ListViewItemClick;
 
             listView2.Text = $" {path} ";
-            listView2.SummaryText = "This is a summary of the right panel";
+            listView2.ShowSummary = true;
+            listView2.SummaryText = summaryText;
             listView2.Columns = 4;
             listView2.Items.AddRange(items);
+            listView2.SelectedIndex = 0;
             listView2.OnItemDraw += ListView2StyleItem;
             listView2.OnSelectedIndexChanged += SelectedIndexChanged;
             listView2.OnItemDrawing += ListView2ItemDrawing;
+            listView2.OnItemClick += ListViewItemClick;
+        }
+
+        private void ListViewItemClick(object sender, DiskItem e)
+        {
+            if(e == null || !e.IsFolder)
+            {
+                return;
+            }
+            var targetList = sender as ListView<DiskItem>;
+            targetList.Items.Clear();
+            var items = GetDiskItems(e.Path).ToList();
+            targetList.Items.AddRange(items);
+            if (items.Any())
+            {
+                targetList.SelectedIndex = 0;
+            }
+            targetList.Text = $" {e.Path} ";
         }
 
         private void ListView2ItemDrawing(object sender, ClForms.Common.EventArgs.ListBoxItemDrawingEventArgs<DiskItem> e)
