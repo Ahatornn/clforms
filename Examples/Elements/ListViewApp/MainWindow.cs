@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -106,27 +107,13 @@ namespace ListViewApp
         private void SelectedIndexChanged(object sender, ClForms.Common.EventArgs.PropertyChangedEventArgs<int> e)
         {
             var targetList = sender as ListView<DiskItem>;
-            if(e.NewValue == -1)
-            {
-                targetList.SummaryText = string.Empty;
-            }
-            else
-            {
-                targetList.SummaryText = targetList.Items[e.NewValue].Name;
-            }
+            targetList.SummaryText = e.NewValue == -1
+                ? string.Empty
+                : targetList.Items[e.NewValue].Name;
         }
 
         private void ListView2StyleItem(object sender, ClForms.Common.EventArgs.ListBoxItemStyleEventArgs<DiskItem> e)
-        {
-            if (e.Item.IsFolder)
-            {
-                e.Foreground = Color.Yellow;
-            }
-            else
-            {
-                e.Foreground = Color.Gray;
-            }
-        }
+            => e.Foreground = e.Item.IsFolder ? Color.Yellow : Color.Gray;
 
         private IEnumerable<DiskItem> GetDiskItems(string path)
         {
@@ -141,7 +128,20 @@ namespace ListViewApp
                     DateTime = Directory.GetCreationTime(parent.FullName),
                 };
             }
-            foreach (var directoryName in Directory.EnumerateDirectories(path))
+
+            var directoryNames = Array.Empty<string>();
+            var files = Array.Empty<string>();
+            try
+            {
+                directoryNames = Directory.EnumerateDirectories(path).ToArray();
+                files = Directory.GetFiles(path);
+            }
+            catch (Exception e)
+            {
+                MessageBox.ShowError(e.Message);
+            }
+
+            foreach (var directoryName in directoryNames)
             {
                 yield return new DiskItem
                 {
@@ -151,7 +151,7 @@ namespace ListViewApp
                     DateTime = Directory.GetCreationTime(directoryName),
                 };
             }
-            foreach (var file in Directory.GetFiles(path))
+            foreach (var file in files)
             {
                 yield return new DiskItem
                 {

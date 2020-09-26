@@ -56,7 +56,7 @@ namespace ClForms.Elements.Abstractions
                 {
                     OnTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(text, value));
                     text = value;
-                    InvalidateMeasure();
+                    InvalidateMeasureIfAutoSize();
                 }
             }
         }
@@ -77,7 +77,7 @@ namespace ClForms.Elements.Abstractions
                 {
                     OnWordWrapChanged?.Invoke(this, new PropertyChangedEventArgs<bool>(wordWrap, value));
                     wordWrap = value;
-                    InvalidateMeasure();
+                    InvalidateMeasureIfAutoSize();
                 }
             }
         }

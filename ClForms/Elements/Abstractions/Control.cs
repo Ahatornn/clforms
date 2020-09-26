@@ -324,6 +324,22 @@ namespace ClForms.Elements.Abstractions
         public void InvalidateVisual() => IsVisualValid = false;
 
         /// <summary>
+        /// Invalidates the measurement state (layout) for the element if <see cref="AutoSize"/>
+        /// property is <see langword="true"/> otherwise invalidates the rendering of the element
+        /// </summary>
+        public void InvalidateMeasureIfAutoSize()
+        {
+            if (AutoSize)
+            {
+                InvalidateMeasure();
+            }
+            else
+            {
+                InvalidateVisual();
+            }
+        }
+
+        /// <summary>
         /// Updates the <see cref="DesiredSize" /> of a <see cref="Control" />. Parent elements call
         /// this method from their own Measure(Size) implementations to form a recursive layout update
         /// </summary>

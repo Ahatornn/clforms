@@ -41,7 +41,7 @@ namespace ClForms.Elements
                 {
                     OnTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(groupBase.text, value));
                     groupBase.text = value;
-                    InvalidateMeasure();
+                    InvalidateMeasureIfAutoSize();
                 }
             }
         }

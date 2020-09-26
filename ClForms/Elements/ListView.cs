@@ -34,6 +34,7 @@ namespace ClForms.Elements
         private int[] drawingColumnWidths;
         private int segmentHeight = 0;
         private bool wasConstructed = false;
+        private Rect groupBaseArrangeFinalRect = Rect.Empty;
 
         /// <summary>
         /// Initialize a new instance <see cref="ListView"/>
@@ -80,17 +81,17 @@ namespace ClForms.Elements
         /// <summary>
         /// Gets the index of first visibled item 
         /// </summary>
-        public int FirstVisibledItemIndex { get; private set; } = 0;
+        public int FirstVisibleItemIndex { get; private set; } = 0;
 
         /// <summary>
-        /// Gets the all visibled items
+        /// Gets the all visible items
         /// </summary>
-        public IEnumerable<T> VisibledItems
+        public IEnumerable<T> VisibleItems
         {
             get
             {
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1) * Columns;
-                return Items.Skip(FirstVisibledItemIndex).Take(itemsCount);
+                return Items.Skip(FirstVisibleItemIndex).Take(itemsCount);
             }
         }
 
@@ -108,7 +109,11 @@ namespace ClForms.Elements
                 {
                     OnTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(groupBase.text, value));
                     groupBase.text = value;
-                    InvalidateMeasure();
+                    if (!groupBaseArrangeFinalRect.HasEmptyDimension())
+                    {
+                        groupBase.Arrange(groupBaseArrangeFinalRect, null, false);
+                    }
+                    InvalidateMeasureIfAutoSize();
                 }
             }
         }
@@ -307,9 +312,9 @@ namespace ClForms.Elements
                     {
                         ErasePreviousSelectedBackground();
                         var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-                        if (!(value > FirstVisibledItemIndex && value < FirstVisibledItemIndex + segmentItems))
+                        if (!(value > FirstVisibleItemIndex && value < FirstVisibleItemIndex + segmentItems))
                         {
-                            var fittedColumnItems = value < FirstVisibledItemIndex
+                            var fittedColumnItems = value < FirstVisibleItemIndex
                                 ? segmentHeight
                                 : segmentHeight * Columns;
                             var firstIndex = 0;
@@ -317,7 +322,7 @@ namespace ClForms.Elements
                             {
                                 firstIndex += fittedColumnItems;
                             }
-                            FirstVisibledItemIndex = firstIndex;
+                            FirstVisibleItemIndex = firstIndex;
                             InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
                         }
                         SetSelectedBackground();
@@ -339,7 +344,8 @@ namespace ClForms.Elements
         /// <inheritdoc cref="Control.Arrange"/>
         public override void Arrange(Rect finalRect, bool reduceMargin = true)
         {
-            var calculatedRect = groupBase.Arrange(finalRect, null, false);
+            groupBaseArrangeFinalRect = finalRect;
+            var calculatedRect = groupBase.Arrange(groupBaseArrangeFinalRect, null, false);
             bufferedLinesContext = new ScreenDrawingContext(calculatedRect);
             bufferedLinesContext.Release(Color.NotSet, Color.NotSet);
             if (showGridLine)
@@ -393,17 +399,17 @@ namespace ClForms.Elements
             }
             var previousSelectedIndex = selectedIndex;
             var nextSelectedIndex = selectedIndex;
-            var previousFirstVisibleItemIndex = FirstVisibledItemIndex;
-            var nextFirstVisibleItemIndex = FirstVisibledItemIndex;
+            var previousFirstVisibleItemIndex = FirstVisibleItemIndex;
+            var nextFirstVisibleItemIndex = FirstVisibleItemIndex;
 
             if (keyInfo.Key == ConsoleKey.DownArrow)
             {
                 if (Items.Count - 1 > selectedIndex)
                 {
                     var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1) - 1) * Columns;
-                    if ((selectedIndex + 1) - FirstVisibledItemIndex > itemsCount)
+                    if ((selectedIndex + 1) - FirstVisibleItemIndex > itemsCount)
                     {
-                        nextFirstVisibleItemIndex = FirstVisibledItemIndex + 1;
+                        nextFirstVisibleItemIndex = FirstVisibleItemIndex + 1;
                     }
 
                     nextSelectedIndex = selectedIndex + 1;
@@ -414,15 +420,15 @@ namespace ClForms.Elements
             {
                 if (selectedIndex > 0)
                 {
-                    if (selectedIndex - 1 < FirstVisibledItemIndex)
+                    if (selectedIndex - 1 < FirstVisibleItemIndex)
                     {
-                        nextFirstVisibleItemIndex = FirstVisibledItemIndex - 1;
+                        nextFirstVisibleItemIndex = FirstVisibleItemIndex - 1;
                     }
                     nextSelectedIndex = selectedIndex - 1;
                 }
                 else
                 {
-                    nextSelectedIndex = FirstVisibledItemIndex;
+                    nextSelectedIndex = FirstVisibleItemIndex;
                 }
             }
 
@@ -431,14 +437,14 @@ namespace ClForms.Elements
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
                 if(selectedIndex == -1)
                 {
-                    nextSelectedIndex = FirstVisibledItemIndex;
+                    nextSelectedIndex = FirstVisibleItemIndex;
                 }
-                else if(FirstVisibledItemIndex + (segmentItems * Columns) < Items.Count - 1)
+                else if(FirstVisibleItemIndex + (segmentItems * Columns) < Items.Count - 1)
                 {
                     nextSelectedIndex = Math.Min(Items.Count - 1, selectedIndex + (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)));
-                    if(nextSelectedIndex - FirstVisibledItemIndex >= (segmentItems * Columns))
+                    if(nextSelectedIndex - FirstVisibleItemIndex >= (segmentItems * Columns))
                     {
-                        nextFirstVisibleItemIndex = FirstVisibledItemIndex + segmentItems;
+                        nextFirstVisibleItemIndex = FirstVisibleItemIndex + segmentItems;
                     }
                 }
             }
@@ -448,14 +454,14 @@ namespace ClForms.Elements
                 var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
                 if(selectedIndex == -1)
                 {
-                    nextSelectedIndex = FirstVisibledItemIndex;
+                    nextSelectedIndex = FirstVisibleItemIndex;
                 }
                 else if(selectedIndex - segmentItems >= 0)
                 {
                     nextSelectedIndex = selectedIndex - segmentItems;
-                    if(nextSelectedIndex < FirstVisibledItemIndex)
+                    if(nextSelectedIndex < FirstVisibleItemIndex)
                     {
-                        nextFirstVisibleItemIndex = Math.Max(0, FirstVisibledItemIndex - segmentItems);
+                        nextFirstVisibleItemIndex = Math.Max(0, FirstVisibleItemIndex - segmentItems);
                     }
                 }
             }
@@ -478,11 +484,11 @@ namespace ClForms.Elements
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
                 if (selectedIndex == -1)
                 {
-                    nextSelectedIndex = FirstVisibledItemIndex;
+                    nextSelectedIndex = FirstVisibleItemIndex;
                 }
                 else if (selectedIndex + itemsCount < Items.Count)
                 {
-                    var currentDiff = selectedIndex - FirstVisibledItemIndex;
+                    var currentDiff = selectedIndex - FirstVisibleItemIndex;
                     nextSelectedIndex = selectedIndex + itemsCount;
                     nextFirstVisibleItemIndex = Math.Min(nextSelectedIndex - currentDiff, Items.Count - itemsCount);
                 }
@@ -493,11 +499,11 @@ namespace ClForms.Elements
                 var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
                 if(selectedIndex == -1)
                 {
-                    nextSelectedIndex = FirstVisibledItemIndex;
+                    nextSelectedIndex = FirstVisibleItemIndex;
                 }
                 else if (selectedIndex - itemsCount >= 0)
                 {
-                    var currentDiff = selectedIndex - FirstVisibledItemIndex;
+                    var currentDiff = selectedIndex - FirstVisibleItemIndex;
                     nextSelectedIndex = selectedIndex - itemsCount;
                     nextFirstVisibleItemIndex = Math.Max(0, nextSelectedIndex - currentDiff);
                 }
@@ -508,7 +514,7 @@ namespace ClForms.Elements
                 ErasePreviousSelectedBackground();
                 if (previousFirstVisibleItemIndex != nextFirstVisibleItemIndex)
                 {
-                    FirstVisibledItemIndex = nextFirstVisibleItemIndex;
+                    FirstVisibleItemIndex = nextFirstVisibleItemIndex;
                     InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
                 }
                 selectedIndex = nextSelectedIndex;
@@ -531,16 +537,16 @@ namespace ClForms.Elements
             }
 
             var itemsCount = (segmentHeight - (ColumnHeaders.Any() ? 2 : 1)) * Columns;
-            if (index > FirstVisibledItemIndex + itemsCount)
+            if (index > FirstVisibleItemIndex + itemsCount)
             {
                 return;
             }
             var oldSelectedIndex = selectedIndex;
             var newSelectedIndex = selectedIndex;
 
-            if (index < FirstVisibledItemIndex)
+            if (index < FirstVisibleItemIndex)
             {
-                FirstVisibledItemIndex += count * (action == ListViewItemCollectionAction.Add ? 1 : -1);
+                FirstVisibleItemIndex += count * (action == ListViewItemCollectionAction.Add ? 1 : -1);
                 if(selectedIndex > -1)
                 {
                     newSelectedIndex += count * (action == ListViewItemCollectionAction.Add ? 1 : -1);
@@ -560,9 +566,9 @@ namespace ClForms.Elements
                         newSelectedIndex += count * (action == ListViewItemCollectionAction.Add ? 1 : -1);
                     }
                 }
-                if(newSelectedIndex > -1 && newSelectedIndex - itemsCount > FirstVisibledItemIndex)
+                if(newSelectedIndex > -1 && newSelectedIndex - itemsCount > FirstVisibleItemIndex)
                 {
-                    FirstVisibledItemIndex = newSelectedIndex - itemsCount;
+                    FirstVisibleItemIndex = newSelectedIndex - itemsCount;
                 }
                 InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
             }
@@ -596,11 +602,11 @@ namespace ClForms.Elements
             }
 
             var segmentItems = segmentHeight - (ColumnHeaders.Any() ? 2 : 1);
-            var columnIndex = (selectedIndex - FirstVisibledItemIndex) / segmentItems;
+            var columnIndex = (selectedIndex - FirstVisibleItemIndex) / segmentItems;
             var leftIndent = drawingColumnWidths.Take(columnIndex).Sum() + (columnIndex == 0 ? 1 : 2);
 
             selectedRectDescription.SelectedRect = new Rect(leftIndent, 
-                (ColumnHeaders.Any() ? 2 : 1) + (selectedIndex - FirstVisibledItemIndex - segmentItems * columnIndex), 
+                (ColumnHeaders.Any() ? 2 : 1) + (selectedIndex - FirstVisibleItemIndex - segmentItems * columnIndex), 
                 drawingColumnWidths[columnIndex] - (columnIndex == 0 ? 0 : 1), 
                 1);
             selectedRectDescription.Background = bufferedContentContext.Background[selectedRectDescription.SelectedRect.Location];
@@ -624,7 +630,7 @@ namespace ClForms.Elements
             if (wasConstructed)
             {
                 ErasePreviousSelectedBackground();
-                FirstVisibledItemIndex = 0;
+                FirstVisibleItemIndex = 0;
                 InvalidateBufferedContentContext(bufferedContentContext.ContextBounds);
             }
 
@@ -850,7 +856,7 @@ namespace ClForms.Elements
                 }
 
                 var headerInfos = GetHeaderInfo(actualSegmentWidth).ToList();
-                var drawItems = Items.Skip(column * (segmentHeight - 2) + FirstVisibledItemIndex).Take(segmentHeight - 2);
+                var drawItems = Items.Skip(column * (segmentHeight - 2) + FirstVisibleItemIndex).Take(segmentHeight - 2);
                 var topIndent = 2;
 
                 foreach (var item in drawItems)
@@ -920,7 +926,7 @@ namespace ClForms.Elements
                     actualSegmentWidth++;
                 }
 
-                var drawItems = Items.Skip(column * (segmentHeight - 1) + FirstVisibledItemIndex).Take(segmentHeight - 1);
+                var drawItems = Items.Skip(column * (segmentHeight - 1) + FirstVisibleItemIndex).Take(segmentHeight - 1);
                 var topIndent = 1;
                 foreach (var item in drawItems)
                 {

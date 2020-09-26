@@ -54,7 +54,7 @@ namespace ClForms.Elements
                 {
                     OnTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(text, NormalizeText(value)));
                     text = NormalizeText(value);
-                    InvalidateMeasure();
+                    InvalidateMeasureIfAutoSize();
                 }
             }
         }

@@ -59,6 +59,7 @@ namespace ClForms.Elements
                 {
                     OnGlyphChanged?.Invoke(this, new PropertyChangedEventArgs<string>(glyph, value));
                     glyph = value;
+                    InvalidateMeasureIfAutoSize();
                 }
             }
         }
@@ -79,6 +80,7 @@ namespace ClForms.Elements
                     OnGlyphForegroundChanged?.Invoke(this,
                         new PropertyChangedEventArgs<Color>(glyphForeground, value));
                     glyphForeground = value;
+                    InvalidateVisual();
                 }
             }
         }
