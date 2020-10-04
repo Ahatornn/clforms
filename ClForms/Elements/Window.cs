@@ -265,12 +265,10 @@ namespace ClForms.Elements
                     .Height);
                 if (AutoSize)
                 {
-                    minContentSize.Width = Width ?? minContentSize.Width;
-                    minContentSize.Height = Height ?? minContentSize.Height;
                     base.Measure(new Size(
-                        Math.Min(minContentSize.Width + (Padding + BorderThickness).Horizontal, availableSize.Width),
-                        Math.Min(minContentSize.Height + (Padding + BorderThickness).Vertical, availableSize.Height)));
-
+                        Width ?? Math.Min(minContentSize.Width + (Padding + BorderThickness).Horizontal, availableSize.Width),
+                        Height ?? Math.Min(minContentSize.Height + (Padding + BorderThickness).Vertical, availableSize.Height))
+                    );
                 }
                 else
                 {

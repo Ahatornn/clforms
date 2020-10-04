@@ -1,7 +1,6 @@
 using ClForms.Common;
-using ClForms.Common.Grid;
 using ClForms.Elements;
-using ClForms.Themes;
+using ClForms.Elements.Menu;
 
 namespace ListViewApp
 {
@@ -12,37 +11,37 @@ namespace ListViewApp
         /// </summary>
         private void InitializeComponent()
         {
-            WindowState = ControlState.Maximized;
-            Title = "Norton commander emulator";
-            AutoSize = false;
+            Width = 80;
+            Height = 20;
+            Title = "ListView demo app";
 
-            var grid = new Grid();
-            grid.RowDefinitions.Add(new RowDefinition(SizeType.AutoSize));
-            grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.AutoSize));
-            grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.AutoSize));
-
-            listView1 = new ListView<DiskItem>
+            panel1 = new Panel()
             {
-                Background = Color.Blue,
-                BorderColor = Color.White,
-                Foreground = Color.White,
-                TextAlignment = TextAlignment.Center,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Center,
             };
-            grid.AddContent(listView1);
 
-            listView2 = new ListView<DiskItem>
-            {
-                Background = Color.Blue,
-                BorderColor = Color.White,
-                Foreground = Color.White,
-                TextAlignment = TextAlignment.Center,
-            };
-            grid.AddContent(listView2, 1, 0);
+            mainMenu1 = new MainMenu();
+            var controlsMenuItem = new MenuItem("Steps");
+            mainMenu1.Items.Add(controlsMenuItem);
 
-            AddContent(grid);
+            propMenuItem = new MenuItem("Properties");
+            mainMenu1.Items.Add(propMenuItem);
+
+            statusBar1 = new StatusBar();
+            statusBar1.AddHelpButton();
+
+            statusBarLabel = new Label();
+            statusBar1.AddContent(statusBarLabel, Dock.Right);
+
+            StatusBar = statusBar1;
+            AddContent(panel1);
         }
 
-        private ListView<DiskItem> listView1;
-        private ListView<DiskItem> listView2;
+        private Panel panel1;
+        private MainMenu mainMenu1;
+        private MenuItem propMenuItem;
+        private StatusBar statusBar1;
+        private Label statusBarLabel;
     }
 }
