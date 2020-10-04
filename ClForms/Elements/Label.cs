@@ -40,6 +40,22 @@ namespace ClForms.Elements
             this.text = text;
         }
 
+        /// <summary>
+        /// Initialize a new instance <see cref="Label"/> with lines of text
+        /// </summary>
+        public Label(string[] text)
+            : this()
+        {
+            if (text == null)
+            {
+                throw new ArgumentNullException();
+            }
+            var aggrStr = string.Empty;
+            var allText = text.Aggregate(aggrStr,
+                ((current, value) => current.Length > 0 ? current + Environment.NewLine + value : current + value));
+            this.text = string.Concat(allText);
+        }
+
         #region Properties
 
         #region Text
