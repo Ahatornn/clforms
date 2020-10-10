@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
@@ -43,17 +44,15 @@ namespace ClForms.Elements
         /// <summary>
         /// Initialize a new instance <see cref="Label"/> with lines of text
         /// </summary>
-        public Label(string[] text)
+        public Label(string[] lines)
             : this()
         {
-            if (text == null)
+            if (lines == null)
             {
                 throw new ArgumentNullException();
             }
-            var aggrStr = string.Empty;
-            var allText = text.Aggregate(aggrStr,
-                ((current, value) => current.Length > 0 ? current + Environment.NewLine + value : current + value));
-            this.text = string.Concat(allText);
+
+            text = GetAllText(lines);
         }
 
         #region Properties
@@ -116,6 +115,20 @@ namespace ClForms.Elements
                     InvalidateVisual();
                 }
             }
+        }
+
+        #endregion
+        #region Lines
+
+        /// <summary>
+        /// Gets or sets the individual lines of text in the control
+        /// </summary>
+        public string[] Lines
+        {
+            get => string.IsNullOrWhiteSpace(text)
+                ? Array.Empty<string>()
+                : text.Split(Environment.NewLine);
+            set => Text = GetAllText(value ?? Array.Empty<string>());
         }
 
         #endregion
@@ -200,6 +213,14 @@ namespace ClForms.Elements
         public void Clear() => Text = string.Empty;
 
         protected virtual string GetTextPresenter() => text;
+
+        private static string GetAllText(string[] lines)
+        {
+            var aggrStr = string.Empty;
+            var allText = lines.Aggregate(aggrStr,
+                ((current, value) => current.Length > 0 ? current + Environment.NewLine + value : current + value));
+            return string.Concat(allText);
+        }
 
         #endregion
 
