@@ -1,7 +1,6 @@
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Core.Contexts;
-using ClForms.Themes;
 
 namespace ClForms.Helpers
 {
@@ -12,6 +11,7 @@ namespace ClForms.Helpers
             ScreenDrawingContext childContext)
         {
             var result = new ScreenDrawingContext(parentContext.ContextBounds);
+            result.MergeWith(Point.Empty, parentContext);
             result.MergeWith(location, childContext);
             return result;
         }
@@ -37,15 +37,6 @@ namespace ClForms.Helpers
                             childContext.Background[col - location.X, row - location.Y],
                             childContext.Foreground[col - location.X, row - location.Y],
                             childContext.Chars[col - location.X, row - location.Y],
-                            ignoreEmpty);
-                    }
-                    else
-                    {
-                        parentContext.SetValues(col,
-                            row,
-                            parentContext.Background[col, row],
-                            parentContext.Foreground[col, row],
-                            parentContext.Chars[col, row],
                             ignoreEmpty);
                     }
                 }
