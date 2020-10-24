@@ -4,5 +4,6 @@ namespace ListViewApp
     {
         Welcome,
         Base,
+        Headers,
     }
 }

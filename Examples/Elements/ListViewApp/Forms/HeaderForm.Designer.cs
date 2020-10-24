@@ -1,4 +1,3 @@
-using System;
 using ClForms.Common;
 using ClForms.Common.Grid;
 using ClForms.Elements;
@@ -7,7 +6,7 @@ using ListViewApp.Models;
 
 namespace ListViewApp.Forms
 {
-    public partial class BaseListView
+    public partial class HeaderForm
     {
         /// <summary>
         /// Initialize components of Window as buttons, panels, etc.
@@ -39,10 +38,13 @@ namespace ListViewApp.Forms
                 Text = "Counties",
                 TextAlignment = TextAlignment.Center,
                 AutoSelect = true,
+                HeaderForeground = Color.Cyan,
             };
             targetListView.Items.AddRange(MainWindow.CountryInfos);
-            targetListView.OnSelectedIndexChanged += ListViewSelectedIndexChanged;
-
+            targetListView.ColumnHeaders.Add("Country", x => x.Country);
+            targetListView.ColumnHeaders.Add("Gdp", x => x.Gdp.ToString(), 6, TextAlignment.Right);
+            targetListView.ColumnHeaders.Add("Ppl", x => x.Population.ToString(), 9, TextAlignment.Right);
+            targetListView.OnItemDraw += TargetListViewItemDraw;
 
             grid.AddContent(targetListView, 0, 0, 1, 2);
 
@@ -51,7 +53,7 @@ namespace ListViewApp.Forms
                 Margin = new Thickness(1, 0, 0, 0),
             };
 
-            descriptionLabel = new Label("Let's check how to work Items, ShowGridLine and ShowSummary properties")
+            descriptionLabel = new Label("Let's check how to work with ColumnHeaders")
             {
                 WordWrap = true,
             };
@@ -59,15 +61,14 @@ namespace ListViewApp.Forms
 
             codeLabel = new Label(new[]
             {
-                "targetListView = new ListView<CountryInfo>()",
-                "{",
-                "    ShowGridLine = true,",
-                "    ShowSummary = true,",
-                "    BorderColor = Color.Black,",
-                "    SummaryText = …,",
-                "    Text = \"Counties\",",
-                "    TextAlignment = …,",
-                "};"
+                "targetListView.HeaderForeground = Color.Cyan;",
+                "…",
+                "targetListView.ColumnHeaders",
+                ".Add(\"Country\",",
+                "    x => x.Population,",
+                "    9,",
+                "    TextAlignment.Right",
+                ");",
             })
             {
                 WordWrap = true,

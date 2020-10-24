@@ -22,7 +22,18 @@ namespace ListViewApp
             };
 
             mainMenu1 = new MainMenu();
-            var controlsMenuItem = new MenuItem("Steps");
+            controlsMenuItem = new MenuItem("Steps");
+
+            var baseMenuItem = new MenuItem("Base properties", null, @checked: true);
+            baseMenuItem.Tag = ScreenType.Base;
+            baseMenuItem.OnClick += StepsMenuClick;
+            controlsMenuItem.Items.Add(baseMenuItem);
+
+            var headerMenuItem = new MenuItem("ColumnHeaders");
+            headerMenuItem.Tag = ScreenType.Headers;
+            headerMenuItem.OnClick += StepsMenuClick;
+            controlsMenuItem.Items.Add(headerMenuItem);
+
             mainMenu1.Items.Add(controlsMenuItem);
 
             propMenuItem = new MenuItem("Properties");
@@ -43,5 +54,6 @@ namespace ListViewApp
         private MenuItem propMenuItem;
         private StatusBar statusBar1;
         private Label statusBarLabel;
+        private MenuItem controlsMenuItem;
     }
 }
