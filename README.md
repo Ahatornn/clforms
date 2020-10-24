@@ -44,7 +44,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [TextBox](https://github.com/Ahatornn/clforms/wiki/TextBox)
 - [x] [TilePanel](https://github.com/Ahatornn/clforms/wiki/TilePanel)
 - [x] [Window](https://github.com/Ahatornn/clforms/wiki/Window)
-- [ ] ListView
+- [x] [ListView](https://github.com/Ahatornn/clforms/wiki/ListView)
 <img src="Images/panelExample.gif" />
 
 ## Release Notes
