@@ -28,36 +28,36 @@ namespace ClForms.Common
         /// <summary>
         /// Add an item to the collection
         /// </summary>
-        public void Add(string text) => Add(new ColumnHeader<T> {Text = text});
+        public void Add(string text) => Add(text, width: null);
 
         /// <summary>
         /// Add an item to the collection
         /// </summary>
-        public void Add(string text, int? width) => Add(new ColumnHeader<T> {Text = text, Width = width});
+        public void Add(string text, int? width) => Add(text, null, width);
 
         /// <summary>
         /// Add an item to the collection
         /// </summary>
-        public void Add(string text, Func<T, string> displayMember) => Add(new ColumnHeader<T> { Text = text, DisplayMember = displayMember });
+        public void Add(string text, Func<T, string> displayMember) => Add(text, displayMember, null);
 
         /// <inheritdoc />
         public void Add(ColumnHeader<T> item)
         {
             items.Add(item);
-            owner.InvalidateVisual();
+            owner.InvalidateMeasure();
         }
 
         /// <summary>
         /// Add an item to the collection
         /// </summary>
         public void Add(string text, Func<T, string> displayMember, int? width, TextAlignment alignment = TextAlignment.Left) =>
-            Add(new ColumnHeader<T> {Text = text, DisplayMember = displayMember, Alignment = alignment, Width = width});
+            Add(new ColumnHeader<T>(text, displayMember, width, alignment));
 
         /// <inheritdoc />
         public void Clear()
         {
             items.Clear();
-            owner.InvalidateVisual();
+            owner.InvalidateMeasure();
         }
 
         /// <inheritdoc />
@@ -69,7 +69,7 @@ namespace ClForms.Common
         /// <inheritdoc />
         public bool Remove(ColumnHeader<T> item)
         {
-            owner.InvalidateVisual();
+            owner.InvalidateMeasure();
             return items.Remove(item);
         }
 
@@ -86,14 +86,14 @@ namespace ClForms.Common
         public void Insert(int index, ColumnHeader<T> item)
         {
             items.Insert(index, item);
-            owner.InvalidateVisual();
+            owner.InvalidateMeasure();
         }
 
         /// <inheritdoc />
         public void RemoveAt(int index)
         {
             items.RemoveAt(index);
-            owner.InvalidateVisual();
+            owner.InvalidateMeasure();
         }
 
         /// <inheritdoc />
