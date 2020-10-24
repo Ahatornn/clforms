@@ -156,9 +156,11 @@ namespace ClForms.Core
         {
             if (!(wnd.WasClosed && wnd.Showing))
             {
-                var wndParams = currentWindowParams == null
-                    ? new WindowParameters(wnd, CreateEmptyContext())
-                    : new WindowParameters(wnd, currentWindowParams.ParentContext.Merge(currentWindowParams.Window.Location, currentWindowParams.CurrentBuffer));
+                var context = currentWindowParams == null
+                    ? CreateEmptyContext()
+                    : currentWindowParams.ParentContext.Merge(currentWindowParams.Window.Location,
+                        currentWindowParams.CurrentBuffer);
+                var wndParams = new WindowParameters(wnd, context);
 
                 windows.Push(wndParams);
                 currentWindowParams = wndParams;
