@@ -226,7 +226,7 @@ namespace ClForms.Elements.Abstractions
         public void SetFocus()
         {
             var wnd = ParentWindow();
-            wnd.TrySetFocus(this);
+            wnd?.TrySetFocus(this);
         }
 
         /// <summary>
