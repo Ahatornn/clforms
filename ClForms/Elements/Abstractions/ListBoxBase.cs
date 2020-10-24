@@ -514,7 +514,7 @@ namespace ClForms.Elements.Abstractions
                 }
                 else
                 {
-                    for (var i = selIndex; i > 0; i--)
+                    for (var i = selIndex; i >= 0; i--)
                     {
                         if (CanSelectItem(Items[i]))
                         {
