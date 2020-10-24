@@ -22,6 +22,7 @@ namespace ClForms.Elements
     {
         private readonly ListViewGroupBase<T> groupBase;
         private bool showGridLine;
+        private bool autoSelect;
         private GridSpanBorderChars gridBorderChars;
         private string summaryText;
         private bool showSummary;
@@ -79,7 +80,7 @@ namespace ClForms.Elements
         public ListViewItemCollection<T> Items { get; }
 
         /// <summary>
-        /// Gets the index of first visibled item 
+        /// Gets the index of first visible item 
         /// </summary>
         public int FirstVisibleItemIndex { get; private set; } = 0;
 
@@ -174,7 +175,19 @@ namespace ClForms.Elements
                 {
                     OnShowSummaryChanged?.Invoke(this, new PropertyChangedEventArgs<bool>(showSummary, value));
                     showSummary = value;
-                    InvalidateVisual();
+                    if (wasConstructed)
+                    {
+                        if (showSummary && (FirstVisibleItemIndex + segmentHeight) - 3 <= selectedIndex)
+                        {
+                            FirstVisibleItemIndex += (selectedIndex == (FirstVisibleItemIndex + segmentHeight - 2) ? 2 : 1);
+                        }
+
+                        if (!showSummary && selectedIndex == Items.Count - 1 && FirstVisibleItemIndex > 0)
+                        {
+                            FirstVisibleItemIndex = Math.Max(0, FirstVisibleItemIndex - 2);
+                        }
+                    }
+                    InvalidateMeasure();
                 }
             }
         }
@@ -270,7 +283,7 @@ namespace ClForms.Elements
         #region HeaderForeground
 
         /// <summary>
-        /// Gets or sets a brush that describes the foreground of a control headers
+        /// Gets or sets a color that describes the foreground of a control headers
         /// </summary>
         public Color HeaderForeground
         {
@@ -282,7 +295,7 @@ namespace ClForms.Elements
                     OnHeaderForegroundChanged?.Invoke(this,
                         new PropertyChangedEventArgs<Color>(headerForeground, value));
                     headerForeground = value;
-                    InvalidateVisual();
+                    InvalidateMeasure();
                 }
             }
         }
@@ -331,6 +344,34 @@ namespace ClForms.Elements
                 }
             }
         }
+        #endregion
+        #region AutoSelect
+
+        /// <summary>
+        /// Gets or sets a value indicating whether set <see cref="SelectedIndex"/> to first visible item after component focused
+        /// if current <see cref="SelectedIndex"/> value is -1
+        /// </summary>
+        public bool AutoSelect
+        {
+            get => autoSelect;
+            set
+            {
+                if (value != autoSelect)
+                {
+                    OnAutoSelectChanged?.Invoke(this, new PropertyChangedEventArgs<bool>(autoSelect, value));
+                    autoSelect = value;
+                    if (autoSelect && IsFocus && selectedIndex == -1 && Items.Count > 0)
+                    {
+                        selectedIndex = FirstVisibleItemIndex;
+                        if (wasConstructed)
+                        {
+                            SetSelectedBackground();
+                        }
+                    }
+                }
+            }
+        }
+
         #endregion
 
         #endregion
@@ -586,6 +627,11 @@ namespace ClForms.Elements
         {
             if (e.NewValue)
             {
+                if (selectedIndex == -1 && autoSelect && Items.Count > 0)
+                {
+                    selectedIndex = FirstVisibleItemIndex;
+                    OnSelectedIndexChanged?.Invoke(this, new PropertyChangedEventArgs<int>(-1, 0));
+                }
                 SetSelectedBackground();
             }
             else
@@ -607,7 +653,7 @@ namespace ClForms.Elements
 
             selectedRectDescription.SelectedRect = new Rect(leftIndent, 
                 (ColumnHeaders.Any() ? 2 : 1) + (selectedIndex - FirstVisibleItemIndex - segmentItems * columnIndex), 
-                drawingColumnWidths[columnIndex] - (columnIndex == 0 ? 0 : 1), 
+                drawingColumnWidths[columnIndex] - (columnIndex == 0 ? 0 : 1) - (showGridLine ? 0 : 1), 
                 1);
             selectedRectDescription.Background = bufferedContentContext.Background[selectedRectDescription.SelectedRect.Location];
             selectedRectDescription.Foreground = bufferedContentContext.Foreground[selectedRectDescription.SelectedRect.Location];
@@ -968,6 +1014,11 @@ namespace ClForms.Elements
         #endregion
 
         #region Events
+
+        /// <summary>
+        /// Occurs when the value of the <see cref="AutoSelect" /> property changes
+        /// </summary>
+        public event EventHandler<PropertyChangedEventArgs<bool>> OnAutoSelectChanged;
 
         /// <summary>
         /// Occurs when the value of the <see cref="Text" /> property changes
