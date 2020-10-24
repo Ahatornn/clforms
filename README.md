@@ -48,6 +48,16 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 <img src="Images/panelExample.gif" />
 
 ## Release Notes
+* 1.0.26
+    * Added ListView
+    * Added InvalidateMeasureIfAutoSize to Control
+    * Fix Measure of Window
+    * Append work with Environment.NewLine in Label control
+    * Added Lines property into Label
+    * Fix buffering of parent screen for popup menu, window etc.
+    * Refactoring ApplicationHandler
+    * Fix SetFocus if control not prepared yet
+    * Fix move backward method in ListBoxBase control
 * 1.0.25
     * Fix Grid borders (More combination of spanned cells in [GridSpanBorderChars](https://github.com/Ahatornn/clforms/wiki/GridSpanBorderChars))
     * Fix MessageBox icon borders (It has rounded corners, left and right margin)
