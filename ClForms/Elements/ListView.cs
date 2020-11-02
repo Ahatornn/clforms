@@ -35,7 +35,6 @@ namespace ClForms.Elements
         private int[] drawingColumnWidths;
         private int segmentHeight = 0;
         private bool wasConstructed = false;
-        private Rect groupBaseArrangeFinalRect = Rect.Empty;
 
         /// <summary>
         /// Initialize a new instance <see cref="ListView"/>
@@ -110,10 +109,7 @@ namespace ClForms.Elements
                 {
                     OnTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(groupBase.text, value));
                     groupBase.text = value;
-                    if (!groupBaseArrangeFinalRect.HasEmptyDimension())
-                    {
-                        groupBase.Arrange(groupBaseArrangeFinalRect, null, false);
-                    }
+                    groupBase.RecalculateTextPosition();
                     InvalidateMeasureIfAutoSize();
                 }
             }
@@ -135,6 +131,7 @@ namespace ClForms.Elements
                     OnTextAlignmentChanged?.Invoke(this,
                         new PropertyChangedEventArgs<TextAlignment>(groupBase.textAlignment, value));
                     groupBase.textAlignment = value;
+                    groupBase.RecalculateTextPosition();
                     InvalidateVisual();
                 }
             }
@@ -385,8 +382,7 @@ namespace ClForms.Elements
         /// <inheritdoc cref="Control.Arrange"/>
         public override void Arrange(Rect finalRect, bool reduceMargin = true)
         {
-            groupBaseArrangeFinalRect = finalRect;
-            var calculatedRect = groupBase.Arrange(groupBaseArrangeFinalRect, null, false);
+            var calculatedRect = groupBase.Arrange(finalRect, null, false);
             bufferedLinesContext = new ScreenDrawingContext(calculatedRect);
             bufferedLinesContext.Release(Color.NotSet, Color.NotSet);
             if (showGridLine)

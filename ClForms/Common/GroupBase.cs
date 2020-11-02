@@ -14,6 +14,7 @@ namespace ClForms.Common
         internal Color borderColor;
         internal BorderChars borderChars;
         internal readonly Control targetControl;
+        internal Rect bounds = Rect.Empty;
 
         internal GroupBase(Control targetControl)
         {
@@ -60,6 +61,7 @@ namespace ClForms.Common
 
         internal Rect Arrange(Rect finalRect, Action<Rect> contentArrangeDelegate, bool applyDelegate)
         {
+            bounds = finalRect;
             var offset = targetControl.Margin + targetControl.Padding +borderThickness;
             var clientRect = new Rect((targetControl.Padding + borderThickness).Left,
                 (targetControl.Padding + borderThickness).Top,
@@ -70,19 +72,25 @@ namespace ClForms.Common
                 contentArrangeDelegate.Invoke(clientRect);
             }
 
-            if (!string.IsNullOrWhiteSpace(text))
+            RecalculateTextPosition();
+            return finalRect;
+        }
+
+        internal void RecalculateTextPosition()
+        {
+            if (!(string.IsNullOrWhiteSpace(text) || bounds.HasEmptyDimension()))
             {
-                var presenterText = text.Length > finalRect.Width - borderThickness.Horizontal
-                    ? text.Substring(0, finalRect.Width - borderThickness.Horizontal - 1) + "…"
+                var presenterText = text.Length > bounds.Width - borderThickness.Horizontal
+                    ? text.Substring(0, bounds.Width - borderThickness.Horizontal - 1) + "…"
                     : text;
                 switch (textAlignment)
                 {
                     case TextAlignment.Right:
-                        TextArea = new Rect(finalRect.Width - borderThickness.Right - presenterText.Length,
+                        TextArea = new Rect(bounds.Width - borderThickness.Right - presenterText.Length,
                             borderThickness.Top - 1, text.Length, 1);
                         break;
                     case TextAlignment.Center:
-                        TextArea = new Rect((finalRect.Width - borderThickness.Horizontal - presenterText.Length) / 2 + 1,
+                        TextArea = new Rect((bounds.Width - borderThickness.Horizontal - presenterText.Length) / 2 + 1,
                             borderThickness.Top - 1, text.Length, 1);
                         break;
                     default:
@@ -94,8 +102,6 @@ namespace ClForms.Common
             {
                 TextArea = Rect.Empty;
             }
-
-            return finalRect;
         }
 
         internal void OnRender(IDrawingContext context)

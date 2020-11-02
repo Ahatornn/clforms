@@ -46,7 +46,8 @@ namespace ClForms.Elements.Abstractions
                 {
                     OnTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(groupBase.text, value));
                     groupBase.text = value;
-                    InvalidateMeasure();
+                    groupBase.RecalculateTextPosition();
+                    InvalidateMeasureIfAutoSize();
                 }
             }
         }
@@ -67,6 +68,7 @@ namespace ClForms.Elements.Abstractions
                     OnTextAlignmentChanged?.Invoke(this,
                         new PropertyChangedEventArgs<TextAlignment>(groupBase.textAlignment, value));
                     groupBase.textAlignment = value;
+                    groupBase.RecalculateTextPosition();
                     InvalidateVisual();
                 }
             }
