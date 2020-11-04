@@ -202,7 +202,7 @@ namespace ClForms.Elements.Abstractions
                 skip += stackHeight;
             }
 
-            resultSize.Width += (maxColumns - 1) * 2;
+            resultSize.Width += (maxColumns - 1) * ContentMeasureItemIndent;
 
             return new Size(Math.Min(contentSize.Width, resultSize.Width),
                 Math.Min(contentSize.Height, resultSize.Height));

@@ -159,7 +159,7 @@ namespace ClForms.Elements
                     context.SetCursorPos(leftIndent, topIndent + i);
                     context.DrawText($"{GetGlyph(selectedItems.Contains(items[i]))} {items[i].Text}", foreColor);
                 }
-                leftIndent += items.Max(x => x.Text.Length + 3) + 2;
+                leftIndent += items.Max(x => x.Text.Length) + ContentMeasureItemIndent * 2;
             }
         }
 

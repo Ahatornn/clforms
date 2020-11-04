@@ -61,8 +61,8 @@ namespace ClForms.Common
 
         internal Rect Arrange(Rect finalRect, Action<Rect> contentArrangeDelegate, bool applyDelegate)
         {
-            bounds = finalRect;
-            var offset = targetControl.Margin + targetControl.Padding +borderThickness;
+            var offset = targetControl.Margin + targetControl.Padding + borderThickness;
+            bounds = finalRect.Reduce(targetControl.Margin);
             var clientRect = new Rect((targetControl.Padding + borderThickness).Left,
                 (targetControl.Padding + borderThickness).Top,
                 finalRect.Width - offset.Horizontal,
