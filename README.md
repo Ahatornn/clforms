@@ -33,6 +33,7 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [GroupBox](https://github.com/Ahatornn/clforms/wiki/GroupBox)
 - [x] [Label](https://github.com/Ahatornn/clforms/wiki/Label)
 - [x] [ListBox](https://github.com/Ahatornn/clforms/wiki/ListBox)
+- [x] [ListView](https://github.com/Ahatornn/clforms/wiki/ListView)
 - [x] [MainMenu](https://github.com/Ahatornn/clforms/wiki/MainMenu)
 - [x] [MessageBox](https://github.com/Ahatornn/clforms/wiki/MessageBox)
 - [x] [Panel](https://github.com/Ahatornn/clforms/wiki/Panel)
@@ -44,7 +45,6 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [TextBox](https://github.com/Ahatornn/clforms/wiki/TextBox)
 - [x] [TilePanel](https://github.com/Ahatornn/clforms/wiki/TilePanel)
 - [x] [Window](https://github.com/Ahatornn/clforms/wiki/Window)
-- [x] [ListView](https://github.com/Ahatornn/clforms/wiki/ListView)
 <img src="Images/panelExample.gif" />
 
 ## Release Notes
