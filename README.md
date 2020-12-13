@@ -13,7 +13,7 @@
 
 Find the **ClForms** package through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
 ```
-PM> Install-Package ClForms -Version 1.0.25
+PM> Install-Package ClForms -Version 1.0.26
 ```
 
 > You can also download [ClFormsExtension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
