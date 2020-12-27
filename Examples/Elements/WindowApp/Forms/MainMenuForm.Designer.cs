@@ -26,7 +26,7 @@ namespace WindowApp.Forms
             maxParamItem.OnClick += WindowStateChangedClick;
             paramItem.Items.Add(maxParamItem);
 
-            var mormParamItem = new MenuItem("Mormal");
+            var mormParamItem = new MenuItem("Normal");
             mormParamItem.Tag = ControlState.Normal;
             mormParamItem.OnClick += WindowStateChangedClick;
             paramItem.Items.Add(mormParamItem);
