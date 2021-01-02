@@ -5,7 +5,7 @@
     <Authors>Konoplev Anatolii</Authors>
     <Product>Command-Line Forms</Product>
     <Description>This is a framework for make console application with pseudographics interface</Description>
-    <Version>1.0.26</Version>
+    <Version>1.0.27</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <RepositoryUrl>https://github.com/Ahatornn/clforms</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
@@ -16,15 +16,7 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>favico.jpg</PackageIcon>
     <PackageProjectUrl>https://github.com/Ahatornn/clforms</PackageProjectUrl>
-    <PackageReleaseNotes>Added ListView
-Added InvalidateMeasureIfAutoSize to Control
-Fix Measure of Window
-Append work with Environment.NewLine in Label control
-Added Lines property into Label
-Fix buffering of parent screen for popup menu, window etc.
-Refactoring ApplicationHandler
-Fix SetFocus if control not prepared yet
-Fix move backward method in ListBoxBase control</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix Measure of ProgressBar and Label controls when turn off Autosize property</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
