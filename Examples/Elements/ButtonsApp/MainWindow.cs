@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using ButtonsApp.Forms;
 using ClForms.Elements;
 using ClForms.Elements.Menu;
@@ -7,6 +9,14 @@ namespace ButtonsApp
 {
     public partial class MainWindow : Window
     {
+        internal static Dictionary<ScreenType, string> Screens = new Dictionary<ScreenType, string>
+        {
+            {ScreenType.Button, "Button"},
+            {ScreenType.CheckBox, "CheckBox"},
+            {ScreenType.RadioButton, "RadioButton"},
+            {ScreenType.MessageBox, "MessageBox"},
+            {ScreenType.ProgressBar, "ProgressBar"},
+        };
         private ScreenType currentScreenType;
 
         public MainWindow()
@@ -17,6 +27,7 @@ namespace ButtonsApp
 
         private void GotoScreen(ScreenType targetScreenType)
         {
+            propMenuItem.Visible = false;
             currentScreenType = targetScreenType;
             ReleaseCheckedMenu();
             switch (targetScreenType)
@@ -36,8 +47,18 @@ namespace ButtonsApp
                 case ScreenType.MessageBox:
                     _ = new MessageBoxForm {panel1 = {Parent = panel1}};
                     break;
+                case ScreenType.ProgressBar:
+                    _ = new ProgressBarForm(propMenuItem) { panel1 = { Parent = panel1 } };
+                    propMenuItem.Visible = true;
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(targetScreenType), targetScreenType, null);
+            }
+
+            var element = controlsMenuItem.Items.Cast<MenuItem>().FirstOrDefault(x => (ScreenType) x.Tag == targetScreenType);
+            if (element != null)
+            {
+                element.Checked = true;
             }
         }
 
@@ -60,10 +81,10 @@ namespace ButtonsApp
 
         private void ReleaseCheckedMenu()
         {
-            buttonMenuItem.Checked = false;
-            checkBoxMenuItem.Checked = false;
-            radioMenuItem.Checked = false;
-            messageBoxMenuItem.Checked = false;
+            foreach (var item in controlsMenuItem.Items.Cast<MenuItem>())
+            {
+                item.Checked = false;
+            }
         }
     }
 }

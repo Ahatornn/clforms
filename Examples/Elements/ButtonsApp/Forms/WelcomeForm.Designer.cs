@@ -36,7 +36,7 @@ namespace ButtonsApp.Forms
                 WordWrap = true,
             });
 
-            foreach (var controlName in controlList)
+            foreach (var controlName in MainWindow.Screens.Values)
             {
                 stackPanel1.AddContent(new Label(controlName)
                 {

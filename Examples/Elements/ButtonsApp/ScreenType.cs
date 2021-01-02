@@ -7,5 +7,6 @@ namespace ButtonsApp
         CheckBox,
         RadioButton,
         MessageBox,
+        ProgressBar,
     }
 }
