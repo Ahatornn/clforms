@@ -37,6 +37,7 @@ namespace ClForms.Elements
             Height = 1;
             showValue = false;
             valueAsPerCent = true;
+            AutoSize = false;
         }
 
         #region Properties
@@ -226,8 +227,17 @@ namespace ClForms.Elements
 
         /// <inheritdoc cref="Control.Measure"/>
         public override void Measure(Size availableSize)
-            => base.Measure(new Size(Math.Min((Width ?? Padding.Horizontal) + Margin.Horizontal, availableSize.Width),
-                Math.Min((Height ?? Padding.Vertical) + Margin.Vertical, availableSize.Height)));
+        {
+            if (AutoSize)
+            {
+                base.Measure(new Size(Math.Min((Width ?? Padding.Horizontal) + Margin.Horizontal, availableSize.Width),
+                    Math.Min((Height ?? Padding.Vertical) + Margin.Vertical, availableSize.Height)));
+                return;
+            }
+
+            base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                Math.Min(Height ?? availableSize.Height, availableSize.Height)));
+        }
 
         /// <inheritdoc cref="Control.OnRender"/>
         protected override void OnRender(IDrawingContext context)

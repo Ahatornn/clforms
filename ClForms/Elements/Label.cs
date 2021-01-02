@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using ClForms.Abstractions;
 using ClForms.Abstractions.Engine;
 using ClForms.Common;
@@ -140,6 +139,11 @@ namespace ClForms.Elements
         /// <inheritdoc cref="Control.Measure"/>
         public override void Measure(Size availableSize)
         {
+            if (!AutoSize)
+            {
+                base.Measure(availableSize);
+                return;
+            }
             var contentArea = new Rect(new Size(availableSize.Width, availableSize.Height))
                 .Reduce(Margin)
                 .Reduce(Padding);
@@ -147,7 +151,7 @@ namespace ClForms.Elements
             contentArea.Height = Height ?? contentArea.Height;
             var presentedText = GetTextPresenter();
 
-            if (!string.IsNullOrWhiteSpace(presentedText) && !contentArea.HasEmptyDimension())
+            if (!(string.IsNullOrWhiteSpace(presentedText) || contentArea.HasEmptyDimension()))
             {
                 Size size;
                 if (presentedText.Length <= contentArea.Width)
