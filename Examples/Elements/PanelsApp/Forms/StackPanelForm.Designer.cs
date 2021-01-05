@@ -53,7 +53,7 @@ namespace PanelsApp.Forms
             });
             grid.AddContent(targetPanel, 0, 1);
 
-            descriptionLabel = new Label("Let's check how to work Orientation properties")
+            descriptionLabel = new Label("Let's check how to work Orientation property")
             {
                 Margin = new Thickness(1, 0, 0, 0),
                 WordWrap = true,

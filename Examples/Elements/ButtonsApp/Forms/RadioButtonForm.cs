@@ -11,9 +11,8 @@ namespace ButtonsApp.Forms
 
         private void CheckedChanged(object sender, ClForms.Common.EventArgs.PropertyChangedEventArgs<bool> e)
         {
-            if (e.NewValue)
+            if (e.NewValue && sender is RadioButton radioButton)
             {
-                var radioButton = sender as RadioButton;
                 var groupBox = radioButton.Parent.Parent as GroupBox;
                 propertyChangedLabel.Text = $"You checked {radioButton.Text} in {groupBox.Text}";
             }
