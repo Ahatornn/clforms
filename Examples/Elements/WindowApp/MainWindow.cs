@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices.ComTypes;
 using ClForms.Elements;
 using WindowApp.Forms;
 
@@ -28,6 +29,10 @@ namespace WindowApp
                     break;
                 case ScreenType.MainWindowCommon:
                     _ = new MainMenuForm(this) {panel1 = {Parent = panel1}};
+                    break;
+                case ScreenType.TextBox:
+                    MainMenu.Items.Clear();
+                    _ = new TextBoxForm {panel1 = {Parent = panel1}};
                     break;
             }
         }

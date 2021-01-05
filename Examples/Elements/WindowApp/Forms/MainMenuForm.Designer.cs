@@ -72,10 +72,11 @@ namespace WindowApp.Forms
             {
                 Parent = panel1,
                 Width = 70,
-                Margin = new Thickness(0, 2),
+                Margin = new Thickness(0, 1),
             };
             grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 4));
-            grid.RowDefinitions.Add(new RowDefinition(SizeType.AutoSize));
+            grid.RowDefinitions.AddRow();
+            grid.RowDefinitions.Add(new RowDefinition(SizeType.Absolute, 1));
 
             grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.Percent, 50));
             grid.ColumnDefinitions.Add(new ColumnDefinition(SizeType.Percent, 50));
@@ -86,7 +87,6 @@ namespace WindowApp.Forms
                 Foreground = Color.NotSet,
                 Background = Color.NotSet,
                 Text = "Now look at an example how to use MainMenu in your application. Look at the top of the window. There are panel with items. Press [Alt+F1] for go to the first main menu item.",
-                Margin = new Thickness(0, 0, 0, 1),
             };
 
             grid.AddContent(lb1, 0, 0, 2);
@@ -139,6 +139,13 @@ namespace WindowApp.Forms
                 Text = "First you should to create new instance of MainMenu. Then create some menu items for your business logic. Finally set \"MainMenu\" property of main window.",
             };
             grid.AddContent(descriptionCodeLabel, 1, 1);
+
+            grid.AddContent(
+                new Label
+                {
+                    Text = "Press [space bar] button for next controls",
+                    Margin = new Thickness(0, 0, 0, 0),
+                }, 0, 2, 2);
 
             AddContent(panel1);
         }

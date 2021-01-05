@@ -35,21 +35,21 @@ namespace WindowApp.Forms
                 TextAlignment = TextAlignment.Center,
                 WordWrap = true,
             });
-            stackPanel1.AddContent(new Label("Window")
+            foreach (var item in new []
             {
-                TextAlignment = TextAlignment.Center,
-                Foreground = Color.Green,
-            });
-            stackPanel1.AddContent(new Label("StatusBar")
+                "Window",
+                "StatusBar",
+                "MainMenu",
+                "TextBox",
+            })
             {
-                TextAlignment = TextAlignment.Center,
-                Foreground = Color.Green,
-            });
-            stackPanel1.AddContent(new Label("MainMenu")
-            {
-                TextAlignment = TextAlignment.Center,
-                Foreground = Color.Green,
-            });
+                stackPanel1.AddContent(new Label(item)
+                {
+                    TextAlignment = TextAlignment.Center,
+                    Foreground = Color.Green,
+                });
+            }
+            
             stackPanel1.AddContent(new Label("If you want to continue press [space bar]. For close this window and exit from app press [Ctrl+F4]")
             {
                 TextAlignment = TextAlignment.Center,
