@@ -19,8 +19,12 @@ namespace ClForms.Common.Grid
         /// Initialize a new instance <see cref="RowDefinition"/> with <see cref="SizeType"/>
         /// </summary>
         public RowDefinition(SizeType sizeType)
-            : this(sizeType, 0)
+            : this(sizeType, 1)
         {
+            if (sizeType == SizeType.Percent)
+            {
+                Height = 100;
+            }
         }
 
         /// <summary>

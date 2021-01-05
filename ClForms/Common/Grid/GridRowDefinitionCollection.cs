@@ -14,5 +14,10 @@ namespace ClForms.Common.Grid
         internal GridRowDefinitionCollection(MultipleContentControl owner) : base(owner)
         {
         }
+
+        /// <summary>
+        /// Adds an auto size row to collection
+        /// </summary>
+        public void AddRow() => Add(new RowDefinition(SizeType.AutoSize));
     }
 }

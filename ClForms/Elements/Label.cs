@@ -141,7 +141,8 @@ namespace ClForms.Elements
         {
             if (!AutoSize)
             {
-                base.Measure(availableSize);
+                base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                    Math.Min(Height ?? availableSize.Height, availableSize.Height)));
                 return;
             }
             var contentArea = new Rect(new Size(availableSize.Width, availableSize.Height))

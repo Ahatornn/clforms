@@ -35,6 +35,7 @@ namespace ClForms.Elements
             passwordChar = char.MinValue;
             readOnly = false;
             maxLength = 0;
+            AutoSize = false;
             characterCasing = CharacterCasing.Normal;
         }
 
@@ -136,7 +137,7 @@ namespace ClForms.Elements
                 {
                     OnCharacterCasingChanged?.Invoke(this, new PropertyChangedEventArgs<CharacterCasing>(characterCasing, value));
                     characterCasing = value;
-                    if (text != NormalizeText(text))
+                    if (!string.IsNullOrWhiteSpace(text) && text != NormalizeText(text))
                     {
                         OnTextChanged?.Invoke(this, new PropertyChangedEventArgs<string>(text, NormalizeText(text)));
                         text = NormalizeText(text);
@@ -169,6 +170,12 @@ namespace ClForms.Elements
         /// <inheritdoc cref="Control.Measure"/>
         public override void Measure(Size availableSize)
         {
+            if (!AutoSize)
+            {
+                base.Measure(new Size(Math.Min(Width ?? availableSize.Width, availableSize.Width),
+                    Math.Min(Height ?? availableSize.Height, availableSize.Height)));
+                return;
+            }
             var contentArea = new Rect(new Size(availableSize.Width, availableSize.Height))
                 .Reduce(Margin)
                 .Reduce(Padding);

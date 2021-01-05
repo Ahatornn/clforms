@@ -14,5 +14,10 @@ namespace ClForms.Common.Grid
         internal GridColumnDefinitionCollection(MultipleContentControl owner) : base(owner)
         {
         }
+
+        /// <summary>
+        /// Adds an auto size column to collection
+        /// </summary>
+        public void AddColumn() => Add(new ColumnDefinition(SizeType.AutoSize));
     }
 }
