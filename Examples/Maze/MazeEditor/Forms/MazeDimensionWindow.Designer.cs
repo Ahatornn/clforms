@@ -31,18 +31,21 @@ namespace MazeEditor.Forms
             {
                 Checked = true,
                 Margin = new Thickness(5, 0, 0, 0),
+                Tag = new Size(45, 15),
             };
             stackPanel2.AddContent(radioButton1);
 
-            radioButton2 = new RadioButton("60 x 21")
+            radioButton2 = new RadioButton("59 x 21")
             {
                 Margin = new Thickness(5, 0, 0, 0),
+                Tag = new Size(59, 21),
             };
             stackPanel2.AddContent(radioButton2);
 
-            radioButton3 = new RadioButton("120 x 28")
+            radioButton3 = new RadioButton("119 x 27")
             {
                 Margin = new Thickness(5, 0, 0, 0),
+                Tag = new Size(119, 27),
             };
             stackPanel2.AddContent(radioButton3);
 

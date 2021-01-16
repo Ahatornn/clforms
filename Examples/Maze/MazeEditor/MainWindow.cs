@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
+using ClForms.Core;
 using ClForms.Elements;
 using ClForms.Elements.Menu;
 using ClForms.Themes;
@@ -135,6 +137,18 @@ namespace MazeEditor
 
             var dimension = new Size(colCount, rowCount);
             var mapWnd = new MapViewerWindow(CreateEmptyMaze(dimension)) { panel1 = { Parent = this.panel1 } };
+            PrepareStatusBar(dimension);
+            MapViewerWindowPrepare(mapWnd);
+        }
+
+        private void GenerateClick(object sender, EventArgs e)
+        {
+            if (!SaveIfHasChanged())
+            {
+                return;
+            }
+            var dimension = new Size(colCount, rowCount);
+            var mapWnd = new MapViewerWindow(CreateMaze(dimension)) { panel1 = { Parent = this.panel1 } };
             PrepareStatusBar(dimension);
             MapViewerWindowPrepare(mapWnd);
         }
@@ -272,6 +286,7 @@ namespace MazeEditor
                 item.Enabled = true;
             }
 
+            generateMenuItem.Enabled = true;
             clearMazeMenuItem.Enabled = true;
         }
 
@@ -329,6 +344,126 @@ namespace MazeEditor
             }
 
             return mazeCells;
+        }
+
+        private int[,] CreateMaze(Size size)
+        {
+            var mazeCells = new int[size.Height, size.Width];
+            for (var rowIndex = 0; rowIndex < size.Height; rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < size.Width; colIndex++)
+                {
+                    mazeCells[rowIndex, colIndex] = (int) MapItem.Empty;
+                    if (rowIndex == 0 ||
+                        rowIndex == size.Height - 1 ||
+                        colIndex == 0 ||
+                        colIndex == size.Width - 1 ||
+                        rowIndex % 2 == 0 ||
+                        colIndex % 2 == 0)
+                    {
+                        mazeCells[rowIndex, colIndex] = (int) MapItem.Wall;
+                    }
+                }
+            }
+
+            var allCellCount = ((size.Width - 1) / 2) * ((size.Height - 1) / 2);
+            var visitedCellCount = 1;
+
+            var currentCell = new Point(1, 1);
+            mazeCells[currentCell.Y, currentCell.X] = (int) MapItem.StartPoint;
+            var path = new Stack<Point>();
+            var rndGenerator = new Random(DateTime.Now.Millisecond);
+
+            while (visitedCellCount < allCellCount)
+            {
+                var emptyCells = GetNeighbourEmptyCells(size, mazeCells, currentCell).ToArray();
+                if (emptyCells.Length > 0)
+                {
+                    path.Push(currentCell);
+                    var nextCell = emptyCells[0];
+                    if (emptyCells.Length > 1)
+                    {
+                        nextCell = emptyCells[rndGenerator.Next(emptyCells.Length)];
+                    }
+
+                    var wallForBreakX = (currentCell.X + nextCell.X) / 2;
+                    var wallForBreakY = (currentCell.Y + nextCell.Y) / 2;
+                    mazeCells[wallForBreakY, wallForBreakX] = (int) MapItem.Empty;
+
+                    currentCell = new Point(nextCell.X, nextCell.Y);
+                    mazeCells[currentCell.Y, currentCell.X] = (int) MapItem.Visited;
+
+                    visitedCellCount++;
+                }
+                else if(path.Any())
+                {
+                    currentCell = path.Pop();
+                }
+                else if(TryGetEmptyCell(size, mazeCells, ref currentCell))
+                {
+                    mazeCells[currentCell.Y, currentCell.X] = (int) MapItem.Visited;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            for (var rowIndex = 0; rowIndex < size.Height; rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < size.Width; colIndex++)
+                {
+                    if(mazeCells[rowIndex, colIndex] == (int) MapItem.Visited)
+                    {
+                        mazeCells[rowIndex, colIndex] = (int) MapItem.Empty;
+                    }
+                }
+            }
+            return mazeCells;
+        }
+
+        private static bool TryGetEmptyCell(Size size, int[,] mazeCells, ref Point currentCell)
+        {
+            for (var rowIndex = 0; rowIndex < size.Height; rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < size.Width; colIndex++)
+                {
+                    if(mazeCells[rowIndex, colIndex] == (int) MapItem.Empty)
+                    {
+                        currentCell = new Point(colIndex, rowIndex);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private static IEnumerable<Point> GetNeighbourEmptyCells(Size dimension, int[,] mazeCells, Point currentCell)
+        {
+            if (currentCell.Y - 2 > 0 &&
+                mazeCells[currentCell.Y - 2, currentCell.X] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X, currentCell.Y - 2);
+            }
+
+            if (currentCell.X + 2 < dimension.Width &&
+                mazeCells[currentCell.Y, currentCell.X + 2] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X + 2, currentCell.Y);
+            }
+
+            if (currentCell.Y + 2 < dimension.Height &&
+                mazeCells[currentCell.Y + 2, currentCell.X] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X, currentCell.Y + 2);
+            }
+
+            if (currentCell.X - 2 > 0 &&
+                mazeCells[currentCell.Y, currentCell.X - 2] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X - 2, currentCell.Y);
+            }
         }
     }
 }

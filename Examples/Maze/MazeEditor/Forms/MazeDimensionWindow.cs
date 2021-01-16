@@ -53,15 +53,15 @@ namespace MazeEditor.Forms
             {
                 if (radioButton2.Checked)
                 {
-                    return new Size(60, 21);
+                    return (Size) radioButton2.Tag;
                 }
 
                 if (radioButton3.Checked)
                 {
-                    return new Size(120, 28);
+                    return (Size) radioButton3.Tag;
                 }
 
-                return new Size(45, 15);
+                return (Size) radioButton1.Tag;
             }
         }
     }

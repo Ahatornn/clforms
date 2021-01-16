@@ -80,6 +80,11 @@ namespace MazeEditor
             editMenuItem.Items.Add(twentyCoinsMenuItem);
 
             editMenuItem.Items.Add(new SeparatorMenuItem());
+            generateMenuItem = new MenuItem("Generate", new Shortcut(ConsoleKey.G, false, true, false), enabled: false);
+            generateMenuItem.OnClick += GenerateClick;
+            editMenuItem.Items.Add(generateMenuItem);
+
+            editMenuItem.Items.Add(new SeparatorMenuItem());
 
             clearMazeMenuItem = new MenuItem("Clear maze", null, enabled: false);
             clearMazeMenuItem.OnClick += ClearMazeClick;
@@ -112,7 +117,6 @@ namespace MazeEditor
             statusDimensionLabel = new Label();
             statusMazeItemLabel = new Label();
             statusSaveLabel = new Label("●");
-
             AddContent(panel1);
         }
 
@@ -131,6 +135,7 @@ namespace MazeEditor
         private MenuItem keyMenuItem;
         private MenuItem tenCoinsMenuItem;
         private MenuItem twentyCoinsMenuItem;
+        private MenuItem generateMenuItem;
         private MenuItem clearMazeMenuItem;
 
         private StatusBar statusBar1;

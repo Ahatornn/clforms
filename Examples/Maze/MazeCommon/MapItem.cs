@@ -6,6 +6,11 @@ namespace MazeCommon
     public enum MapItem
     {
         /// <summary>
+        /// Value for generated maze algorithm
+        /// </summary>
+        Visited = -1,
+
+        /// <summary>
         /// Empty
         /// </summary>
         Empty = 0,
