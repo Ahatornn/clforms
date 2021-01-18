@@ -20,6 +20,10 @@ namespace MazeCommon
             MapItem.Key => 'Ⱡ',
             MapItem.TenCoins => '⑩',
             MapItem.TwentyCoins => '⓴',
+            MapItem.PathShowedDown => '▾',
+            MapItem.PathShowedLeft => '◂',
+            MapItem.PathShowedRight => '▸',
+            MapItem.PathShowedTop => '▴',
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
     }

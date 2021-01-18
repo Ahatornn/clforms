@@ -6,6 +6,26 @@ namespace MazeCommon
     public enum MapItem
     {
         /// <summary>
+        /// Value for show user path as leftwards arrow
+        /// </summary>
+        PathShowedLeft = -5,
+
+        /// <summary>
+        /// Value for show user path as downwards arrow
+        /// </summary>
+        PathShowedDown = -4,
+
+        /// <summary>
+        /// Value for show user path as rightwards arrow
+        /// </summary>
+        PathShowedRight = -3,
+
+        /// <summary>
+        /// Value for show user path as upwards arrow
+        /// </summary>
+        PathShowedTop = -2,
+
+        /// <summary>
         /// Value for generated maze algorithm
         /// </summary>
         Visited = -1,

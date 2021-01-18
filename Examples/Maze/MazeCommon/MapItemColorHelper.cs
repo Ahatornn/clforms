@@ -26,6 +26,12 @@ namespace MazeCommon
                     isSelect ? Color.White : Color.Yellow),
                 MapItem.TwentyCoins => new ContextColorPoint(isSelect ? Color.Magenta : Color.Black,
                     isSelect ? Color.White : Color.Yellow),
+                var pathShowed when
+                    pathShowed == MapItem.PathShowedDown ||
+                    pathShowed == MapItem.PathShowedLeft ||
+                    pathShowed == MapItem.PathShowedRight ||
+                    pathShowed == MapItem.PathShowedTop
+                => new ContextColorPoint(isSelect ? Color.Magenta : Color.Black, Color.White),
                 _ => new ContextColorPoint(Color.Black, isSelect ? Color.Magenta : Color.Black)
             };
     }

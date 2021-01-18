@@ -85,10 +85,14 @@ namespace MazeEditor
             editMenuItem.Items.Add(generateMenuItem);
 
             editMenuItem.Items.Add(new SeparatorMenuItem());
-
             clearMazeMenuItem = new MenuItem("Clear maze", null, enabled: false);
             clearMazeMenuItem.OnClick += ClearMazeClick;
             editMenuItem.Items.Add(clearMazeMenuItem);
+
+            editMenuItem.Items.Add(new SeparatorMenuItem());
+            checkPathMenuItem = new MenuItem("Check path", new Shortcut(ConsoleKey.P, false, true, false), enabled: false);
+            checkPathMenuItem.OnClick += CheckPathClick;
+            editMenuItem.Items.Add(checkPathMenuItem);
 
             mainMenu1.Items.Add(editMenuItem);
             MainMenu = mainMenu1;
@@ -137,6 +141,7 @@ namespace MazeEditor
         private MenuItem twentyCoinsMenuItem;
         private MenuItem generateMenuItem;
         private MenuItem clearMazeMenuItem;
+        private MenuItem checkPathMenuItem;
 
         private StatusBar statusBar1;
         private Panel panel1;

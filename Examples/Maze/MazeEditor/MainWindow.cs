@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
-using ClForms.Core;
 using ClForms.Elements;
 using ClForms.Elements.Menu;
 using ClForms.Themes;
@@ -153,6 +152,26 @@ namespace MazeEditor
             MapViewerWindowPrepare(mapWnd);
         }
 
+        private void CheckPathClick(object sender, EventArgs e)
+        {
+            if (!startPoint.HasValue)
+            {
+                MessageBox.ShowError("Check path", "You have not any entry into Maze. Please, select 'Edit → Start point' and specify target point.");
+                return;
+            }
+
+            if (!endPoint.HasValue)
+            {
+                MessageBox.ShowError("Check path", "You have not any exit from Maze. Please, select 'Edit → End point' and specify target point.");
+                return;
+            }
+
+            if (!currentMapWnd.ShowPath(startPoint.Value, endPoint.Value))
+            {
+                MessageBox.ShowError("Check path", "You have not any path to exit from Maze. Please, delete some walls and try again.");
+            }
+        }
+
         private void CurrentMapChanged(object sender, MazeMapItemEventArgs e)
         {
             hasChanged = true;
@@ -205,6 +224,7 @@ namespace MazeEditor
 
         private bool SaveInternal()
         {
+            currentMapWnd.HidePath();
             if (string.IsNullOrEmpty(fileName))
             {
                 return SaveAsInternal();
@@ -288,6 +308,7 @@ namespace MazeEditor
 
             generateMenuItem.Enabled = true;
             clearMazeMenuItem.Enabled = true;
+            checkPathMenuItem.Enabled = true;
         }
 
         private void CurrentMapWndCursorChanged(object sender, PropertyChangedEventArgs<Point> e)
@@ -370,6 +391,7 @@ namespace MazeEditor
             var visitedCellCount = 1;
 
             var currentCell = new Point(1, 1);
+            startPoint = new Point(currentCell.X, currentCell.Y);
             mazeCells[currentCell.Y, currentCell.X] = (int) MapItem.StartPoint;
             var path = new Stack<Point>();
             var rndGenerator = new Random(DateTime.Now.Millisecond);

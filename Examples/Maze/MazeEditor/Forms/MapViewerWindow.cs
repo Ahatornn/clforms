@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
 using ClForms.Elements;
@@ -12,9 +14,11 @@ namespace MazeEditor.Forms
     {
         private readonly Size mapSize;
         private Point cursorPosition;
+        private bool pathShowed;
 
         public MapViewerWindow(int[,] source)
         {
+            pathShowed = false;
             InitializeComponent();
             CurrentMapItem = MapItem.Empty;
             cursorPosition = new Point(0, 0);
@@ -39,6 +43,7 @@ namespace MazeEditor.Forms
 
         public void KeyPressedHandler(object sender, KeyPressedEventArgs e)
         {
+            HidePath();
             var newPosition = cursorPosition;
             if (e.KeyInfo.Key == ConsoleKey.LeftArrow && cursorPosition.X > 0)
             {
@@ -90,10 +95,79 @@ namespace MazeEditor.Forms
 
         public void UpdateMazeItem(Point point, MapItem value)
         {
+            HidePath();
             if (MazeMap[point.Y, point.X] != (int) value)
             {
                 MazeMap[point.Y, point.X] = (int) value;
                 InvalidateVisual();
+            }
+        }
+
+        public bool ShowPath(Point startPoint, Point finishPoint)
+        {
+            pathShowed = true;
+            var currentCell = new Point(startPoint.X, startPoint.Y);
+            var cloneMap = (int[,])MazeMap.Clone();
+            PrepareMap(mapSize, cloneMap);
+            var allCellCount = GetAllAvailableCells(mapSize, cloneMap);
+            var visitedCellCount = 1;
+            cloneMap[currentCell.Y, currentCell.X] = (int) MapItem.Visited;
+            var path = new Stack<Point>();
+
+            while (visitedCellCount < allCellCount)
+            {
+                var emptyCells = GetNeighbourAvailableCells(mapSize, cloneMap, currentCell).ToArray();
+                if (emptyCells.Any())
+                {
+                    path.Push(currentCell);
+                    if (emptyCells.Contains(finishPoint))
+                    {
+                        break;
+                    }
+                    var nextCell = emptyCells[0];
+                    currentCell = new Point(nextCell.X, nextCell.Y);
+                    cloneMap[currentCell.Y, currentCell.X] = (int) MapItem.Visited;
+                    visitedCellCount++;
+                }
+                else if (path.Any())
+                {
+                    currentCell = path.Pop();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            var prevPoint = new Point(startPoint.X, startPoint.Y);
+            foreach (var point in path.Reverse())
+            {
+                MazeMap[point.Y, point.X] = (int) MapItem.PathShowedDown;
+                MazeMap[prevPoint.Y, prevPoint.X] = (int) GetItemDirection(prevPoint, point);
+                
+                prevPoint = point;
+            }
+            MazeMap[startPoint.Y, startPoint.X] = (int) MapItem.StartPoint;
+            MazeMap[prevPoint.Y, prevPoint.X] = (int) GetItemDirection(prevPoint, finishPoint);
+            canvas1.InvalidateVisual();
+            return true;
+        }
+
+        public void HidePath()
+        {
+            if (pathShowed)
+            {
+                pathShowed = false;
+                for (var rowIndex = 0; rowIndex < mapSize.Height; rowIndex++)
+                {
+                    for (var colIndex = 0; colIndex < mapSize.Width; colIndex++)
+                    {
+                        if (MazeMap[rowIndex, colIndex] < 0)
+                        {
+                            MazeMap[rowIndex, colIndex] = (int) MapItem.Empty;
+                        }
+                    }
+                }
             }
         }
 
@@ -110,6 +184,84 @@ namespace MazeEditor.Forms
                     e.Context.DrawText(printingChar, colorParams.Background, colorParams.Foreground);
                 }
             }
+        }
+
+        private static int GetAllAvailableCells(Size mapSize, int[,] mazeMap)
+        {
+            var result = 0;
+            for (var rowIndex = 0; rowIndex < mapSize.Height; rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < mapSize.Width; colIndex++)
+                {
+                    if (mazeMap[rowIndex, colIndex] != (int) MapItem.Wall)
+                    {
+                        result++;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static void PrepareMap(Size mapSize, int[,] cloneMap)
+        {
+            for (var rowIndex = 0; rowIndex < mapSize.Height; rowIndex++)
+            {
+                for (var colIndex = 0; colIndex < mapSize.Width; colIndex++)
+                {
+                    if (cloneMap[rowIndex, colIndex] != (int) MapItem.Wall)
+                    {
+                        cloneMap[rowIndex, colIndex] = (int) MapItem.Empty;
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<Point> GetNeighbourAvailableCells(Size mapSize, int[,] mazeMap, Point currentCell)
+        {
+            if (currentCell.Y - 1 > 0 &&
+                mazeMap[currentCell.Y - 1, currentCell.X] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X, currentCell.Y - 1);
+            }
+
+            if (currentCell.X + 1 < mapSize.Width &&
+                mazeMap[currentCell.Y, currentCell.X + 1] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X + 1, currentCell.Y);
+            }
+
+            if (currentCell.Y + 1 < mapSize.Height &&
+                mazeMap[currentCell.Y + 1, currentCell.X] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X, currentCell.Y + 1);
+            }
+
+            if (currentCell.X - 1 > 0 &&
+                mazeMap[currentCell.Y, currentCell.X - 1] == (int) MapItem.Empty)
+            {
+                yield return new Point(currentCell.X - 1, currentCell.Y);
+            }
+        }
+
+        private static MapItem GetItemDirection(Point previous, Point next)
+        {
+            if (previous.X != next.X)
+            {
+                if (next.X > previous.X)
+                {
+                    return MapItem.PathShowedRight;
+                }
+
+                return MapItem.PathShowedLeft;
+            }
+
+            if (next.Y > previous.Y)
+            {
+                return MapItem.PathShowedDown;
+            }
+
+            return MapItem.PathShowedTop;
         }
 
         #region Events
