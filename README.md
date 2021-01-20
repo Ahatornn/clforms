@@ -7,7 +7,7 @@
 
 **Pseudographics interface for console window by .Net Core 3.1**
 
-<img src="Images/windowExample.gif" />
+<img src="Images/clform_common.gif" />
 
 ## Installation
 
