@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
 using ClForms.Core;
@@ -47,7 +48,22 @@ namespace MazeGame
                 string[] mazeString;
                 try
                 {
-                    mazeString = File.ReadAllLines(dialogWnd.FileName);
+                    var fileName = Path.GetFileNameWithoutExtension(dialogWnd.FileName);
+                    if (fileName?.StartsWith('<') == true)
+                    {
+                        var assembly = Assembly.GetExecutingAssembly();
+                        var resourceName = assembly.GetManifestResourceNames()
+                            .Single(str => str.EndsWith($"{fileName.Substring(2, fileName.Length - 4)}.mmf"));
+                        using var stream = assembly.GetManifestResourceStream(resourceName);
+                        using var reader = new StreamReader(stream);
+                        var resourceAllText = reader.ReadToEnd();
+
+                        mazeString = Regex.Split(resourceAllText, "\r\n|\r|\n");
+                    }
+                    else
+                    {
+                        mazeString = File.ReadAllLines(dialogWnd.FileName);
+                    }
                 }
                 catch (Exception exception)
                 {

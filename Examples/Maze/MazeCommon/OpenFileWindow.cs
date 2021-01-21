@@ -26,6 +26,11 @@ namespace MazeCommon
         private void OpenFileWindowActivated(object sender, System.EventArgs e)
         {
             listBox1.BeginUpdate();
+            listBox1.Items.Add("< s_firstMap >");
+            listBox1.Items.Add("< s_secondMap >");
+            listBox1.Items.Add("< m_firstMap >");
+            listBox1.Items.Add("< m_secondMap >");
+            listBox1.Items.Add("< l_firstMap >");
             foreach (var file in Directory.GetFiles(TargetFolder, $"*{Consts.MazeMapFileExtension}", SearchOption.TopDirectoryOnly))
             {
                 listBox1.Items.Add(Path.GetFileNameWithoutExtension(file));

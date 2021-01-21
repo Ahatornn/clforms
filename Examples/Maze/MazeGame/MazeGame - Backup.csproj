@@ -6,22 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\l_firstMap.mmf" />
-    <None Remove="Resources\m_firstMap.mmf" />
-    <None Remove="Resources\m_secondMap.mmf" />
-    <None Remove="Resources\s_firstMap.mmf" />
-    <None Remove="Resources\s_secondMap.mmf" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\l_firstMap.mmf" />
-    <EmbeddedResource Include="Resources\m_firstMap.mmf" />
-    <EmbeddedResource Include="Resources\m_secondMap.mmf" />
-    <EmbeddedResource Include="Resources\s_firstMap.mmf" />
-    <EmbeddedResource Include="Resources\s_secondMap.mmf" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MazeCommon\MazeCommon.csproj" />
   </ItemGroup>
 

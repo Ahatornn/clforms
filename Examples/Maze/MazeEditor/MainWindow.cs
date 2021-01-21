@@ -120,6 +120,8 @@ namespace MazeEditor
             var dialogWnd = new MazeDimensionWindow();
             if (dialogWnd.ShowDialog() == DialogResult.OK)
             {
+                startPoint = Point.Empty;
+                endPoint = null;
                 var mapWnd = new MapViewerWindow(CreateEmptyMaze(dialogWnd.SelectedDimension));
                 mapWnd.panel1.Parent = this.panel1;
                 PrepareStatusBar(dialogWnd.SelectedDimension);
