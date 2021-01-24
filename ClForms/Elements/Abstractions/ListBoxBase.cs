@@ -4,6 +4,7 @@ using ClForms.Abstractions.Engine;
 using ClForms.Common;
 using ClForms.Common.EventArgs;
 using ClForms.Core;
+using ClForms.Helpers;
 using ClForms.Themes;
 
 namespace ClForms.Elements.Abstractions
@@ -287,14 +288,15 @@ namespace ClForms.Elements.Abstractions
             contentArea.Height = Height ?? contentArea.Height;
             if (Items.Any() && AutoSize)
             {
-                var itemWidth = Math.Min(Width.HasValue
-                        ? Width.Value + Margin.Horizontal
-                        : Items.Max(GetItemTextLength) + (Margin + Padding).Horizontal,
-                    availableSize.Width);
                 var itemHeight = Math.Min(Height.HasValue
                         ? Height.Value + Margin.Vertical
                         : Items.Count + (Margin + Padding).Vertical,
                     availableSize.Height);
+
+                var itemWidth = Math.Min(Width.HasValue
+                        ? Width.Value + Margin.Horizontal
+                        : Items.Max(GetItemTextLength) + (Margin + Padding).Horizontal + ScrollableControlHelper.GetScrollOffset(itemHeight, Items),
+                    availableSize.Width);
                 base.Measure(new Size(itemWidth, itemHeight));
             }
             else
@@ -328,8 +330,10 @@ namespace ClForms.Elements.Abstractions
             {
                 context.SetCursorPos(Padding.Left, Padding.Top + row);
                 var item = Items[row + startRenderedItemIndex];
-                OnRenderItemInternal(context, item, reducedArea.Width);
+                OnRenderItemInternal(context, item, reducedArea.Width - ScrollableControlHelper.GetScrollOffset(reducedArea.Height, Items));
             }
+
+            ScrollableControlHelper.OnRender(this, context, reducedArea, Items, startRenderedItemIndex);
         }
 
         protected abstract void OnRenderItemInternal(IDrawingContext context, T item, int itemAreaWidth);

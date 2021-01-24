@@ -23,6 +23,16 @@ namespace ClForms.Abstractions
         Color WindowForeground { get; }
 
         /// <summary>
+        /// Gets a <see cref="Color"/> structure that is the color of the background in the scroll
+        /// </summary>
+        Color ScrollBackground { get; }
+
+        /// <summary>
+        /// Gets a <see cref="Color"/> structure that is the color of the text in the scroll
+        /// </summary>
+        Color ScrollForeground { get; }
+
+        /// <summary>
         /// Gets a <see cref="Color"/> structure that is the color of the background in the client area of a dialog window
         /// </summary>
         Color DialogWindowBackground { get; }

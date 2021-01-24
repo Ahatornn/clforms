@@ -5,7 +5,7 @@
     <Authors>Konoplev Anatolii</Authors>
     <Product>Command-Line Forms</Product>
     <Description>This is a framework for make console application with pseudographics interface</Description>
-    <Version>1.0.28</Version>
+    <Version>1.0.29</Version>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <RepositoryUrl>https://github.com/Ahatornn/clforms</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
@@ -16,7 +16,7 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>favico.jpg</PackageIcon>
     <PackageProjectUrl>https://github.com/Ahatornn/clforms</PackageProjectUrl>
-    <PackageReleaseNotes>Added "AddColumn()" and "AddRow()" methods for Grid defenitions</PackageReleaseNotes>
+    <PackageReleaseNotes>Added scroll to ListBoxBase controls</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

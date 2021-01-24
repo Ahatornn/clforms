@@ -8,6 +8,12 @@ namespace ClForms.Themes
     internal class DefaultSystemColors: ISystemColors
     {
         /// <inheritdoc />
+        Color ISystemColors.ScrollBackground => Color.DarkGray;
+
+        /// <inheritdoc />
+        Color ISystemColors.ScrollForeground => Color.Gray;
+
+        /// <inheritdoc />
         Color ISystemColors.BorderColor => Color.Black;
 
         /// <inheritdoc />
