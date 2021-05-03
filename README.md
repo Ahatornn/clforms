@@ -13,7 +13,7 @@
 
 Find the **ClForms** package through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
 ```
-PM> Install-Package ClForms -Version 1.0.29
+PM> Install-Package ClForms -Version 1.0.30
 ```
 
 > You can also download [ClFormsExtension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
@@ -48,6 +48,8 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 <img src="Images/example_maze.gif" />
 
 ## Release Notes
+* 1.0.30
+    * Changed Control Id property type from long to guid
 * 1.0.29
     * Added scroll to ListBoxBase controls
 * 1.0.28
