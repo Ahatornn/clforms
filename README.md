@@ -13,7 +13,7 @@
 
 Find the **ClForms** package through NuGet package manager inside Visual Studio or [here](https://www.nuget.org/packages/ClForms/)
 ```
-PM> Install-Package ClForms -Version 1.0.28
+PM> Install-Package ClForms -Version 1.0.29
 ```
 
 > You can also download [ClFormsExtension](https://marketplace.visualstudio.com/items?itemName=KonoplevAnatolii.clforms) for creating pseudographics command-line application with this package
@@ -45,9 +45,11 @@ Go to the [Wiki page](https://github.com/Ahatornn/clforms/wiki) for more informa
 - [x] [TextBox](https://github.com/Ahatornn/clforms/wiki/TextBox)
 - [x] [TilePanel](https://github.com/Ahatornn/clforms/wiki/TilePanel)
 - [x] [Window](https://github.com/Ahatornn/clforms/wiki/Window)
-<img src="Images/panelExample.gif" />
+<img src="Images/example_maze.gif" />
 
 ## Release Notes
+* 1.0.29
+    * Added scroll to ListBoxBase controls
 * 1.0.28
     * Added "AddColumn()" and "AddRow()" methods for Grid defenitions
 * 1.0.27
