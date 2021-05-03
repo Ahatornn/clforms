@@ -47,7 +47,6 @@ namespace ClForms.Core
             collections.TryAddSingleton<ISystemColors, DefaultSystemColors>();
             collections.TryAddSingleton<IEventLoop, EventLoop>();
             collections.TryAddSingleton<IPseudographicsProvider, PseudographicsProvider>();
-            collections.TryAddSingleton<IControlLifeCycle, ControlLifeCycle>();
             collections.TryAddSingleton<IEnvironment, DefaultEnvironment>();
             collections.TryAddSingleton<IApp, ApplicationHandler>();
 

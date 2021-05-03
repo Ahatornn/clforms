@@ -12,7 +12,7 @@ namespace ClForms.Common.Grid
         private int columnSpan;
         private int rowSpan;
 
-        public long Id { get; set; }
+        public Guid Id { get; set; }
 
         #region Column
 
@@ -99,7 +99,7 @@ namespace ClForms.Common.Grid
 
         public VerticalAlignment VerticalAlignment { get; set; }
 
-        public GridInfo(long id)
+        public GridInfo(Guid id)
         {
             Id = id;
             column = 0;

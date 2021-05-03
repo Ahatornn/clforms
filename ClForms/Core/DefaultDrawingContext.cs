@@ -28,7 +28,7 @@ namespace ClForms.Core
         /// Initialize a new instance <see cref="DefaultDrawingContext"/>
         /// </summary>
         public DefaultDrawingContext(Rect rect,
-            long controlId,
+            Guid controlId,
             IDrawingContext parent)
         {
             ContextBounds = rect;
@@ -54,7 +54,7 @@ namespace ClForms.Core
         public Rect ContextBounds { get; }
 
         /// <inheritdoc cref="IDrawingContext.ControlId"/>
-        public long ControlId { get; }
+        public Guid ControlId { get; }
 
         /// <inheritdoc cref="IDrawingContext.Release(Color,Color,char)"/>
         public void Release(Color backgroundColor, Color foregroundColor, char @char)
@@ -129,7 +129,7 @@ namespace ClForms.Core
         /// <summary>
         /// Create a copy <see cref="DefaultDrawingContext"/> from current context
         /// </summary>
-        public IDrawingContext Clone(long controlId)
+        public IDrawingContext Clone(Guid controlId)
         {
             var result = new DefaultDrawingContext(ContextBounds, controlId, this);
             result.background.Release(background);

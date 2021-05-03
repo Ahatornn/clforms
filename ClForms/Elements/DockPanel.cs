@@ -13,7 +13,7 @@ namespace ClForms.Elements
     /// </summary>
     public class DockPanel: MultipleContentControl, IElementStyle<DockPanel>
     {
-        private readonly ConcurrentDictionary<long, Dock> controlDocks;
+        private readonly ConcurrentDictionary<Guid, Dock> controlDocks;
         private bool lastChildFill;
         private readonly Dock defaultDockBehavior;
 
@@ -22,7 +22,7 @@ namespace ClForms.Elements
         /// </summary>
         public DockPanel()
         {
-            controlDocks = new ConcurrentDictionary<long, Dock>();
+            controlDocks = new ConcurrentDictionary<Guid, Dock>();
             defaultDockBehavior = Dock.Top;
             AutoSize = false;
         }

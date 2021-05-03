@@ -1,3 +1,4 @@
+using System;
 using ClForms.Common;
 using ClForms.Themes;
 
@@ -31,7 +32,7 @@ namespace ClForms.Abstractions.Engine
         /// <summary>
         /// Gets the identifier of the component that represents current drawing context
         /// </summary>
-        long ControlId { get; }
+        Guid ControlId { get; }
 
         /// <summary>
         /// Gets parent context reference
@@ -51,6 +52,6 @@ namespace ClForms.Abstractions.Engine
         /// <summary>
         /// Creates a shallow copy of the <see cref="IDrawingContext"/>
         /// </summary>
-        IDrawingContext Clone(long controlId);
+        IDrawingContext Clone(Guid controlId);
     }
 }

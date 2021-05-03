@@ -16,7 +16,6 @@ namespace ClForms.Elements.Abstractions
     /// </summary>
     public abstract class Control: IElementStyle<Control>, IDisposable
     {
-        private readonly Lazy<long> idProvider;
         private Thickness margin;
         private Thickness padding;
         private Color background;
@@ -33,11 +32,7 @@ namespace ClForms.Elements.Abstractions
         /// </summary>
         protected Control()
         {
-            idProvider = new Lazy<long>(() =>
-            {
-                var provider = Application.ServiceProvider.GetService<IControlLifeCycle>();
-                return provider.GetId();
-            });
+            Id = Guid.NewGuid();
             DrawingContext = DefaultDrawingContext.Empty;
             bounds = Rect.Empty;
             background = foreground = Color.NotSet;
@@ -53,7 +48,7 @@ namespace ClForms.Elements.Abstractions
         /// <summary>
         /// Gets a value of the control's identifier
         /// </summary>
-        public long Id => idProvider.Value;
+        public Guid Id { get; }
 
         /// <summary>
         /// Gets a value indicating whether component sizing was performed

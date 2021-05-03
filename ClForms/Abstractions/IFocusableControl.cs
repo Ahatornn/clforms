@@ -42,7 +42,7 @@ namespace ClForms.Abstractions
         /// <summary>
         /// Component id
         /// </summary>
-        long Id { get; }
+        Guid Id { get; }
 
         /// <summary>
         /// Gets or sets the sequence for moving the TAB key between the controls inside the container
